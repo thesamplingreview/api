@@ -1,11 +1,11 @@
-const config = {
+const { getEnv } = require('../app/helpers/utils');
+
+module.exports = {
   db: {
-    host: process.env.DB_HOST,
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
+    host: getEnv(process.env.DB_HOST),
+    username: getEnv(process.env.DB_USERNAME),
+    password: getEnv(process.env.DB_PASSWORD),
+    database: getEnv(process.env.DB_DATABASE),
     connectTimeout: 60000,
   },
 };
-
-module.exports = config;

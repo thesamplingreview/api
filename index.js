@@ -1,5 +1,7 @@
+const path = require('path');
 const env = require('dotenv');
 const express = require('express');
+const i18n = require('i18n');
 const morgan = require('morgan');
 
 env.config();
@@ -16,13 +18,27 @@ app.use(
   }),
 );
 
+// i18n setup
+i18n.configure({
+  locales: ['en'],
+  defaultLocale: 'en',
+  cookie: 'lang',
+  directory: path.join(__dirname, 'locales'),
+  objectNotation: true,
+  // updateFiles: false,
+  // logDebugFn: function (msg) {
+  //   console.log('debug', msg)
+  // },
+});
+app.use(i18n.init);
+
 // app.get('/', (req, res) => {
 //   res.json({ message: 'ok' });
 // });
 
 // API routes
-const apiRoutes = require('./routes/api');
-app.use('/api', apiRoutes);
+const apiRoutes = require('./routes/admin');
+app.use('/admin', apiRoutes);
 
 // DB connection
 const { sequelize } = require('./app/models');

@@ -1,0 +1,11 @@
+{
+	"validation": {
+		"required": "{{field}} is required.",
+		"invalid_email": "Invalid email address.",
+		"exists": "This {{field}} is already present in our database.",
+		"length_min": "{{field}} must be at least {{min}} characters",
+        "length_max": "{{field}} must be less than {{max}} characters",
+        "length_between": "{{field}} must between {{min}} to {{max}} characters",
+        "in": "{{field}} accept {{values}} only"
+	}
+}

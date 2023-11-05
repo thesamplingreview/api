@@ -1,6 +1,4 @@
-const {
-  ServiceModelNotFound,
-} = require('../errors');
+const { ModelNotFound } = require('../errors');
 
 class BaseService {
   constructor(model) {
@@ -25,7 +23,7 @@ class BaseService {
     });
 
     return {
-      results: rows,
+      data: rows,
       meta: {
         total: count,
         count: rows.length,
@@ -38,7 +36,7 @@ class BaseService {
   async findOne(options = {}) {
     const result = await this.model.findOne(options);
     if (!result) {
-      throw new ServiceModelNotFound('Data not found');
+      throw new ModelNotFound('Data not found');
     }
 
     return result;

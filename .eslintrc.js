@@ -26,6 +26,7 @@ module.exports = {
     'max-len': 'off',
     'no-alert': 'off',
     'no-param-reassign': 'off',
+    'no-underscore-dangle': 'off',
     'camelcase': 'off',
     'import/newline-after-import': 'off',
     'arrow-body-style': 'off',
