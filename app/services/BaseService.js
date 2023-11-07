@@ -22,11 +22,15 @@ class BaseService {
       offset: (page - 1) * perPage,
     });
 
+    // fix group_by issue
+    // @ref: https://github.com/sequelize/sequelize/issues/6148
+    const total = typeof count === 'number' ? count : count.length;
+
     return {
       data: rows,
       meta: {
-        total: count,
         count: rows.length,
+        total,
         page,
         perPage,
       },
@@ -42,8 +46,11 @@ class BaseService {
     return result;
   }
 
-  async findbyId(id) {
-    const result = await this.findOne({ where: { id } });
+  async findbyId(id, options = {}) {
+    const result = await this.findOne({
+      ...options,
+      where: { id },
+    });
 
     return result;
   }

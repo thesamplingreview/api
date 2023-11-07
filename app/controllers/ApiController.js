@@ -1,5 +1,10 @@
 const { debug } = require('../../config/app');
-const { ModelNotFound, ValidationFailed } = require('../errors');
+const {
+  ModelNotFound,
+  AuthError,
+  ValidationFailed,
+  InvalidToken,
+} = require('../errors');
 
 class ApiController {
   /**
@@ -53,20 +58,34 @@ class ApiController {
           ...this.getDebugInfo(req, res),
         });
     }
+    if (err instanceof AuthError) {
+      return res.status(401)
+        .json({
+          code: 401,
+          error: 'Invalid authentication',
+          ...this.getDebugInfo(req, res),
+        });
+    }
     if (err instanceof ValidationFailed) {
       return res.status(422)
         .json({
           code: 422,
           error: err.message,
-          validator: err.errors || [],
+          validator: (err.errors || []).map((d) => ({
+            field: d.path,
+            value: d.value,
+            msg: d.msg,
+          })),
           ...this.getDebugInfo(req, res),
         });
     }
 
+    console.log(err)
+
     return res
-      .status(code)
+      .status(err.code || code)
       .json({
-        code,
+        code: err.code || code,
         error: err.message,
         ...data,
         ...this.getDebugInfo(req, res),

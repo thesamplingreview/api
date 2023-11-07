@@ -6,6 +6,7 @@
 		"length_min": "{{field}} must be at least {{min}} characters",
         "length_max": "{{field}} must be less than {{max}} characters",
         "length_between": "{{field}} must between {{min}} to {{max}} characters",
-        "in": "{{field}} accept {{values}} only"
+        "in": "{{field}} accept {{values}} only",
+        "auth": "Invalid auth credentials"
 	}
 }

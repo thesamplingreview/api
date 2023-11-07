@@ -2,15 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const { validationResult } = require('express-validator');
 const { ValidationFailed } = require('../../errors');
-const ApiController = require('../../controllers/ApiController');
 
 // validation failed handler
 function handleValidationErrors(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const validationError = new ValidationFailed(errors.array());
-    const apiController = new ApiController();
-    return apiController.responseError(req, res, validationError);
+    throw new ValidationFailed('Validation failed', errors.array());
   }
   return next();
 }

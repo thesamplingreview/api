@@ -42,8 +42,8 @@ module.exports = {
     // Disable foreign key checks
     await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { type: Sequelize.QueryTypes.RAW });
 
-    await queryInterface.bulkDelete('ref_roles', null, {});
-    await queryInterface.bulkInsert('ref_roles', roles, {});
+    await queryInterface.bulkDelete('user_roles', null, {});
+    await queryInterface.bulkInsert('user_roles', roles, {});
 
     // Enable foreign key check
     await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { type: Sequelize.QueryTypes.RAW });
@@ -59,7 +59,7 @@ module.exports = {
     // Disable foreign key checks
     await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { type: Sequelize.QueryTypes.RAW });
 
-    await queryInterface.bulkDelete('ref_roles', null, {});
+    await queryInterface.bulkDelete('user_roles', null, {});
 
     // Enable foreign key check
     await queryInterface.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { type: Sequelize.QueryTypes.RAW });

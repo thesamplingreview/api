@@ -9,8 +9,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.belongsTo(models.RefRole, {
+      this.belongsTo(models.UserRole, {
         foreignKey: 'role_id',
+        targetKey: 'id',
+      });
+      this.belongsTo(models.Vendor, {
+        foreignKey: 'vendor_id',
         targetKey: 'id',
       });
       this.hasMany(models.AuthToken, {
@@ -31,6 +35,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+    },
+    name: {
+      type: DataTypes.STRING,
     },
     contact: {
       type: DataTypes.STRING,

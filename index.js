@@ -3,6 +3,7 @@ const env = require('dotenv');
 const express = require('express');
 const i18n = require('i18n');
 const morgan = require('morgan');
+const errorHandler = require('./app/middlewares/errorHandler');
 
 env.config();
 
@@ -32,16 +33,24 @@ i18n.configure({
 });
 app.use(i18n.init);
 
-// app.get('/', (req, res) => {
-//   res.json({ message: 'ok' });
-// });
+// ping
+app.get('/ping', (req, res) => {
+  res.json({ message: 'pong' });
+});
 
 // API routes
+const authRoutes = require('./routes/auth');
 const apiRoutes = require('./routes/admin');
+
+app.use('/auth', authRoutes);
 app.use('/admin', apiRoutes);
+
+// error middleware
+app.use(errorHandler);
 
 // DB connection
 const { sequelize } = require('./app/models');
+
 (async () => {
   try {
     await sequelize.authenticate();

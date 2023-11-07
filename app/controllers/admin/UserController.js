@@ -1,5 +1,5 @@
 const ApiController = require('../ApiController');
-const { RefRole } = require('../../models');
+const { UserRole, Vendor } = require('../../models');
 const UserService = require('../../services/UserService');
 const UserResource = require('../../resources/UserResource');
 
@@ -17,7 +17,7 @@ class UserController extends ApiController {
     try {
       const query = {
         where: await this.userService.genWhereQuery(req),
-        include: [RefRole],
+        include: [UserRole, Vendor],
       };
       const results = await this.userService.paginate(query, 1, 10);
 
@@ -35,8 +35,9 @@ class UserController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.userService.findbyId(req.params.id);
-      record.RefRole = await record.getRefRole();
+      const record = await this.userService.findbyId(req.params.id, {
+        include: [UserRole, Vendor],
+      });
 
       return this.responseJson(req, res, {
         data: new UserResource(record),

@@ -1,3 +1,5 @@
+const VendorResource = require('./VendorResource');
+
 class UserResource {
   constructor(data) {
     this.data = data;
@@ -5,25 +7,29 @@ class UserResource {
 
   toJSON() {
     const relations = {};
-    if (this.data.RefRole !== undefined) {
-      relations.ref_role = this.data.RefRole ? {
-        id: this.data.RefRole.id,
-        name: this.data.RefRole.name,
-        code: this.data.RefRole.code,
+    if (this.data.UserRole !== undefined) {
+      relations.user_role = this.data.UserRole ? {
+        id: this.data.UserRole.id,
+        name: this.data.UserRole.name,
+        code: this.data.UserRole.code,
       } : null;
+    }
+    if (this.data.Vendor !== undefined) {
+      relations.vendors = this.data.Vendor ? new VendorResource(this.data.Vendor) : null;
     }
 
     return {
       id: this.data.id,
       email: this.data.email,
-      contact: this.data.contact,
-      name: this.data.name,
+      contact: this.data.contact || null,
+      name: this.data.name || null,
       status: this.data.status,
       role_id: this.data.role_id,
-      last_login: this.data.last_login,
-      email_verified_at: this.data.email_verified_at,
-      created_at: this.data.created_at,
-      updated_at: this.data.updated_at,
+      vendor_id: this.data.vendor_id,
+      last_login: this.data.last_login || null,
+      email_verified_at: this.data.email_verified_at || null,
+      created_at: this.data.created_at || null,
+      updated_at: this.data.updated_at || null,
       ...relations,
     };
   }

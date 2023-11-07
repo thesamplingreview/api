@@ -1,6 +1,7 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
+const { genUuid } = require('../../app/helpers/utils');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -16,6 +17,7 @@ module.exports = {
     */
     const users = [
       {
+        id: genUuid(),
         name: 'SA',
         email: 'sa@admin.com',
         password: bcrypt.hashSync('123qwe', 12),
