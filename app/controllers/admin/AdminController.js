@@ -1,18 +1,17 @@
 const ApiController = require('../ApiController');
 const {
   sequelize,
-  // User,
   UserRole,
-  Vendor,
 } = require('../../models');
-const UserService = require('../../services/UserService');
+const AdminService = require('../../services/AdminService');
 const UserResource = require('../../resources/UserResource');
+const { ValidationFailed } = require('../../errors');
 
 class UserController extends ApiController {
   constructor() {
     super();
 
-    this.userService = new UserService();
+    this.adminService = new AdminService();
   }
 
   /**
@@ -21,10 +20,10 @@ class UserController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.userService.genWhereQuery(req),
-        include: [UserRole, Vendor],
+        where: await this.adminService.genWhereQuery(req),
+        include: [UserRole],
       };
-      const results = await this.userService.paginate(query, 1, 10);
+      const results = await this.adminService.paginate(query, 1, 10);
 
       return this.responsePaginate(req, res, {
         data: UserResource.collection(results.data),
@@ -40,8 +39,8 @@ class UserController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.userService.findById(req.params.id, {
-        include: [UserRole, Vendor],
+      const record = await this.adminService.findById(req.params.id, {
+        include: [UserRole],
       });
 
       return this.responseJson(req, res, {
@@ -60,16 +59,16 @@ class UserController extends ApiController {
     const formData = {
       email: req.body.email,
       password: req.body.password,
-      contact: req.body.contact,
       name: req.body.name,
-      vendor_id: req.body.vendor_id,
+      contact: req.body.contact,
+      role_id: req.body.role_id,
       status: req.body.status,
     };
 
     // DB update
     const t = await sequelize.transaction();
     try {
-      const result = await this.userService.create(formData, { transaction: t });
+      const result = await this.adminService.create(formData, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {
@@ -92,14 +91,13 @@ class UserController extends ApiController {
       name: req.body.name,
       status: req.body.status,
       role_id: req.body.role_id,
-      vendor_id: req.body.vendor_id,
     };
 
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.userService.findById(req.params.id);
-      const updated = await this.userService.update(record, formData, { transaction: t });
+      const record = await this.adminService.findById(req.params.id);
+      const updated = await this.adminService.update(record, formData, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {
@@ -114,12 +112,17 @@ class UserController extends ApiController {
   /**
    * DELETE - remove
    */
-  async remove(req, res) {
+  async remove(req, res, next) {
+    // validation - own record deletion
+    if (req.params.id === req.user.id) {
+      return next(new ValidationFailed('You can not delete own account'));
+    }
+
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.userService.findById(req.params.id);
-      const deleted = await this.userService.delete(record, { transaction: t });
+      const record = await this.adminService.findById(req.params.id);
+      const deleted = await this.adminService.delete(record, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {

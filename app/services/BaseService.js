@@ -46,42 +46,42 @@ class BaseService {
     return result;
   }
 
-  async findbyId(id, options = {}) {
-    const result = await this.findOne({
-      ...options,
-      where: { id },
-    });
+  async findById(id, options = {}) {
+    const result = await this.model.findByPk(id, options);
+    if (!result) {
+      throw new ModelNotFound('Data not found');
+    }
 
     return result;
   }
 
-  async create(data) {
-    const result = await this.model.create(data);
+  async create(data, options = {}) {
+    const result = await this.model.create(data, options);
 
     return result;
   }
 
-  async update(record, data) {
-    const result = await record.update(data);
+  async update(record, data, options = {}) {
+    const result = await record.update(data, options);
 
     return result;
   }
 
-  async delete(record) {
-    const result = await record.destroy();
+  async delete(record, options = {}) {
+    const result = await record.destroy(options);
 
     return result;
   }
 
   async updateById(id, data) {
-    const record = await this.findbyId(id);
+    const record = await this.findById(id);
     const result = await this.update(record, data);
 
     return result;
   }
 
   async deleteById(id) {
-    const record = await this.findbyId(id);
+    const record = await this.findById(id);
     const result = await this.delete(record);
 
     return result;

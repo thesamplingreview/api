@@ -1,15 +1,14 @@
 const ApiController = require('./ApiController');
 const AuthService = require('../services/AuthService');
-const UserService = require('../services/UserService');
 const JWTService = require('../services/JWTService');
 const UserResource = require('../resources/UserResource');
+const { UserRole } = require('../models');
 
 class AuthController extends ApiController {
   constructor() {
     super();
 
     this.authService = new AuthService();
-    this.userService = new UserService();
     this.jwtService = new JWTService();
   }
 
@@ -28,7 +27,9 @@ class AuthController extends ApiController {
    */
   async my(req, res) {
     try {
-      const user = await this.userService.findbyId(req.user.id);
+      const user = await this.authService.getUser(req.user.id, {
+        include: [UserRole],
+      });
 
       return this.responseJson(req, res, {
         data: new UserResource(user),
@@ -93,7 +94,7 @@ class AuthController extends ApiController {
    */
   async invalidate(req, res) {
     try {
-      const user = await this.userService.findbyId(req.user.id);
+      const user = await this.authService.getUser(req.user.id);
       await this.jwtService.revoke(user);
 
       return this.responseJson(req, res, {

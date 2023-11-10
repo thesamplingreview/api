@@ -2,10 +2,25 @@ const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class UserRole extends Model {
+    // variable
+    static GROUPS = {
+      USER: 'user',
+      ADMIN: 'admin',
+    };
+
     static associate(models) {
       this.hasMany(models.User, {
         foreignKey: 'role_id',
         targetKey: 'id',
+      });
+    }
+
+    static scopes(models) {
+      this.addScope('users', {
+        where: { group: UserRole.GROUPS.USER },
+      });
+      this.addScope('admins', {
+        where: { group: UserRole.GROUPS.ADMIN },
       });
     }
   }

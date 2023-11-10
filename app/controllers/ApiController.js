@@ -10,13 +10,14 @@ class ApiController {
   /**
    * Debug info
    */
-  getDebugInfo(req) {
+  getDebugInfo(req, res, data = {}) {
     if (!debug) {
       return null;
     }
 
     return {
       debug: {
+        ...data,
         body: req.body,
         query: req.query,
       },
@@ -63,7 +64,9 @@ class ApiController {
         .json({
           code: 401,
           error: 'Invalid authentication',
-          ...this.getDebugInfo(req, res),
+          ...this.getDebugInfo(req, res, {
+            error: err.message,
+          }),
         });
     }
     if (err instanceof ValidationFailed) {
@@ -71,16 +74,10 @@ class ApiController {
         .json({
           code: 422,
           error: err.message,
-          validator: (err.errors || []).map((d) => ({
-            field: d.path,
-            value: d.value,
-            msg: d.msg,
-          })),
+          validator: err.errors || [],
           ...this.getDebugInfo(req, res),
         });
     }
-
-    console.log(err)
 
     return res
       .status(err.code || code)

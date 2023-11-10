@@ -1,11 +1,10 @@
 const bcrypt = require('bcryptjs');
-const { ValidationFailed } = require('../errors');
-const UserService = require('./UserService');
+const { ValidationFailed, ModelNotFound } = require('../errors');
 const JWTService = require('./JWTService');
+const { User, UserRole } = require('../models');
 
 class AuthService {
   constructor() {
-    this.userService = new UserService();
     this.jwtService = new JWTService();
   }
 
@@ -22,7 +21,7 @@ class AuthService {
     };
 
     // validation
-    const user = await this.userService.findOne({
+    const user = await User.findOne({
       where: {
         email: formData.email,
       },
@@ -39,6 +38,39 @@ class AuthService {
     const tokens = await this.jwtService.generateAuthToken(user);
 
     return { user, tokens };
+  }
+
+  /**
+   * Check user role group
+   *
+   * @param  {string}  userId
+   * @param  {string}  roleGroup
+   * @return {model|null}
+   */
+  async checkUserRoleGroup(userId, roleGroup) {
+    const user = await User.findOne({
+      where: { id: userId },
+      include: [UserRole],
+    });
+    if (user?.UserRole?.group === roleGroup) {
+      return user;
+    }
+    return null;
+  }
+
+  /**
+   * Get user info
+   *
+   * @param  {string}  userId
+   * @return {model|null}
+   */
+  async getUser(userId, options = {}) {
+    const user = await User.findByPk(userId, options);
+    if (!user) {
+      throw new ModelNotFound();
+    }
+
+    return user;
   }
 }
 

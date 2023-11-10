@@ -7,7 +7,12 @@ const { ValidationFailed } = require('../../errors');
 function handleValidationErrors(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    throw new ValidationFailed('Validation failed', errors.array());
+    const errArr = errors.array().map((d) => ({
+      field: d.path,
+      value: d.value,
+      msg: d.msg,
+    }));
+    throw new ValidationFailed(undefined, errArr);
   }
   return next();
 }

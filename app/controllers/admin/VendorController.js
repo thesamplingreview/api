@@ -48,7 +48,7 @@ class VendorController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.vendorService.findbyId(req.params.id);
+      const record = await this.vendorService.findById(req.params.id);
 
       return this.responseJson(req, res, {
         data: new VendorResource(record),
@@ -63,11 +63,16 @@ class VendorController extends ApiController {
    */
   async create(req, res) {
     // validated
-    const formData = {
-      name: req.body.name,
-      profile: req.body.profile,
-      logo: req.body.logo,
-    };
+    // const formData = {
+    //   name: req.body.name,
+    //   profile: req.body.profile,
+    //   logo: req.body.logo,
+    // };
+    return this.responseJson(req, res, {
+      data: req.body,
+      files: req.file,
+    });
+
     try {
       const result = await this.vendorService.create(formData);
 
@@ -91,7 +96,7 @@ class VendorController extends ApiController {
     };
 
     try {
-      const record = await this.vendorService.findbyId(req.params.id);
+      const record = await this.vendorService.findById(req.params.id);
       const updated = await this.vendorService.update(record, formData);
 
       return this.responseJson(req, res, {
@@ -107,7 +112,7 @@ class VendorController extends ApiController {
    */
   async remove(req, res) {
     try {
-      const record = await this.vendorService.findbyId(req.params.id);
+      const record = await this.vendorService.findById(req.params.id);
       const deleted = await this.vendorService.delete(record);
 
       return this.responseJson(req, res, {

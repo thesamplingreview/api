@@ -3,6 +3,16 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     /**
+     * Static variables
+     */
+    static DEFAULT_ROLE_ID = 1;
+
+    static STATUSES = {
+      ACTIVE: 'active',
+      INACTIVE: 'inactive',
+    };
+
+    /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
@@ -20,6 +30,29 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.AuthToken, {
         foreignKey: 'user_id',
         targetKey: 'id',
+      });
+    }
+
+    /**
+     * Define model scopes here
+     */
+    static scopes(models) {
+      this.addScope('users', {
+        include: [
+          {
+            model: models.UserRole,
+            where: { group: models.UserRole.GROUPS.USER },
+          },
+        ],
+      });
+
+      this.addScope('admins', {
+        include: [
+          {
+            model: models.UserRole,
+            where: { group: models.UserRole.GROUPS.ADMIN },
+          },
+        ],
       });
     }
   }

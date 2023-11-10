@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
-const { User, UserRole, Vendor } = require('../../models');
+const { User, UserRole } = require('../../models');
 
 const statuses = Object.values(User.STATUSES);
 
@@ -53,24 +53,12 @@ const statusValidator = body('status')
     values: statuses.toString(),
   }));
 
-const vendorValidator = body('vendor_id')
-  .notEmpty().bail()
-  .withMessage(validatorMessage('validation.required', 'Vendor'))
-  .custom(async (val, { req }) => {
-    const vendor = await Vendor.findByPk(val);
-    if (!vendor) {
-      throw new Error(req.__('validation.not_exist', { field: 'Vendor' }));
-    }
-    req.vendor = vendor;
-    return true;
-  }).bail();
-
 const roleValidator = body('role_id')
   .toInt()
   .notEmpty().bail()
   .withMessage(validatorMessage('validation.required', 'Role'))
   .custom(async (val, { req }) => {
-    const roles = await UserRole.scope('users').findAll({
+    const roles = await UserRole.scope('admins').findAll({
       attributes: ['id'],
     });
     const roleIds = roles.map((d) => d.id);
@@ -90,8 +78,7 @@ exports.createReq = [
   passwordValidator,
   contactValidator.optional(),
   statusValidator.optional(),
-  vendorValidator.optional(),
-  roleValidator.optional(),
+  roleValidator,
 ];
 
 exports.updateReq = [
@@ -99,7 +86,6 @@ exports.updateReq = [
   passwordValidator.optional(),
   contactValidator.optional(),
   statusValidator.optional(),
-  vendorValidator.optional(),
   roleValidator.optional(),
 ];
 

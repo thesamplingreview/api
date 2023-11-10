@@ -1,12 +1,9 @@
-const path = require('path');
-const env = require('dotenv');
 const express = require('express');
-const i18n = require('i18n');
+const env = require('dotenv');
 const morgan = require('morgan');
-const errorHandler = require('./app/middlewares/errorHandler');
 
+// Init services
 env.config();
-
 const app = express();
 const port = process.env.APP_PORT;
 
@@ -18,20 +15,8 @@ app.use(
     extended: true,
   }),
 );
-
 // i18n setup
-i18n.configure({
-  locales: ['en'],
-  defaultLocale: 'en',
-  cookie: 'lang',
-  directory: path.join(__dirname, 'locales'),
-  objectNotation: true,
-  // updateFiles: false,
-  // logDebugFn: function (msg) {
-  //   console.log('debug', msg)
-  // },
-});
-app.use(i18n.init);
+app.use(require('./app/providers/i18n').init);
 
 // ping
 app.get('/ping', (req, res) => {
@@ -39,18 +24,21 @@ app.get('/ping', (req, res) => {
 });
 
 // API routes
-const authRoutes = require('./routes/auth');
-const apiRoutes = require('./routes/admin');
-
-app.use('/auth', authRoutes);
-app.use('/admin', apiRoutes);
+app.use('/auth', require('./routes/auth'));
+app.use('/admin', require('./routes/admin'));
 
 // error middleware
-app.use(errorHandler);
+app.use(require('./app/middlewares/errorHandler'));
+
+// global handle for Promise
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Handle the error here
+  // Note: You might want to log the error or perform additional actions
+});
 
 // DB connection
 const { sequelize } = require('./app/models');
-
 (async () => {
   try {
     await sequelize.authenticate();

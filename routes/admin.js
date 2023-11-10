@@ -1,15 +1,29 @@
 const express = require('express');
-const auth = require('../app/middlewares/auth');
+const AuthMiddleware = require('../app/middlewares/auth');
+const AdminCheckMiddleware = require('../app/middlewares/adminCheck');
 const {
   UserController,
+  AdminController,
   VendorController,
 } = require('../app/controllers/admin');
-const { UserValidator } = require('../app/middlewares/validators');
+const {
+  UserValidator,
+  AdminValidator,
+  // VendorValidator,
+} = require('../app/middlewares/validators');
 
 const router = express.Router();
 
 // middlewares
-router.use(auth);
+router.use(AuthMiddleware);
+router.use(AdminCheckMiddleware);
+
+// admins module
+router.get('/admins', AdminController.getAll);
+router.get('/admins/:id', AdminController.getSingle);
+router.post('/admins', AdminValidator.createReq, AdminController.create);
+router.put('/admins/:id', AdminValidator.updateReq, AdminController.update);
+router.delete('/admins/:id', AdminController.remove);
 
 // users module
 router.get('/users', UserController.getAll);
@@ -21,7 +35,9 @@ router.delete('/users/:id', UserController.remove);
 // vendor module
 router.get('/vendors', VendorController.getAll);
 router.get('/vendors/:id', VendorController.getSingle);
-router.post('/vendors', VendorController.create);
+
+const handleFormData = require('../app/providers/formidable');
+router.post('/vendors', handleFormData, VendorController.create);
 router.put('/vendors/:id', VendorController.update);
 router.delete('/vendors/:id', VendorController.remove);
 
