@@ -3,10 +3,27 @@ const {
   ModelNotFound,
   AuthError,
   ValidationFailed,
-  InvalidToken,
+  // InvalidToken,
+  S3UploadError,
 } = require('../errors');
 
 class ApiController {
+  /**
+   * Get paginate data
+   */
+  getPaginate(req) {
+    let page = 1;
+    let perPage = 10;
+
+    if (req.query.page) {
+      page = Math.max(Number(req.query.page), 1);
+    }
+    if (req.query.per_page) {
+      perPage = Math.min(Math.max(Number(req.query.per_page), 1), 100);
+    }
+    return { page, perPage };
+  }
+
   /**
    * Debug info
    */
@@ -75,6 +92,14 @@ class ApiController {
           code: 422,
           error: err.message,
           validator: err.errors || [],
+          ...this.getDebugInfo(req, res),
+        });
+    }
+    if (err instanceof S3UploadError) {
+      return res.status(500)
+        .json({
+          code: 500,
+          error: `s3 upload error: ${err.message}`,
           ...this.getDebugInfo(req, res),
         });
     }

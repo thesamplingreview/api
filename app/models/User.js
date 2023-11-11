@@ -84,6 +84,9 @@ module.exports = (sequelize, DataTypes) => {
     role_id: {
       type: DataTypes.INTEGER,
     },
+    vendor_id: {
+      type: DataTypes.UUID,
+    },
     last_login: {
       type: DataTypes.DATE,
     },

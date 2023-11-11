@@ -1,4 +1,5 @@
 const { getInput } = require('../helpers/utils');
+const { s3Upload } = require('../helpers/upload');
 const BaseService = require('./BaseService');
 const { Vendor } = require('../models');
 
@@ -15,10 +16,16 @@ class UserService extends BaseService {
 
   async create(input) {
     const formData = {
-      name: input.email,
-      logo: input.logo || null,
+      name: input.name,
       profile: input.profile || null,
     };
+    if (input.logo?.filepath) {
+      const s3Url = await s3Upload(input.logo, 'vendors');
+      if (s3Url) {
+        formData.logo = s3Url;
+      }
+    }
+
     const result = await this.model.create(formData);
 
     return result;
@@ -27,9 +34,16 @@ class UserService extends BaseService {
   async update(record, input) {
     const formData = {
       name: getInput(input.name, record.name),
-      logo: getInput(input.logo, record.logo),
       profile: getInput(input.profile, record.profile),
     };
+    if (input.logo?.filepath) {
+      const s3Url = await s3Upload(input.logo, 'vendors', {
+        replace: record.logo,
+      });
+      if (s3Url) {
+        formData.logo = s3Url;
+      }
+    }
     const result = await record.update(formData);
 
     return result;

@@ -16,7 +16,8 @@ app.use(
   }),
 );
 // i18n setup
-app.use(require('./app/providers/i18n').init);
+const { i18n } = require('./app/helpers/locale');
+app.use(i18n.init);
 
 // ping
 app.get('/ping', (req, res) => {

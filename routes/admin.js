@@ -9,7 +9,7 @@ const {
 const {
   UserValidator,
   AdminValidator,
-  // VendorValidator,
+  VendorValidator,
 } = require('../app/middlewares/validators');
 
 const router = express.Router();
@@ -35,10 +35,8 @@ router.delete('/users/:id', UserController.remove);
 // vendor module
 router.get('/vendors', VendorController.getAll);
 router.get('/vendors/:id', VendorController.getSingle);
-
-const handleFormData = require('../app/providers/formidable');
-router.post('/vendors', handleFormData, VendorController.create);
-router.put('/vendors/:id', VendorController.update);
+router.post('/vendors', VendorValidator.createReq, VendorController.create);
+router.put('/vendors/:id', VendorValidator.updateReq, VendorController.update);
 router.delete('/vendors/:id', VendorController.remove);
 
 module.exports = router;

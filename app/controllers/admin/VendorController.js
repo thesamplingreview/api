@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
-const { User } = require('../../models');
+const { sequelize, User } = require('../../models');
 const VendorService = require('../../services/VendorService');
 const VendorResource = require('../../resources/VendorResource');
 
@@ -31,7 +31,8 @@ class VendorController extends ApiController {
         distinct: true,
       };
       // const results = await this.vendorService.findAll(query);
-      const results = await this.vendorService.paginate(query, 1, 10);
+      const { page, perPage } = this.getPaginate(req);
+      const results = await this.vendorService.paginate(query, page, perPage);
 
       return this.responsePaginate(req, res, {
         // data: VendorResource.collection(results.data),
@@ -63,23 +64,23 @@ class VendorController extends ApiController {
    */
   async create(req, res) {
     // validated
-    // const formData = {
-    //   name: req.body.name,
-    //   profile: req.body.profile,
-    //   logo: req.body.logo,
-    // };
-    return this.responseJson(req, res, {
-      data: req.body,
-      files: req.file,
-    });
+    const formData = {
+      name: req.body.name,
+      profile: req.body.profile,
+      logo: req.body.logo,
+    };
 
+    // DB update
+    const t = await sequelize.transaction();
     try {
-      const result = await this.vendorService.create(formData);
+      const result = await this.vendorService.create(formData, { transaction: t });
 
+      t.commit();
       return this.responseJson(req, res, {
         data: new VendorResource(result),
       });
     } catch (err) {
+      t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -95,14 +96,18 @@ class VendorController extends ApiController {
       logo: req.body.logo,
     };
 
+    // DB update
+    const t = await sequelize.transaction();
     try {
       const record = await this.vendorService.findById(req.params.id);
-      const updated = await this.vendorService.update(record, formData);
+      const updated = await this.vendorService.update(record, formData, { transaction: t });
 
+      t.commit();
       return this.responseJson(req, res, {
         data: new VendorResource(updated),
       });
     } catch (err) {
+      t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -111,14 +116,18 @@ class VendorController extends ApiController {
    * DELETE - remove
    */
   async remove(req, res) {
+    // DB update
+    const t = await sequelize.transaction();
     try {
       const record = await this.vendorService.findById(req.params.id);
-      const deleted = await this.vendorService.delete(record);
+      const deleted = await this.vendorService.delete(record, { transaction: t });
 
+      t.commit();
       return this.responseJson(req, res, {
         data: new VendorResource(deleted),
       });
     } catch (err) {
+      t.rollback();
       return this.responseError(req, res, err);
     }
   }
