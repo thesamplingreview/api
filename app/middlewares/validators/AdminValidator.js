@@ -5,21 +5,22 @@ const { User, UserRole } = require('../../models');
 const statuses = Object.values(User.STATUSES);
 
 /* eslint-disable newline-per-chained-call */
-const emailValidator = body('email')
+const emailValidator = () => body('email')
   .trim()
   .notEmpty().bail()
   .withMessage(validatorMessage('validation.required', 'Email'))
   .isEmail().bail()
   .withMessage(validatorMessage('validation.invalid_email', 'Email'))
-  .custom(async (val, { req }) => {
+  .custom(async (val) => {
     const exist = await User.count({ where: { email: val } });
     if (exist > 0) {
-      throw new Error(req.__('validation.exist', { field: 'Email' }));
+      throw new Error('Invalid');
     }
     return true;
-  }).bail();
+  }).bail()
+  .withMessage(validatorMessage('validation.exist', 'Email'));
 
-const nameValidator = body('name')
+const nameValidator = () => body('name')
   .trim()
   .escape()
   .notEmpty().bail()
@@ -31,7 +32,7 @@ const nameValidator = body('name')
     max: 50,
   }));
 
-const passwordValidator = body('password')
+const passwordValidator = () => body('password')
   .notEmpty().bail()
   .withMessage(validatorMessage('validation.required', 'Password'))
   .isLength({ min: 6 }).bail()
@@ -42,9 +43,9 @@ const passwordValidator = body('password')
   // .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).*$/, 'g')
   // .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character');
 
-const contactValidator = body('contact');
+const contactValidator = () => body('contact');
 
-const statusValidator = body('status')
+const statusValidator = () => body('status')
   .notEmpty().bail()
   .withMessage(validatorMessage('validation.required', 'Status'))
   .isIn(statuses).bail()
@@ -53,7 +54,7 @@ const statusValidator = body('status')
     values: statuses.toString(),
   }));
 
-const roleValidator = body('role_id')
+const roleValidator = () => body('role_id')
   .toInt()
   .notEmpty().bail()
   .withMessage(validatorMessage('validation.required', 'Role'))
@@ -73,20 +74,20 @@ const roleValidator = body('role_id')
 
 // request validators
 exports.createReq = [
-  emailValidator,
-  nameValidator,
-  passwordValidator,
-  contactValidator.optional(),
-  statusValidator.optional(),
-  roleValidator,
+  emailValidator(),
+  nameValidator(),
+  passwordValidator(),
+  contactValidator().optional(),
+  statusValidator().optional(),
+  roleValidator(),
 ];
 
 exports.updateReq = [
-  nameValidator.optional(),
-  passwordValidator.optional(),
-  contactValidator.optional(),
-  statusValidator.optional(),
-  roleValidator.optional(),
+  nameValidator().optional(),
+  passwordValidator().optional(),
+  contactValidator().optional(),
+  statusValidator().optional(),
+  roleValidator().optional(),
 ];
 
 /* eslint-enable newline-per-chained-call */

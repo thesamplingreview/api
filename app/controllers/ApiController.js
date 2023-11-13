@@ -104,13 +104,16 @@ class ApiController {
         });
     }
 
+    console.log(err);
     return res
       .status(err.code || code)
       .json({
         code: err.code || code,
         error: err.message,
         ...data,
-        ...this.getDebugInfo(req, res),
+        ...this.getDebugInfo(req, res, {
+          errors: err.errors,
+        }),
       });
   }
 }

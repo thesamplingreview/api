@@ -27,9 +27,9 @@ module.exports = {
         references: {
           model: 'user_roles',
           key: 'id',
-          onUpdate: 'CASCADE',
-          onDelete: 'CASCADE',
         },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       last_login: Sequelize.DATE,
       email_verified_at: Sequelize.DATE,

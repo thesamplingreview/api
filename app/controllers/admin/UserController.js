@@ -1,7 +1,7 @@
 const ApiController = require('../ApiController');
 const {
   sequelize,
-  // User,
+  User,
   UserRole,
   Vendor,
 } = require('../../models');
@@ -29,6 +29,7 @@ class UserController extends ApiController {
 
       return this.responsePaginate(req, res, {
         data: UserResource.collection(results.data),
+        // data: results.data,
         meta: results.meta,
       });
     } catch (err) {
@@ -130,6 +131,31 @@ class UserController extends ApiController {
       await t.rollback();
       return this.responseError(req, res, err);
     }
+  }
+
+  /**
+   * GET - options
+   */
+  async options(req, res) {
+    const roles = await UserRole.scope('users').findAll({
+      attributes: ['id', 'name'],
+    });
+    const vendors = await Vendor.findAll({
+      attributes: ['id', 'name'],
+    });
+
+    const options = {
+      roles,
+      vendors,
+      statuses: Object.values(User.STATUSES).map((val) => ({
+        id: val,
+        name: val.charAt(0).toUpperCase() + val.slice(1),
+      })),
+    };
+
+    return this.responseJson(req, res, {
+      data: options,
+    });
   }
 }
 

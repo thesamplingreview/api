@@ -1,12 +1,10 @@
 const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
-const { parseFormData, validatorCheck } = require('../../helpers/upload');
+const { parseFormData, validatorFileCheck } = require('../../helpers/upload');
 
 /* eslint-disable newline-per-chained-call */
 const logoValidator = () => body('logo')
-  .notEmpty().bail()
-  .withMessage(validatorMessage('validation.required', 'Logo'))
-  .custom(validatorCheck({
+  .custom(validatorFileCheck({
     maxFileSize: 2 * 1024 * 1024, // 2Mb
     mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
   })).bail();

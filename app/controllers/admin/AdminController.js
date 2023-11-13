@@ -1,6 +1,8 @@
+const { Op } = require('sequelize');
 const ApiController = require('../ApiController');
 const {
   sequelize,
+  User,
   UserRole,
 } = require('../../models');
 const AdminService = require('../../services/AdminService');
@@ -133,6 +135,28 @@ class UserController extends ApiController {
       await t.rollback();
       return this.responseError(req, res, err);
     }
+  }
+
+  /**
+   * GET - options
+   */
+  async options(req, res) {
+    const roles = await UserRole.scope('admins').findAll({
+      attributes: ['id', 'name'],
+      where: { id: { [Op.ne]: 9 } },
+    });
+
+    const options = {
+      roles,
+      statuses: Object.values(User.STATUSES).map((val) => ({
+        id: val,
+        name: val.charAt(0).toUpperCase() + val.slice(1),
+      })),
+    };
+
+    return this.responseJson(req, res, {
+      data: options,
+    });
   }
 }
 

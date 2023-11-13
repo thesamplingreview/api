@@ -38,9 +38,9 @@ module.exports = {
         references: {
           model: 'vendors',
           key: 'id',
-          onUpdate: 'CASCADE',
-          onDelete: 'CASCADE',
         },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       }, { transaction });
 
       await transaction.commit();

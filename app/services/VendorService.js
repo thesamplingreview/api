@@ -1,9 +1,9 @@
 const { getInput } = require('../helpers/utils');
-const { s3Upload } = require('../helpers/upload');
+const { s3Upload, s3Remove } = require('../helpers/upload');
 const BaseService = require('./BaseService');
 const { Vendor } = require('../models');
 
-class UserService extends BaseService {
+class VendorService extends BaseService {
   constructor() {
     super(Vendor);
   }
@@ -36,13 +36,18 @@ class UserService extends BaseService {
       name: getInput(input.name, record.name),
       profile: getInput(input.profile, record.profile),
     };
-    if (input.logo?.filepath) {
+    if (input.logo !== undefined && input.logo?.filepath) {
       const s3Url = await s3Upload(input.logo, 'vendors', {
         replace: record.logo,
       });
       if (s3Url) {
         formData.logo = s3Url;
       }
+    } else if (input.logo !== undefined) {
+      if (record.logo) {
+        await s3Remove(record.logo);
+      }
+      formData.logo = null;
     }
     const result = await record.update(formData);
 
@@ -50,4 +55,4 @@ class UserService extends BaseService {
   }
 }
 
-module.exports = UserService;
+module.exports = VendorService;

@@ -1,14 +1,14 @@
 const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
-const { sequelize, User } = require('../../models');
-const VendorService = require('../../services/VendorService');
-const VendorResource = require('../../resources/VendorResource');
+const { sequelize, FormField } = require('../../models');
+const FormService = require('../../services/FormService');
+const FormResource = require('../../resources/FormResource');
 
-class VendorController extends ApiController {
+class FormController extends ApiController {
   constructor() {
     super();
 
-    this.vendorService = new VendorService();
+    this.formService = new FormService();
   }
 
   /**
@@ -17,25 +17,23 @@ class VendorController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.vendorService.genWhereQuery(req),
-        include: [
-          { model: User },
-        ],
+        where: await this.formService.genWhereQuery(req),
+        order: await this.formService.genOrdering(req),
+        // include: [
+        //   { model: FormField },
+        // ],
         attributes: {
           include: [
-            // NOTE: these only works on findAll
-            // [Sequelize.fn('COUNT', Sequelize.col('Users.id')), 'count_users'],
-            [Sequelize.literal('(SELECT COUNT(*) FROM `users` AS `Users` WHERE `Users`.`vendor_id` = `Vendor`.`id`)'), 'usersCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `form_fields` AS `Fields` WHERE `Fields`.`form_id` = `Form`.`id`)'), 'fieldsCount'],
           ],
         },
         distinct: true,
       };
-      // const results = await this.vendorService.findAll(query);
       const { page, perPage } = this.getPaginate(req);
-      const results = await this.vendorService.paginate(query, page, perPage);
+      const results = await this.formService.paginate(query, page, perPage);
 
       return this.responsePaginate(req, res, {
-        data: VendorResource.collection(results.data),
+        data: FormResource.collection(results.data),
         meta: results.meta,
       });
     } catch (err) {
@@ -48,10 +46,17 @@ class VendorController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.vendorService.findById(req.params.id);
+      const record = await this.formService.findById(req.params.id, {
+        include: [
+          { model: FormField },
+        ],
+        order: [
+          [FormField, 'pos', 'ASC'],
+        ],
+      });
 
       return this.responseJson(req, res, {
-        data: new VendorResource(record),
+        data: new FormResource(record),
       });
     } catch (err) {
       return this.responseError(req, res, err);
@@ -65,18 +70,19 @@ class VendorController extends ApiController {
     // validated
     const formData = {
       name: req.body.name,
-      profile: req.body.profile,
-      logo: req.body.logo,
+      description: req.body.description,
+      cover: req.body.cover,
+      fields: req.body.fields,
     };
 
     // DB update
     const t = await sequelize.transaction();
     try {
-      const result = await this.vendorService.create(formData, { transaction: t });
+      const result = await this.formService.create(formData, { transaction: t });
 
       t.commit();
       return this.responseJson(req, res, {
-        data: new VendorResource(result),
+        data: new FormResource(result),
       });
     } catch (err) {
       t.rollback();
@@ -91,19 +97,24 @@ class VendorController extends ApiController {
     // validated
     const formData = {
       name: req.body.name,
-      profile: req.body.profile,
-      logo: req.body.logo,
+      description: req.body.description,
+      cover: req.body.cover,
+      fields: req.body.fields,
     };
 
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.vendorService.findById(req.params.id);
-      const updated = await this.vendorService.update(record, formData, { transaction: t });
+      const record = await this.formService.findById(req.params.id, {
+        include: [
+          { model: FormField },
+        ],
+      });
+      const updated = await this.formService.update(record, formData, { transaction: t });
 
       t.commit();
       return this.responseJson(req, res, {
-        data: new VendorResource(updated),
+        data: new FormResource(updated),
       });
     } catch (err) {
       t.rollback();
@@ -118,12 +129,12 @@ class VendorController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.vendorService.findById(req.params.id);
-      const deleted = await this.vendorService.delete(record, { transaction: t });
+      const record = await this.formService.findById(req.params.id);
+      const deleted = await this.formService.delete(record, { transaction: t });
 
       t.commit();
       return this.responseJson(req, res, {
-        data: new VendorResource(deleted),
+        data: new FormResource(deleted),
       });
     } catch (err) {
       t.rollback();
@@ -145,4 +156,4 @@ class VendorController extends ApiController {
   }
 }
 
-module.exports = VendorController;
+module.exports = FormController;

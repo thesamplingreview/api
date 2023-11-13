@@ -5,8 +5,28 @@ class BaseService {
     this.model = model;
   }
 
+  getSortMeta(req) {
+    const { sort } = req.query;
+    if (!sort) {
+      return null;
+    }
+    let sortKey = sort;
+    let sortOrder = 'ASC';
+    if (sort.startsWith('-')) {
+      sortKey = sort.substring(1);
+      sortOrder = 'DESC';
+    }
+    return [sortKey, sortOrder];
+  }
+
   async genWhereQuery() {
     return {};
+  }
+
+  async genOrdering(req) {
+    // currently only support single column ordering
+    const sort = this.getSortMeta(req);
+    return sort ? [sort] : [];
   }
 
   async findAll(options = {}) {

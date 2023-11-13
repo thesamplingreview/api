@@ -3,43 +3,45 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('auth_tokens', {
+    await queryInterface.createTable('products', {
       id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
       },
-      token: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
-      user_id: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: 'users',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
+      description: {
+        type: Sequelize.TEXT,
       },
-      type: {
+      image_url: {
+        type: Sequelize.TEXT,
+      },
+      brand: {
         type: Sequelize.STRING,
       },
-      blacklisted: {
-        type: Sequelize.BOOLEAN,
+      status: {
+        type: Sequelize.STRING,
       },
-      expired_at: {
-        type: Sequelize.DATE,
+      pos: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
       },
       created_at: {
+        type: Sequelize.DATE,
+      },
+      updated_at: {
+        type: Sequelize.DATE,
+      },
+      deleted_at: {
         type: Sequelize.DATE,
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('auth_tokens');
+    await queryInterface.dropTable('products');
   },
 };

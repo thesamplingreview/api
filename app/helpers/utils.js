@@ -55,4 +55,15 @@ module.exports = {
   genUuid() {
     return uuidv4();
   },
+
+  /**
+   * Convert string to Date
+   */
+  toDate(str, defaultVal = null) {
+    if (str) {
+      const date = new Date(str);
+      return !Number.isNaN(date.getTime()) ? date : defaultVal;
+    }
+    return defaultVal;
+  },
 };

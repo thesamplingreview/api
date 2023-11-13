@@ -10,6 +10,10 @@
 		"in": "{{field}} accept [{{values}}] only",
 		"auth": "Invalid auth credentials",
 		"file_type": "Accept [{{values}}] only",
-		"file_size": "{{field}} must be larger than {{size}} bytes"
+		"file_size": "{{field}} must be larger than {{size}} bytes",
+        "array": "{{field}} must be an array",
+        "json": "{{field}} must be a JSON object",
+        "date": "{{field}} must be a valid date",
+        "slug": "{{field}} must be valid slug string"
 	}
 }

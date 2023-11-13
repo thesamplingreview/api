@@ -31,6 +31,7 @@ function parseFormData({
 } = {}) {
   return (req, res, next) => {
     const form = formidable({
+      multiples: true,
       uploadDir: path.join(process.cwd(), 'tmp'),
       keepExtensions: true,
       filter({ name }) {
@@ -69,8 +70,13 @@ function parseFormData({
  * @param  {array}  options.mimeTypes
  * @return {expressChain}
  */
-function validatorCheck({ field, maxFileSize, mimeTypes }) {
+function validatorFileCheck({ field, maxFileSize, mimeTypes }) {
   return (val, { req, path: pathName }) => {
+    // allow empty
+    if (!val) {
+      return true;
+    }
+
     const fieldName = field || pathName;
     let error = '';
     if (!val?.filepath) {
@@ -190,7 +196,7 @@ async function s3Upload(file, dir = '', options = {}) {
 
 module.exports = {
   parseFormData,
-  validatorCheck,
+  validatorFileCheck,
   s3Client,
   s3PublicUrl,
   s3Upload,

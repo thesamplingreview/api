@@ -1,8 +1,9 @@
+const { User } = require('../models');
 const VendorResource = require('./VendorResource');
 
 class UserResource {
   constructor(data) {
-    this.data = data;
+    this.data = data instanceof User ? data.get({ plain: true }) : data;
   }
 
   toJSON() {
