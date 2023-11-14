@@ -1,7 +1,8 @@
+const { Op } = require('sequelize');
 const { getInput, toDate } = require('../helpers/utils');
 const { s3Upload, s3Remove } = require('../helpers/upload');
 const BaseService = require('./BaseService');
-const { Campaign } = require('../models');
+const { Campaign, CampaignProduct } = require('../models');
 
 class CampaignService extends BaseService {
   constructor() {
@@ -20,7 +21,7 @@ class CampaignService extends BaseService {
     return sort ? [sort] : [['pos', 'ASC']];
   }
 
-  async create(input) {
+  async create(input, options = {}) {
     const formData = {
       slug: input.slug,
       name: input.name,
@@ -42,12 +43,12 @@ class CampaignService extends BaseService {
       }
     }
 
-    const result = await this.model.create(formData);
+    const result = await this.model.create(formData, options);
 
     return result;
   }
 
-  async update(record, input) {
+  async update(record, input, options = {}) {
     const formData = {
       slug: getInput(input.slug, record.slug),
       name: getInput(input.name, record.name),
@@ -75,9 +76,58 @@ class CampaignService extends BaseService {
       }
       formData.cover_url = null;
     }
-    const result = await record.update(formData);
+    const result = await record.update(formData, options);
 
     return result;
+  }
+
+  /**
+   * Sync campaign <> products dataset
+   * - this method using create / update approach (multi-query)
+   * - this method will auto-cleanup old records if the record was not included inside `products`
+   *
+   * @param  {model}  record
+   * @param  {array}  products
+   * @param  {object}  options - sequelize transaction
+   * @return {model[]}
+   */
+  async syncProducts(record, products, options = {}) {
+    if (!products.length) {
+      return [];
+    }
+
+    // create / update
+    const promises = products.filter((product) => product.id)
+      .map(async (product) => {
+        const key = {
+          campaign_id: record.id,
+          product_id: product.id,
+        };
+        let linked = await CampaignProduct.findOne({
+          where: key,
+        }, options);
+        if (!linked) {
+          linked = CampaignProduct.build(key);
+        }
+        linked.filterable = product.filterable || false;
+        linked.config = product.config || null;
+        const result = await linked.save(options);
+
+        return result;
+      });
+
+    const updated = await Promise.all(promises);
+
+    // remove orphan record
+    const updatedIds = updated.map((d) => d.id);
+    await CampaignProduct.destroy({
+      where: {
+        id: { [Op.notIn]: updatedIds },
+        campaign_id: record.id,
+      },
+    });
+
+    return updated;
   }
 }
 

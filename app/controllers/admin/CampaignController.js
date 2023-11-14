@@ -1,7 +1,7 @@
 // const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
 const {
-  sequelize, Campaign, Form, Vendor,
+  sequelize, Campaign, Product, Form, Vendor, User,
 } = require('../../models');
 const CampaignService = require('../../services/CampaignService');
 const CampaignResource = require('../../resources/CampaignResource');
@@ -43,6 +43,8 @@ class CampaignController extends ApiController {
         include: [
           { model: Vendor },
           { model: Form },
+          { model: Product },
+          { model: User },
         ],
       });
 
@@ -166,6 +168,34 @@ class CampaignController extends ApiController {
     return this.responseJson(req, res, {
       data: options,
     });
+  }
+
+  /**
+   * PUT - add products
+   */
+  async updateProducts(req, res) {
+    // validated
+    const formData = {
+      products: req.body.products,
+    };
+
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const record = await this.campaignService.findById(req.params.id);
+      const updated = await this.campaignService.syncProducts(record, formData.products, { transaction: t });
+
+      t.commit();
+      return this.responseJson(req, res, {
+        data: updated,
+      });
+      // return this.responseJson(req, res, {
+      //   data: new CampaignResource(updated),
+      // });
+    } catch (err) {
+      t.rollback();
+      return this.responseError(req, res, err);
+    }
   }
 }
 

@@ -6,7 +6,27 @@ class ProductResource {
   }
 
   toJSON() {
-    return this.data;
+    const relations = {};
+    if (this.data.CampaignProduct !== undefined) {
+      relations.campaign_products = {
+        id: this.data.CampaignProduct?.id || '',
+        filterable: this.data.CampaignProduct?.filterable || false,
+        config: this.data.CampaignProduct?.config || null,
+      };
+    }
+
+    return {
+      id: this.data.id,
+      name: this.data.name,
+      description: this.data.description,
+      image_url: this.data.image_url,
+      brand: this.data.brand,
+      status: this.data.status,
+      pos: this.data.pos,
+      created_at: this.data.created_at,
+      updated_at: this.data.updated_at,
+      ...relations,
+    };
   }
 
   static collection(dataset) {

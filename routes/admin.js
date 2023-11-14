@@ -63,6 +63,7 @@ router.get('/campaigns/:id', CampaignController.getSingle);
 router.post('/campaigns', CampaignValidator.createReq, CampaignController.create);
 router.put('/campaigns/:id', CampaignValidator.updateReq, CampaignController.update);
 router.delete('/campaigns/:id', CampaignController.remove);
+router.put('/campaigns/:id/products', CampaignValidator.productsReq, CampaignController.updateProducts);
 
 // product module
 router.get('/products', ProductController.getAll);

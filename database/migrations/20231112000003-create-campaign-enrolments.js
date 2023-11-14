@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('campaign_products', {
+    await queryInterface.createTable('campaign_enrolments', {
       id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -20,26 +20,37 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
-      product_id: {
-        type: Sequelize.INTEGER,
+      user_id: {
+        type: Sequelize.UUID,
         allowNull: false,
         references: {
-          model: 'products',
+          model: 'users',
           key: 'id',
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
-      filterable: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: 0,
+      form_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'forms',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
       },
-      config: {
+      submissions: {
         type: Sequelize.JSON,
+      },
+      created_at: {
+        type: Sequelize.DATE,
+      },
+      updated_at: {
+        type: Sequelize.DATE,
       },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('campaign_products');
+    await queryInterface.dropTable('campaign_enrolments');
   },
 };

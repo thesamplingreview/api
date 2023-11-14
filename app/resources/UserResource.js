@@ -18,6 +18,15 @@ class UserResource {
     if (this.data.Vendor !== undefined) {
       relations.vendors = this.data.Vendor ? new VendorResource(this.data.Vendor) : null;
     }
+    if (this.data.CampaignEnrolment !== undefined) {
+      relations.campaign_enrolment = {
+        id: this.data.CampaignEnrolment?.id || null,
+        form_id: this.data.CampaignEnrolment?.form_id || null,
+        submissions: this.data.CampaignEnrolment?.submissions || null,
+        created_at: this.data.CampaignEnrolment?.created_at || null,
+        updated_at: this.data.CampaignEnrolment?.updated_at || null,
+      };
+    }
 
     return {
       id: this.data.id,

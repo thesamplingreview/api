@@ -3,7 +3,9 @@ const { body } = require('express-validator');
 const { toDate } = require('../../helpers/utils');
 const { validatorMessage } = require('../../helpers/locale');
 const { parseFormData, validatorFileCheck } = require('../../helpers/upload');
-const { Campaign, Vendor, Form } = require('../../models');
+const {
+  Campaign, Product, Vendor, Form,
+} = require('../../models');
 
 /* eslint-disable newline-per-chained-call */
 const coverValidator = () => body('cover')
@@ -89,6 +91,43 @@ const formValidator = () => body('form_id')
   }).bail()
   .withMessage(validatorMessage('validation.not_exist', 'Form'));
 
+const productsValidator = ({ optional = false } = {}) => {
+  const fieldName = 'products';
+  const bodyChain = body(fieldName)
+    .isArray({ min: 0 }).bail()
+    .withMessage(validatorMessage('validation.array', 'Fields'));
+  if (optional) {
+    bodyChain.optional();
+  }
+  return [
+    bodyChain,
+    body(`${fieldName}.*.id`)
+      .notEmpty().bail()
+      .withMessage(validatorMessage('validation.required', 'product.id'))
+      .custom(async (val) => {
+        const exist = await Product.findByPk(val);
+        if (!exist) {
+          throw new Error('Invalid');
+        }
+        return true;
+      })
+      .withMessage(validatorMessage('validation.not_exist', 'product.id')),
+    body(`${fieldName}.*.filterable`)
+      .toBoolean(),
+    body(`${fieldName}.*.config`)
+      .isJSON().bail()
+      .withMessage(validatorMessage('validation.json', 'field.config'))
+      .customSanitizer((value) => {
+        try {
+          return value ? JSON.parse(value) : null;
+        } catch (err) {
+          return null;
+        }
+      })
+      .optional({ values: 'falsy' }),
+  ];
+};
+
 // request validators
 exports.createReq = [
   parseFormData({
@@ -126,6 +165,10 @@ exports.updateReq = [
   metaKeywordsValidator().optional(),
   statusValidator().optional(),
   posValidator().optional(),
+];
+
+exports.productsReq = [
+  productsValidator(),
 ];
 
 /* eslint-enable newline-per-chained-call */

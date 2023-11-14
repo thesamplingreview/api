@@ -21,7 +21,7 @@ class FormService extends BaseService {
     return whereQuery;
   }
 
-  async create(input) {
+  async create(input, options = {}) {
     // create - form model
     const formData = {
       name: input.name,
@@ -33,18 +33,18 @@ class FormService extends BaseService {
         formData.cover_url = s3Url;
       }
     }
-    const result = await this.model.create(formData);
+    const result = await this.model.create(formData, options);
 
     // create - form fields
     if (input.fields && input.fields.length) {
-      const fields = await this.syncFormFields(result, input.fields);
+      const fields = await this.syncFormFields(result, input.fields, [], options);
       result.setDataValue('FormFields', fields);
     }
 
     return result;
   }
 
-  async update(record, input) {
+  async update(record, input, options = {}) {
     // update - form model
     const formData = {
       name: getInput(input.name, record.name),
@@ -63,12 +63,12 @@ class FormService extends BaseService {
       }
       formData.cover_url = null;
     }
-    const result = await record.update(formData);
+    const result = await record.update(formData, options);
 
     // update - form field model
     if (input.fields && input.fields.length) {
       const oldIds = await record.getFormFields().then((ds) => ds.map((d) => d.id));
-      const fields = await this.syncFormFields(result, input.fields, oldIds);
+      const fields = await this.syncFormFields(result, input.fields, oldIds, options);
       result.setDataValue('FormFields', fields);
     }
 
@@ -82,9 +82,10 @@ class FormService extends BaseService {
    * @param  {model}  form
    * @param  {array}  fields
    * @param  {string[]}  oldIds - used for verification
+   * @param  {object}  options - sequelize options
    * @return {model[]}
    */
-  async syncFormFields(form, fields, oldIds = []) {
+  async syncFormFields(form, fields, oldIds = [], options = {}) {
     // using oldIds to check for fields under same form only, in order to prevent the case if passing another form's field_id
     const dataset = fields.map((field, index) => ({
       id: field.id && oldIds.includes(field.id) ? field.id : null,
@@ -104,6 +105,7 @@ class FormService extends BaseService {
       updateOnDuplicate: ['name', 'type', 'description', 'placeholder', 'options', 'config', 'mandatory', 'status', 'pos'],
       // returning: true, // not for mysql
       individualHooks: true,
+      ...options,
     });
 
     // clean up orpaned records
@@ -113,7 +115,7 @@ class FormService extends BaseService {
         id: { [Op.notIn]: newIds },
         form_id: form.id,
       },
-    });
+    }, options);
 
     return results;
   }

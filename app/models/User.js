@@ -31,6 +31,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'user_id',
         targetKey: 'id',
       });
+      this.belongsToMany(models.Campaign, {
+        through: models.CampaignEnrolment,
+      });
     }
 
     /**

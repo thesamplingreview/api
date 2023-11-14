@@ -22,6 +22,9 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsToMany(models.Product, {
         through: models.CampaignProduct,
       });
+      this.belongsToMany(models.User, {
+        through: models.CampaignEnrolment,
+      });
     }
   }
 
