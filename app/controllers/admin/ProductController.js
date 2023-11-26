@@ -53,16 +53,9 @@ class ProductController extends ApiController {
     // validated
     const formData = {
       name: req.body.name,
-      slug: req.body.slug,
+      brand: req.body.brand,
       description: req.body.description,
-      cover: req.body.cover,
-      meta_title: req.body.meta_title,
-      meta_description: req.body.meta_description,
-      meta_keywords: req.body.meta_keywords,
-      start_date: req.body.start_date,
-      end_date: req.body.end_date,
-      vendor_id: req.vendor?.id,
-      form_id: req.form?.id,
+      image: req.body.image,
       status: req.body.status,
       pos: req.body.pos,
     };
@@ -89,16 +82,9 @@ class ProductController extends ApiController {
     // validated
     const formData = {
       name: req.body.name,
-      slug: req.body.slug,
+      brand: req.body.brand,
       description: req.body.description,
-      cover: req.body.cover,
-      meta_title: req.body.meta_title,
-      meta_description: req.body.meta_description,
-      meta_keywords: req.body.meta_keywords,
-      start_date: req.body.start_date,
-      end_date: req.body.end_date,
-      vendor_id: req.vendor?.id,
-      form_id: req.form?.id,
+      image: req.body.image,
       status: req.body.status,
       pos: req.body.pos,
     };

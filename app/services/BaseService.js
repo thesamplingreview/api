@@ -75,6 +75,12 @@ class BaseService {
     return result;
   }
 
+  async count(options = {}) {
+    const result = await this.model.count(options);
+
+    return result;
+  }
+
   async create(data, options = {}) {
     const result = await this.model.create(data, options);
 

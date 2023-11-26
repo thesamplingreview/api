@@ -1,6 +1,6 @@
 const express = require('express');
-const AuthMiddleware = require('../app/middlewares/auth');
-const AdminCheckMiddleware = require('../app/middlewares/adminCheck');
+const AuthMiddleware = require('../../app/middlewares/auth');
+const AdminCheckMiddleware = require('../../app/middlewares/adminCheck');
 const {
   UserController,
   AdminController,
@@ -8,7 +8,7 @@ const {
   FormController,
   CampaignController,
   ProductController,
-} = require('../app/controllers/admin');
+} = require('../../app/controllers/admin');
 const {
   UserValidator,
   AdminValidator,
@@ -16,7 +16,7 @@ const {
   FormValidator,
   CampaignValidator,
   ProductValidator,
-} = require('../app/middlewares/validators');
+} = require('../../app/middlewares/validators');
 
 const router = express.Router();
 

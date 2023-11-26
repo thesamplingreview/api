@@ -22,12 +22,11 @@ class ProductService extends BaseService {
 
   async create(input) {
     const formData = {
-      slug: input.slug,
       name: input.name,
       description: input.description || null,
       brand: input.brand || null,
       status: input.status || Product.STATUSES.ACTIVE,
-      pos: input.pos || 0,
+      pos: input.pos || await this.count(),
     };
     if (input.image?.filepath) {
       const s3Url = await s3Upload(input.image, 'campaigns');
@@ -43,7 +42,6 @@ class ProductService extends BaseService {
 
   async update(record, input) {
     const formData = {
-      slug: getInput(input.slug, record.slug),
       name: getInput(input.name, record.name),
       description: getInput(input.description, record.description),
       brand: getInput(input.brand, record.brand),

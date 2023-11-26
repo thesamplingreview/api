@@ -1,5 +1,6 @@
 const express = require('express');
 const env = require('dotenv');
+const cors = require('cors');
 const morgan = require('morgan');
 
 // Init services
@@ -8,6 +9,7 @@ const app = express();
 const port = process.env.APP_PORT;
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(
@@ -25,8 +27,7 @@ app.get('/ping', (req, res) => {
 });
 
 // API routes
-app.use('/auth', require('./routes/auth'));
-app.use('/admin', require('./routes/admin'));
+app.use('/v1', require('./routes/v1/index'));
 
 // error middleware
 app.use(require('./app/middlewares/errorHandler'));

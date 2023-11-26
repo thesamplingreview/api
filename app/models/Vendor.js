@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     profile: {
       type: DataTypes.STRING,
     },
-    logo: {
+    logo_url: {
       type: DataTypes.STRING,
     },
     created_at: {

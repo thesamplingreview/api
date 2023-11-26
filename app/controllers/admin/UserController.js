@@ -1,4 +1,5 @@
 const ApiController = require('../ApiController');
+const allOptions = require('../../../config/options');
 const {
   sequelize,
   User,
@@ -151,6 +152,7 @@ class UserController extends ApiController {
         id: val,
         name: val.charAt(0).toUpperCase() + val.slice(1),
       })),
+      phone_prefixes: allOptions.phonePrefixes,
     };
 
     return this.responseJson(req, res, {

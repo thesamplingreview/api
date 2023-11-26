@@ -22,7 +22,7 @@ class VendorService extends BaseService {
     if (input.logo?.filepath) {
       const s3Url = await s3Upload(input.logo, 'vendors');
       if (s3Url) {
-        formData.logo = s3Url;
+        formData.logo_url = s3Url;
       }
     }
 
@@ -41,13 +41,13 @@ class VendorService extends BaseService {
         replace: record.logo,
       });
       if (s3Url) {
-        formData.logo = s3Url;
+        formData.logo_url = s3Url;
       }
     } else if (input.logo !== undefined) {
-      if (record.logo) {
-        await s3Remove(record.logo);
+      if (record.logo_url) {
+        await s3Remove(record.logo_url);
       }
-      formData.logo = null;
+      formData.logo_url = null;
     }
     const result = await record.update(formData);
 

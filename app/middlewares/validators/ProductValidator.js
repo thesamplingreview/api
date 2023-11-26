@@ -1,6 +1,9 @@
 const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
 const { parseFormData, validatorFileCheck } = require('../../helpers/upload');
+const { Product } = require('../../models');
+
+const statuses = Object.values(Product.STATUSES);
 
 /* eslint-disable newline-per-chained-call */
 const imageValidator = () => body('image')
@@ -20,7 +23,11 @@ const descValidator = () => body('description');
 const brandValidator = () => body('brand');
 
 const statusValidator = () => body('status')
-  .toBoolean();
+  .isIn(statuses).bail()
+  .withMessage(validatorMessage('validation.in', {
+    field: 'Status',
+    values: statuses.toString(),
+  }));
 
 const posValidator = () => body('pos')
   .toInt();
@@ -40,7 +47,7 @@ exports.createReq = [
 
 exports.updateReq = [
   parseFormData({
-    fileFields: ['cover'],
+    fileFields: ['image'],
   }),
   nameValidator(),
   descValidator().optional(),

@@ -15,7 +15,7 @@ class VendorResource {
       id: this.data.id,
       name: this.data.name,
       profile: this.data.profile || null,
-      logo: this.data.logo || null,
+      logo_url: this.data.logo_url || null,
       created_at: this.data.created_at || null,
       updated_at: this.data.updated_at || null,
       ...counts,

@@ -20,7 +20,7 @@ module.exports = {
         profile: {
           type: Sequelize.STRING,
         },
-        logo: {
+        logo_url: {
           type: Sequelize.STRING,
         },
         created_at: {

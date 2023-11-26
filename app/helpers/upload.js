@@ -4,7 +4,7 @@ const formidable = require('formidable');
 // const { Upload } = require('@aws-sdk/lib-storage');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const { s3 } = require('../../config/filesystem');
-const { S3UploadError } = require('../errors');
+const { S3UploadError, BadRequest } = require('../errors');
 
 /**
  * Init s3Client
@@ -29,7 +29,15 @@ const s3Client = new S3Client({
 function parseFormData({
   fileFields = [],
 } = {}) {
-  return (req, res, next) => {
+  return async (req, res, next) => {
+    // next if request is form-data
+    // else formidable will causing stuck
+    const contentType = req.get('Content-Type');
+    if (!contentType.startsWith('multipart/form-data')) {
+      next(new BadRequest());
+      return;
+    }
+
     const form = formidable({
       multiples: true,
       uploadDir: path.join(process.cwd(), 'tmp'),
@@ -45,7 +53,8 @@ function parseFormData({
 
     form.parse(req, (err, fields, files) => {
       if (err) {
-        return next(err);
+        next(err);
+        return;
       }
 
       // as express-validator unable to access req.files, hence will assign req.files into req.body
@@ -56,7 +65,7 @@ function parseFormData({
       };
       req.files = files;
 
-      return next();
+      next();
     });
   };
 }
