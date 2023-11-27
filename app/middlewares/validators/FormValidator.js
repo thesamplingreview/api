@@ -17,7 +17,7 @@ const nameValidator = () => body('name')
 
 const descValidator = () => body('description');
 
-const fieldsValidator = ({ optional = false }) => {
+const fieldsValidator = ({ optional = false } = {}) => {
   const fieldName = 'fields';
   const bodyChain = body(fieldName)
     .isArray({ min: 0 }).bail()
@@ -67,7 +67,10 @@ exports.updateReq = [
   nameValidator(),
   coverValidator().optional(),
   descValidator().optional(),
-  fieldsValidator({ optional: true }),
+];
+
+exports.updateFieldsReq = [
+  fieldsValidator(),
 ];
 
 /* eslint-enable newline-per-chained-call */

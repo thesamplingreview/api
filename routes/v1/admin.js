@@ -54,6 +54,7 @@ router.get('/forms/all/options', FormController.options);
 router.get('/forms/:id', FormController.getSingle);
 router.post('/forms', FormValidator.createReq, FormController.create);
 router.put('/forms/:id', FormValidator.updateReq, FormController.update);
+router.put('/forms/:id/fields', FormValidator.updateFieldsReq, FormController.updateFields);
 router.delete('/forms/:id', FormController.remove);
 
 // campaign module

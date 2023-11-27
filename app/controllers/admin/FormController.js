@@ -99,6 +99,34 @@ class FormController extends ApiController {
       name: req.body.name,
       description: req.body.description,
       cover: req.body.cover,
+    };
+
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const record = await this.formService.findById(req.params.id, {
+        include: [
+          { model: FormField },
+        ],
+      });
+      const updated = await this.formService.update(record, formData, { transaction: t });
+
+      t.commit();
+      return this.responseJson(req, res, {
+        data: new FormResource(updated),
+      });
+    } catch (err) {
+      t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * PUT - update fields
+   */
+  async updateFields(req, res) {
+    // validated
+    const formData = {
       fields: req.body.fields,
     };
 
