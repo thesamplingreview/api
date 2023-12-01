@@ -58,6 +58,10 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
       },
+      highlight: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
       status: {
         type: Sequelize.STRING(30),
       },

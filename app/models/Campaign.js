@@ -6,8 +6,8 @@ module.exports = (sequelize, DataTypes) => {
      * Static variables
      */
     static STATUSES = {
-      ACTIVE: 'active',
-      INACTIVE: 'inactive',
+      DRAFT: 'draft',
+      PUBLISH: 'publish',
     };
 
     static associate(models) {
@@ -17,6 +17,10 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.belongsTo(models.Vendor, {
         foreignKey: 'vendor_id',
+        targetKey: 'id',
+      });
+      this.hasMany(models.CampaignEnrolment, {
+        foreignKey: 'campaign_id',
         targetKey: 'id',
       });
       this.belongsToMany(models.Product, {
@@ -70,6 +74,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     form_id: {
       type: DataTypes.INTEGER,
+    },
+    highlight: {
+      type: DataTypes.BOOLEAN,
     },
     status: {
       type: DataTypes.STRING,

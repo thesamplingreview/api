@@ -1,6 +1,6 @@
 const express = require('express');
-const AuthMiddleware = require('../../app/middlewares/auth');
-const AdminCheckMiddleware = require('../../app/middlewares/adminCheck');
+const tokenInfoMiddleware = require('../../app/middlewares/tokenInfo');
+const userCheckMiddleware = require('../../app/middlewares/userCheck');
 const {
   UserController,
   AdminController,
@@ -21,8 +21,8 @@ const {
 const router = express.Router();
 
 // middlewares
-router.use(AuthMiddleware);
-router.use(AdminCheckMiddleware);
+router.use(tokenInfoMiddleware());
+router.use(userCheckMiddleware('admin'));
 
 // admins module
 router.get('/admins', AdminController.getAll);

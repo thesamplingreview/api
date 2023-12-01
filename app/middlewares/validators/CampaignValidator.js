@@ -59,8 +59,13 @@ const endDateValidator = () => body('end_date')
   }).bail()
   .withMessage(validatorMessage('validation.date', 'End Date'));
 
+const statuses = Object.values(Campaign.STATUSES);
 const statusValidator = () => body('status')
-  .toBoolean();
+  .isIn(statuses).bail()
+  .withMessage(validatorMessage('validation.in', {
+    field: 'Status',
+    values: statuses.toString(),
+  }));
 
 const posValidator = () => body('pos')
   .toInt();

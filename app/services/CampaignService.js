@@ -1,8 +1,9 @@
 const { Op } = require('sequelize');
 const { getInput, toDate } = require('../helpers/utils');
 const { s3Upload, s3Remove } = require('../helpers/upload');
+const { ModelNotFound } = require('../errors');
 const BaseService = require('./BaseService');
-const { Campaign, CampaignProduct } = require('../models');
+const { Campaign, CampaignProduct, CampaignEnrolment } = require('../models');
 
 class CampaignService extends BaseService {
   constructor() {
@@ -21,6 +22,18 @@ class CampaignService extends BaseService {
     return sort ? [sort] : [['pos', 'ASC']];
   }
 
+  async findBySlug(slug, options = {}) {
+    const result = await this.model.findOne({
+      ...options,
+      where: { slug },
+    });
+    if (!result) {
+      throw new ModelNotFound('Data not found');
+    }
+
+    return result;
+  }
+
   async create(input, options = {}) {
     const formData = {
       slug: input.slug,
@@ -33,7 +46,7 @@ class CampaignService extends BaseService {
       end_date: toDate(input.end_date, null),
       vendor_id: input.vendor_id || null,
       form_id: input.form_id || null,
-      status: input.status || Campaign.STATUSES.ACTIVE,
+      status: input.status || Campaign.STATUSES.DRAFT,
       pos: input.pos || 0,
     };
     if (input.cover?.filepath) {

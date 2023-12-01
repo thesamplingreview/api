@@ -1,4 +1,3 @@
-// const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
 const {
   sequelize, Campaign, Product, Form, Vendor, User,
@@ -21,6 +20,7 @@ class CampaignController extends ApiController {
       const query = {
         where: await this.campaignService.genWhereQuery(req),
         order: await this.campaignService.genOrdering(req),
+        include: [Form, Vendor],
       };
       const { page, perPage } = this.getPaginate(req);
       const results = await this.campaignService.paginate(query, page, perPage);
@@ -156,9 +156,13 @@ class CampaignController extends ApiController {
     const forms = await Form.findAll({
       attributes: ['id', 'name'],
     });
+    const vendors = await Vendor.findAll({
+      attributes: ['id', 'name'],
+    });
 
     const options = {
       forms,
+      vendors,
       statuses: Object.values(Campaign.STATUSES).map((val) => ({
         id: val,
         name: val.charAt(0).toUpperCase() + val.slice(1),

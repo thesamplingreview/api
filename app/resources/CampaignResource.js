@@ -3,6 +3,7 @@ const VendorResource = require('./VendorResource');
 const FormResource = require('./FormResource');
 const UserResource = require('./UserResource');
 const ProductResource = require('./ProductResource');
+const CampaignEnrolmentResource = require('./CampaignEnrolmentResource');
 
 class CampaignResource {
   constructor(data) {
@@ -23,6 +24,9 @@ class CampaignResource {
     if (this.data.Users !== undefined) {
       relations.users = this.data.Users.map((d) => new UserResource(d));
     }
+    if (this.data.CampaignEnrolments !== undefined) {
+      relations.enrolments = this.data.CampaignEnrolments.map((d) => new CampaignEnrolmentResource(d));
+    }
 
     return {
       id: this.data.id,
@@ -36,6 +40,7 @@ class CampaignResource {
       start_date: this.data.start_date,
       end_date: this.data.end_date,
       status: this.data.status,
+      highlight: this.data.highlight,
       pos: this.data.pos,
       vendor_id: this.data.vendor_id,
       form_id: this.data.form_id,

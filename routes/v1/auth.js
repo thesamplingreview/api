@@ -1,5 +1,5 @@
 const express = require('express');
-const AuthMiddleware = require('../../app/middlewares/auth');
+const tokenInfoMiddleware = require('../../app/middlewares/tokenInfo');
 const { AuthValidator } = require('../../app/middlewares/validators');
 const AuthController = require('../../app/controllers/AuthController');
 
@@ -22,19 +22,19 @@ router.post(
 
 router.get(
   '/validate',
-  [AuthMiddleware],
+  tokenInfoMiddleware(),
   authController.validate.bind(authController),
 );
 
 router.post(
   '/invalidate',
-  [AuthMiddleware],
+  tokenInfoMiddleware(),
   authController.invalidate.bind(authController),
 );
 
 router.get(
   '/my',
-  [AuthMiddleware],
+  tokenInfoMiddleware(),
   authController.my.bind(authController),
 );
 
