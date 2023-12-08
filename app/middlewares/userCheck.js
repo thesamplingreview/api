@@ -1,5 +1,6 @@
 const { AuthError } = require('../errors');
 const AuthService = require('../services/AuthService');
+const UserService = require('../services/UserService');
 
 const userCheck = (role = '') => {
   return async (req, res, next) => {
@@ -9,10 +10,10 @@ const userCheck = (role = '') => {
     }
 
     try {
-      const authService = new AuthService();
       let userObj;
       // check for specified role group
       if (role) {
+        const authService = new AuthService();
         const user = await authService.checkUserRoleGroup(userId, role);
         if (user) {
           userObj = {
@@ -23,7 +24,8 @@ const userCheck = (role = '') => {
           };
         }
       } else {
-        const user = await authService.getUser(userId);
+        const userService = new UserService();
+        const user = await userService.findById(userId);
         if (user) {
           userObj = {
             id: user.id,

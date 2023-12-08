@@ -1,7 +1,4 @@
 const { CampaignEnrolment } = require('../models');
-const CampaignResource = require('./CampaignResource');
-const FormResource = require('./FormResource');
-const UserResource = require('./UserResource');
 
 class CampaignEnrolmentResource {
   constructor(data) {
@@ -11,12 +8,15 @@ class CampaignEnrolmentResource {
   toJSON() {
     const relations = {};
     if (this.data.Campaign !== undefined) {
+      const CampaignResource = require('./CampaignResource');
       relations.campaign = this.data.Campaign ? new CampaignResource(this.data.Campaign) : null;
     }
     if (this.data.Form !== undefined) {
+      const FormResource = require('./FormResource');
       relations.form = this.data.Form ? new FormResource(this.data.Form) : null;
     }
     if (this.data.User !== undefined) {
+      const UserResource = require('./UserResource');
       relations.user = this.data.User ? new UserResource(this.data.User) : null;
     }
 

@@ -121,7 +121,7 @@ const productsValidator = ({ optional = false } = {}) => {
       .toBoolean(),
     body(`${fieldName}.*.config`)
       .isJSON().bail()
-      .withMessage(validatorMessage('validation.json', 'field.config'))
+      .withMessage(validatorMessage('validation.json', 'product.config'))
       .customSanitizer((value) => {
         try {
           return value ? JSON.parse(value) : null;

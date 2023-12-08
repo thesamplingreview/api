@@ -1,5 +1,4 @@
 const { User } = require('../models');
-const VendorResource = require('./VendorResource');
 
 class UserResource {
   constructor(data) {
@@ -16,6 +15,7 @@ class UserResource {
       } : null;
     }
     if (this.data.Vendor !== undefined) {
+      const VendorResource = require('./VendorResource');
       relations.vendors = this.data.Vendor ? new VendorResource(this.data.Vendor) : null;
     }
     if (this.data.CampaignEnrolment !== undefined) {

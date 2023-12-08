@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
-const { sequelize, FormField } = require('../../models');
+const { sequelize, Campaign, FormField } = require('../../models');
 const FormService = require('../../services/FormService');
 const FormResource = require('../../resources/FormResource');
 
@@ -19,9 +19,9 @@ class FormController extends ApiController {
       const query = {
         where: await this.formService.genWhereQuery(req),
         order: await this.formService.genOrdering(req),
-        // include: [
-        //   { model: FormField },
-        // ],
+        include: [
+          { model: Campaign },
+        ],
         attributes: {
           include: [
             [Sequelize.literal('(SELECT COUNT(*) FROM `form_fields` AS `Fields` WHERE `Fields`.`form_id` = `Form`.`id`)'), 'fieldsCount'],

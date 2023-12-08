@@ -5,14 +5,10 @@ const {
   MyController,
   CampaignController,
 } = require('../../app/controllers/app');
-// const {
-//   UserValidator,
-//   AdminValidator,
-//   VendorValidator,
-//   FormValidator,
-//   CampaignValidator,
-//   ProductValidator,
-// } = require('../../app/middlewares/validators');
+const {
+  CampaignEnrolmentValidator,
+  MyValidator,
+} = require('../../app/middlewares/validators');
 
 // allow public & auth protected routes
 const publicRouter = express.Router();
@@ -25,9 +21,10 @@ authRouter.use(userCheckMiddleware());
 // campaign module
 publicRouter.get('/campaigns', CampaignController.getAll);
 publicRouter.get('/campaigns/:slug', CampaignController.getSingle);
+authRouter.post('/campaigns/enrolment', CampaignEnrolmentValidator.createReq, CampaignController.createEnrolment);
 
 // my module
-authRouter.get('/my/campaigns', MyController.getCampaigns);
+authRouter.get('/my/campaigns', MyValidator.updateReq, MyController.getCampaigns);
 
 const router = express.Router();
 router.use(publicRouter);

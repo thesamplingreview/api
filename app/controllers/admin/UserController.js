@@ -6,14 +6,14 @@ const {
   UserRole,
   Vendor,
 } = require('../../models');
-const UserService = require('../../services/UserService');
+const CustomerService = require('../../services/CustomerService');
 const UserResource = require('../../resources/UserResource');
 
 class UserController extends ApiController {
   constructor() {
     super();
 
-    this.userService = new UserService();
+    this.customerService = new CustomerService();
   }
 
   /**
@@ -22,11 +22,11 @@ class UserController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.userService.genWhereQuery(req),
+        where: await this.customerService.genWhereQuery(req),
         include: [UserRole, Vendor],
       };
       const { page, perPage } = this.getPaginate(req);
-      const results = await this.userService.paginate(query, page, perPage);
+      const results = await this.customerService.paginate(query, page, perPage);
 
       return this.responsePaginate(req, res, {
         data: UserResource.collection(results.data),
@@ -43,7 +43,7 @@ class UserController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.userService.findById(req.params.id, {
+      const record = await this.customerService.findById(req.params.id, {
         include: [UserRole, Vendor],
       });
 
@@ -72,7 +72,7 @@ class UserController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const result = await this.userService.create(formData, { transaction: t });
+      const result = await this.customerService.create(formData, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {
@@ -101,8 +101,8 @@ class UserController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.userService.findById(req.params.id);
-      const updated = await this.userService.update(record, formData, { transaction: t });
+      const record = await this.customerService.findById(req.params.id);
+      const updated = await this.customerService.update(record, formData, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {
@@ -121,8 +121,8 @@ class UserController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.userService.findById(req.params.id);
-      const deleted = await this.userService.delete(record, { transaction: t });
+      const record = await this.customerService.findById(req.params.id);
+      const deleted = await this.customerService.delete(record, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {

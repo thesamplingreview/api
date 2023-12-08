@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'form_id',
         targetKey: 'id',
       });
+      this.hasMany(models.Campaign, {
+        foreignKey: 'form_id',
+        targetKey: 'id',
+      });
       this.belongsTo(models.Vendor, {
         foreignKey: 'vendor_id',
         targetKey: 'id',

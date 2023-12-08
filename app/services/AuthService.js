@@ -57,21 +57,6 @@ class AuthService {
     }
     return null;
   }
-
-  /**
-   * Get user info
-   *
-   * @param  {string}  userId
-   * @return {model|null}
-   */
-  async getUser(userId, options = {}) {
-    const user = await User.findByPk(userId, options);
-    if (!user) {
-      throw new ModelNotFound();
-    }
-
-    return user;
-  }
 }
 
 module.exports = AuthService;

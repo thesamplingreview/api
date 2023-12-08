@@ -31,5 +31,6 @@ module.exports = {
     'import/newline-after-import': 'off',
     'arrow-body-style': 'off',
     'class-methods-use-this': 'off',
+    'global-require': 'off',
   },
 };

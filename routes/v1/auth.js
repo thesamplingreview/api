@@ -2,12 +2,13 @@ const express = require('express');
 const tokenInfoMiddleware = require('../../app/middlewares/tokenInfo');
 const { AuthValidator } = require('../../app/middlewares/validators');
 const AuthController = require('../../app/controllers/AuthController');
+const MyController = require('../../app/controllers/MyController');
 
 const router = express.Router();
 
+// auth module
 const authController = new AuthController();
 
-// auth module
 router.post(
   '/login',
   AuthValidator.loginWithPasswordReq,
@@ -32,10 +33,18 @@ router.post(
   authController.invalidate.bind(authController),
 );
 
+// my module
+const myController = new MyController();
 router.get(
   '/my',
   tokenInfoMiddleware(),
-  authController.my.bind(authController),
+  myController.my.bind(myController),
+);
+
+router.put(
+  '/my',
+  tokenInfoMiddleware(),
+  myController.update.bind(myController),
 );
 
 module.exports = router;

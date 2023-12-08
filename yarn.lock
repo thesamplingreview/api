@@ -4186,6 +4186,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nodemailer@npm:^6.9.7":
+  version: 6.9.7
+  resolution: "nodemailer@npm:6.9.7"
+  checksum: 0cf66d27aed3bd2cbdff9939402cec3d2119c31b2b9ff4af3bcd59f48287ea75b90c0ce2cd9eb0df838164972cd25581b4b723c91fd673e2608bcb28445ccb1b
+  languageName: node
+  linkType: hard
+
 "nodemon@npm:^3.0.1":
   version: 3.0.1
   resolution: "nodemon@npm:3.0.1"
@@ -4768,6 +4775,7 @@ __metadata:
     jsonwebtoken: ^9.0.2
     morgan: ^1.10.0
     mysql2: ^3.6.2
+    nodemailer: ^6.9.7
     nodemon: ^3.0.1
     sequelize: ^6.33.0
     sequelize-cli: ^6.6.1

@@ -12,6 +12,13 @@ class FormResource {
         return d instanceof FormField ? d.get({ plain: true }) : d;
       }).sort((a, b) => a.pos - b.pos);
     }
+    if (this.data.Campaigns !== undefined) {
+      relations.campaigns = this.data.Campaigns.map((d) => ({
+        id: d.id,
+        name: d.name,
+        slug: d.slug,
+      }));
+    }
 
     const counts = {};
     if (this.data.fieldsCount !== undefined) {

@@ -142,6 +142,26 @@ class CampaignService extends BaseService {
 
     return updated;
   }
+
+  /**
+   * Campaign enrolment
+   *
+   * @param  {object}  input
+   * @param  {object}  options - sequelize transaction
+   * @return {model}
+   */
+  async createCampaignEnrolment(input, options = {}) {
+    const formData = {
+      campaign_id: input.campaign_id,
+      user_id: input.user_id,
+      form_id: input.form_id || null,
+      submissions: input.submissions,
+    };
+
+    const result = await CampaignEnrolment.create(formData, options);
+
+    return result;
+  }
 }
 
 module.exports = CampaignService;

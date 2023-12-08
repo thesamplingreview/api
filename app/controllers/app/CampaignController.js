@@ -1,9 +1,10 @@
 const ApiController = require('../ApiController');
 const {
-  Campaign, Product, Form, FormField, Vendor, CampaignEnrolment,
+  sequelize, Campaign, Product, Form, FormField, Vendor, CampaignEnrolment,
 } = require('../../models');
 const CampaignService = require('../../services/CampaignService');
 const CampaignResource = require('../../resources/CampaignResource');
+const CampaignEnrolmentResource = require('../../resources/CampaignEnrolmentResource');
 
 class CampaignController extends ApiController {
   constructor() {
@@ -72,6 +73,32 @@ class CampaignController extends ApiController {
         data: new CampaignResource(record),
       });
     } catch (err) {
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * Create enrolment
+   */
+  async createEnrolment(req, res) {
+    // validated
+    const formData = {
+      user_id: req.user.id,
+      campaign_id: req.body.campaign_id,
+      form_id: req.body.form_id,
+      submissions: req.body.submissions,
+    };
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const result = await this.campaignService.createCampaignEnrolment(formData, { transaction: t });
+
+      t.commit();
+      return this.responseJson(req, res, {
+        data: new CampaignEnrolmentResource(result),
+      });
+    } catch (err) {
+      t.rollback();
       return this.responseError(req, res, err);
     }
   }

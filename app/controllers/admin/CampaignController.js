@@ -159,10 +159,18 @@ class CampaignController extends ApiController {
     const vendors = await Vendor.findAll({
       attributes: ['id', 'name'],
     });
+    const products = await Product.findAll({
+      attributes: ['id', 'name'],
+      where: {
+        status: Product.STATUSES.ACTIVE,
+      },
+      order: [['pos', 'ASC']],
+    });
 
     const options = {
       forms,
       vendors,
+      products,
       statuses: Object.values(Campaign.STATUSES).map((val) => ({
         id: val,
         name: val.charAt(0).toUpperCase() + val.slice(1),
