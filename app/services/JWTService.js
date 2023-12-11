@@ -192,13 +192,13 @@ class JWTService {
   /**
    * Revoke user tokens
    *
-   * @param  {string}  token
+   * @param  {string}  userId
    * @return {model}
    */
-  async revoke(user) {
+  async revoke(userId) {
     const results = await AuthToken.destroy({
       where: {
-        user_id: user.id,
+        user_id: userId,
       },
     });
 

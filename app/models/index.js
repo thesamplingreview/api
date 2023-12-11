@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { DataTypes, Sequelize } = require('sequelize');
 const { db } = require('../../config/database');
+const appConfig = require('../../config/app');
 
 const sequelize = new Sequelize(
   db.database,
@@ -10,6 +11,7 @@ const sequelize = new Sequelize(
   {
     host: db.host,
     dialect: 'mysql',
+    timezone: appConfig.timezone,
   },
 );
 

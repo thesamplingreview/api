@@ -1,50 +1,30 @@
 const express = require('express');
 const tokenInfoMiddleware = require('../../app/middlewares/tokenInfo');
-const { AuthValidator } = require('../../app/middlewares/validators');
-const AuthController = require('../../app/controllers/AuthController');
-const MyController = require('../../app/controllers/MyController');
+const {
+  AuthValidator,
+  PasswordValidator,
+} = require('../../app/middlewares/validators');
+const {
+  AuthController,
+  MyController,
+  PasswordController,
+} = require('../../app/controllers/auth');
 
 const router = express.Router();
 
 // auth module
-const authController = new AuthController();
-
-router.post(
-  '/login',
-  AuthValidator.loginWithPasswordReq,
-  authController.login.bind(authController),
-);
-
-router.post(
-  '/token-refresh',
-  AuthValidator.tokenRefreshReq,
-  authController.tokenRefresh.bind(authController),
-);
-
-router.get(
-  '/validate',
-  tokenInfoMiddleware(),
-  authController.validate.bind(authController),
-);
-
-router.post(
-  '/invalidate',
-  tokenInfoMiddleware(),
-  authController.invalidate.bind(authController),
-);
+router.post('/login', AuthValidator.loginWithPasswordReq, AuthController.login);
+router.post('/signup', AuthValidator.signupWithPasswordReq, AuthController.signup);
+router.post('/token-refresh', AuthValidator.tokenRefreshReq, AuthController.tokenRefresh);
+router.get('/validate', tokenInfoMiddleware(), AuthController.validate);
+router.post('/invalidate', tokenInfoMiddleware(), AuthController.invalidate);
 
 // my module
-const myController = new MyController();
-router.get(
-  '/my',
-  tokenInfoMiddleware(),
-  myController.my.bind(myController),
-);
+router.get('/my', tokenInfoMiddleware(), MyController.my);
+router.put('/my', tokenInfoMiddleware(), MyController.update);
 
-router.put(
-  '/my',
-  tokenInfoMiddleware(),
-  myController.update.bind(myController),
-);
+// password reset
+router.post('/password/reset-token', PasswordValidator.resetTokenReq, PasswordController.resetToken);
+router.post('/password/reset', PasswordValidator.resetPasswordReq, PasswordController.resetPassword);
 
 module.exports = router;

@@ -1,14 +1,14 @@
-const ApiController = require('./ApiController');
-const AuthService = require('../services/AuthService');
-const JWTService = require('../services/JWTService');
-const UserResource = require('../resources/UserResource');
-const { UserRole } = require('../models');
+const ApiController = require('../ApiController');
+const AuthService = require('../../services/AuthService');
+const JWTService = require('../../services/JWTService');
+const CustomerService = require('../../services/CustomerService');
+const UserResource = require('../../resources/UserResource');
+const { sequelize } = require('../../models');
 
 class AuthController extends ApiController {
   constructor() {
     super();
 
-    this.authService = new AuthService();
     this.jwtService = new JWTService();
   }
 
@@ -23,23 +23,6 @@ class AuthController extends ApiController {
   }
 
   /**
-   * GET - my
-   */
-  async my(req, res) {
-    try {
-      const user = await this.authService.getUser(req.user.id, {
-        include: [UserRole],
-      });
-
-      return this.responseJson(req, res, {
-        data: new UserResource(user),
-      });
-    } catch (err) {
-      return this.responseError(req, res, err);
-    }
-  }
-
-  /**
    * POST - login
    */
   async login(req, res) {
@@ -49,9 +32,15 @@ class AuthController extends ApiController {
       password: req.body.password,
     };
 
+    const authService = new AuthService();
+    const t = await sequelize.transaction();
     try {
-      const { user, tokens } = await this.authService.loginWithPassword(formData);
+      const { user, tokens } = await authService.loginWithPassword(formData);
 
+      user.last_login = new Date();
+      await user.save();
+
+      await t.commit();
       return this.responseJson(req, res, {
         data: {
           jwt: tokens,
@@ -59,7 +48,35 @@ class AuthController extends ApiController {
         },
       });
     } catch (err) {
+      await t.rollback();
       err.message = req.__('validation.auth'); // mask error
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * POST - signup
+   */
+  async signup(req, res) {
+    // validated
+    const formData = {
+      email: req.body.email,
+      name: req.body.name,
+      password: req.body.password,
+      contact: req.body.contact,
+    };
+
+    const customerService = new CustomerService();
+    const t = await sequelize.transaction();
+    try {
+      const result = await customerService.create(formData, { transaction: t });
+
+      await t.commit();
+      return this.responseJson(req, res, {
+        data: new UserResource(result),
+      });
+    } catch (err) {
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -94,8 +111,7 @@ class AuthController extends ApiController {
    */
   async invalidate(req, res) {
     try {
-      const user = await this.authService.getUser(req.user.id);
-      await this.jwtService.revoke(user);
+      await this.jwtService.revoke(req.user.id);
 
       return this.responseJson(req, res, {
         message: 'Access revoked.',

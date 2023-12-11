@@ -1,7 +1,7 @@
-const ApiController = require('./ApiController');
-const { sequelize } = require('../models');
-const UserService = require('../services/UserService');
-const UserResource = require('../resources/UserResource');
+const ApiController = require('../ApiController');
+const { sequelize } = require('../../models');
+const UserService = require('../../services/UserService');
+const UserResource = require('../../resources/UserResource');
 
 class MyController extends ApiController {
   constructor() {
