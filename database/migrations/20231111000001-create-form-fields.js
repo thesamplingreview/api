@@ -33,6 +33,9 @@ module.exports = {
       description: {
         type: Sequelize.STRING,
       },
+      hint: {
+        type: Sequelize.STRING,
+      },
       options: {
         type: Sequelize.STRING,
       },

@@ -34,6 +34,9 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.STRING,
     },
+    hint: {
+      type: DataTypes.STRING,
+    },
     options: {
       type: DataTypes.STRING,
     },

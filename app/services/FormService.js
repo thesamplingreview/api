@@ -92,6 +92,7 @@ class FormService extends BaseService {
       name: field.name || null,
       type: field.type || null,
       description: field.description || null,
+      hint: field.hint || null,
       placeholder: field.placeholder || null,
       options: field.options || null,
       config: field.config || null,
@@ -102,7 +103,9 @@ class FormService extends BaseService {
     }));
 
     const results = await FormField.bulkCreate(dataset, {
-      updateOnDuplicate: ['name', 'type', 'description', 'placeholder', 'options', 'config', 'mandatory', 'status', 'pos'],
+      updateOnDuplicate: [
+        'name', 'type', 'description', 'hint', 'placeholder', 'options', 'config', 'mandatory', 'status', 'pos',
+      ],
       // returning: true, // not for mysql
       individualHooks: true,
       ...options,

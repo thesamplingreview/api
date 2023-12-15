@@ -39,6 +39,13 @@ const fieldsValidator = ({ optional = false } = {}) => {
     body(`${fieldName}.*.config`)
       .isJSON().bail()
       .withMessage(validatorMessage('validation.json', 'field.config'))
+      .customSanitizer((value) => {
+        try {
+          return value ? JSON.parse(value) : null;
+        } catch (err) {
+          return null;
+        }
+      })
       .optional({ values: 'falsy' }),
     body(`${fieldName}.*.id`)
       .toInt(),
