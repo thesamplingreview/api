@@ -43,10 +43,28 @@ const passwordValidator = () => body('password')
     min: 6,
   }));
 
+const newPasswordValidator = () => body('new_password')
+  .notEmpty().bail()
+  .withMessage(validatorMessage('validation.required', 'New Password'))
+  .isLength({ min: 6 }).bail()
+  .withMessage(validatorMessage('validation.length_min', {
+    field: 'New Password',
+    min: 6,
+  }));
+
+const oldPasswordValidator = () => body('old_password')
+  .notEmpty().bail()
+  .withMessage(validatorMessage('validation.required', 'Old Password'));
+
 /* eslint-enable newline-per-chained-call */
 
 exports.resetTokenReq = [
   emailValidator(),
+];
+
+exports.changePasswordReq = [
+  newPasswordValidator(),
+  oldPasswordValidator(),
 ];
 
 exports.resetPasswordReq = [

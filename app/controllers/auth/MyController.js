@@ -1,4 +1,7 @@
+const bcrypt = require('bcryptjs');
 const ApiController = require('../ApiController');
+const { genValidatorItem } = require('../../helpers/validator');
+const { ValidationFailed } = require('../../errors');
 const { sequelize } = require('../../models');
 const UserService = require('../../services/UserService');
 const UserResource = require('../../resources/UserResource');
@@ -41,6 +44,38 @@ class MyController extends ApiController {
     try {
       const record = await this.userService.findById(req.user.id);
       const result = await this.userService.update(record, formData, { transaction: t });
+
+      await t.commit();
+      return this.responseJson(req, res, {
+        data: new UserResource(result),
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * PUT - change password
+   */
+  async changePassword(req, res) {
+    // validated
+    const formData = {
+      password: req.body.new_password,
+    };
+
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const user = await this.userService.findById(req.user.id);
+      const isPasswordValid = bcrypt.compareSync(req.body.old_password, user.password);
+      if (!isPasswordValid) {
+        throw new ValidationFailed(undefined, [
+          genValidatorItem('Old password not match', 'old_password'),
+        ]);
+      }
+
+      const result = await this.userService.update(user, formData, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {

@@ -23,6 +23,7 @@ router.post('/invalidate', tokenInfoMiddleware(), AuthController.invalidate);
 // my module
 router.get('/my', tokenInfoMiddleware(), MyController.my);
 router.put('/my', tokenInfoMiddleware(), MyController.update);
+router.put('/my/password', tokenInfoMiddleware(), PasswordValidator.changePasswordReq, MyController.changePassword);
 
 // password reset
 // NOTE: this API should called internally!!!

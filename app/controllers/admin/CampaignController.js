@@ -62,10 +62,17 @@ class CampaignController extends ApiController {
   async create(req, res) {
     // validated
     const formData = {
-      name: req.body.name,
       slug: req.body.slug,
+      name: req.body.name,
       description: req.body.description,
+      intro_title: req.body.intro_title,
+      intro_description: req.body.intro_description,
+      presubmit_title: req.body.presubmit_title,
+      presubmit_description: req.body.presubmit_description,
+      postsubmit_title: req.body.postsubmit_title,
+      postsubmit_description: req.body.postsubmit_description,
       cover: req.body.cover,
+      backgroound: req.body.background,
       meta_title: req.body.meta_title,
       meta_description: req.body.meta_description,
       meta_keywords: req.body.meta_keywords,
@@ -98,10 +105,17 @@ class CampaignController extends ApiController {
   async update(req, res) {
     // validated
     const formData = {
-      name: req.body.name,
       slug: req.body.slug,
+      name: req.body.name,
       description: req.body.description,
+      intro_title: req.body.intro_title,
+      intro_description: req.body.intro_description,
+      presubmit_title: req.body.presubmit_title,
+      presubmit_description: req.body.presubmit_description,
+      postsubmit_title: req.body.postsubmit_title,
+      postsubmit_description: req.body.postsubmit_description,
       cover: req.body.cover,
+      background: req.body.background,
       meta_title: req.body.meta_title,
       meta_description: req.body.meta_description,
       meta_keywords: req.body.meta_keywords,

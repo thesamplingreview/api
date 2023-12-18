@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { ValidationFailed, ModelNotFound } = require('../errors');
+const { ValidationFailed } = require('../errors');
 const JWTService = require('./JWTService');
 const { User, UserRole } = require('../models');
 

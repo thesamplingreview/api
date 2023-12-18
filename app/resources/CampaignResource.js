@@ -1,3 +1,7 @@
+const isDate = require('date-fns/isDate');
+const isBefore = require('date-fns/isBefore');
+const isAfter = require('date-fns/isAfter');
+const isSameDay = require('date-fns/isSameDay');
 const { Campaign } = require('../models');
 
 class CampaignResource {
@@ -30,16 +34,24 @@ class CampaignResource {
 
     return {
       id: this.data.id,
-      name: this.data.name,
       slug: this.data.slug,
+      name: this.data.name,
       description: this.data.description,
+      intro_title: this.data.intro_title,
+      intro_description: this.data.intro_description,
+      presubmit_title: this.data.presubmit_title,
+      presubmit_description: this.data.presubmit_description,
+      postsubmit_title: this.data.postsubmit_title,
+      postsubmit_description: this.data.postsubmit_description,
       meta_title: this.data.meta_title,
       meta_description: this.data.meta_description,
       meta_keywords: this.data.meta_keywords,
       cover_url: this.data.cover_url,
+      background_url: this.data.background_url,
       start_date: this.data.start_date,
       end_date: this.data.end_date,
       status: this.data.status,
+      state: this.generateStateAttr(this.data),
       highlight: this.data.highlight,
       pos: this.data.pos,
       vendor_id: this.data.vendor_id,
@@ -48,6 +60,40 @@ class CampaignResource {
       updated_at: this.data.updated_at,
       ...relations,
     };
+  }
+
+  generateStateAttr(data) {
+    const startDt = isDate(data.start_date) ? new Date(data.start_date) : null;
+    const endDt = isDate(data.end_date) ? new Date(data.end_date) : null;
+    const now = new Date();
+    if (startDt && endDt) {
+      if (isBefore(startDt, now) && isBefore(endDt, now)) {
+        return 'past';
+      }
+      if (isAfter(startDt, now) && isAfter(endDt, now)) {
+        return 'coming';
+      }
+      return 'current';
+    }
+    if (startDt) {
+      if (isSameDay(startDt, now)) {
+        return 'current';
+      }
+      if (isAfter(startDt, now)) {
+        return 'coming';
+      }
+      return 'past';
+    }
+    if (endDt) {
+      if (isSameDay(endDt, now)) {
+        return 'current';
+      }
+      if (isAfter(endDt, now)) {
+        return 'coming';
+      }
+      return 'past';
+    }
+    return null;
   }
 
   static collection(dataset) {

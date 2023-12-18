@@ -18,10 +18,10 @@ class CampaignController extends ApiController {
    */
   async getAll(req, res) {
     try {
+      // force published only
+      req.query.status = Campaign.STATUSES.PUBLISH;
       const query = {
-        where: {
-          status: Campaign.STATUSES.PUBLISH,
-        },
+        where: await this.campaignService.genWhereQuery(req),
         order: await this.campaignService.genOrdering(req),
         include: [
           { model: Vendor },

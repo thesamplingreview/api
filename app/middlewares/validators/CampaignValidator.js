@@ -14,6 +14,12 @@ const coverValidator = () => body('cover')
     mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
   })).bail();
 
+const backgroundValidator = () => body('background')
+  .custom(validatorFileCheck({
+    maxFileSize: 2 * 1024 * 1024, // 2Mb
+    mimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'],
+  })).bail();
+
 const slugValidator = ({ paramId } = {}) => body('slug')
   .trim()
   .escape()
@@ -40,6 +46,18 @@ const nameValidator = () => body('name')
   .withMessage(validatorMessage('validation.required', 'Name'));
 
 const descValidator = () => body('description');
+
+const introTitleValidator = () => body('intro_title');
+
+const introDescValidator = () => body('intro_description');
+
+const preSubmitTitleValidator = () => body('presubmit_title');
+
+const preSubmitDescValidator = () => body('presubmit_description');
+
+const postSubmitTitleValidator = () => body('postsubmit_title');
+
+const postSubmitDescValidator = () => body('postsubmit_description');
 
 const metaTitleValidator = () => body('meta_title');
 
@@ -136,12 +154,19 @@ const productsValidator = ({ optional = false } = {}) => {
 // request validators
 exports.createReq = [
   parseFormData({
-    fileFields: ['cover'],
+    fileFields: ['cover', 'background'],
   }),
   slugValidator(),
   nameValidator(),
   descValidator().optional(),
+  introTitleValidator().optional(),
+  introDescValidator().optional(),
+  preSubmitTitleValidator().optional(),
+  preSubmitDescValidator().optional(),
+  postSubmitTitleValidator().optional(),
+  postSubmitDescValidator().optional(),
   coverValidator().optional(),
+  backgroundValidator().optional(),
   startDateValidator().optional({ values: 'falsy' }),
   endDateValidator().optional({ values: 'falsy' }),
   vendorValidator().optional({ values: 'falsy' }),
@@ -155,12 +180,19 @@ exports.createReq = [
 
 exports.updateReq = [
   parseFormData({
-    fileFields: ['cover'],
+    fileFields: ['cover', 'background'],
   }),
   slugValidator({ paramId: 'id' }),
   nameValidator(),
   descValidator().optional(),
+  introTitleValidator().optional(),
+  introDescValidator().optional(),
+  preSubmitTitleValidator().optional(),
+  preSubmitDescValidator().optional(),
+  postSubmitTitleValidator().optional(),
+  postSubmitDescValidator().optional(),
   coverValidator().optional(),
+  backgroundValidator().optional(),
   startDateValidator().optional({ values: 'falsy' }),
   endDateValidator().optional({ values: 'falsy' }),
   vendorValidator().optional({ values: 'falsy' }),

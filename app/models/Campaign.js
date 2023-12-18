@@ -51,6 +51,24 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.TEXT,
     },
+    intro_title: {
+      type: DataTypes.STRING,
+    },
+    intro_description: {
+      type: DataTypes.TEXT,
+    },
+    presubmit_title: {
+      type: DataTypes.STRING,
+    },
+    presubmit_description: {
+      type: DataTypes.TEXT,
+    },
+    postsubmit_title: {
+      type: DataTypes.STRING,
+    },
+    postsubmit_description: {
+      type: DataTypes.TEXT,
+    },
     meta_title: {
       type: DataTypes.STRING,
     },
@@ -61,6 +79,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
     },
     cover_url: {
+      type: DataTypes.STRING,
+    },
+    background_url: {
       type: DataTypes.STRING,
     },
     start_date: {

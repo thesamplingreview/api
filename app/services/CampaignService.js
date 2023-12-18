@@ -13,6 +13,44 @@ class CampaignService extends BaseService {
   async genWhereQuery(req) {
     const whereQuery = {};
 
+    // filter - name
+    if (req.query.name?.trim()) {
+      whereQuery.name = {
+        [Op.like]: `%${req.query.name}%`,
+      };
+    }
+    // filter - status
+    if (req.query.status?.trim()) {
+      whereQuery.status = req.query.status.trim();
+    }
+    // filter - date
+    if (req.query.state?.trim()) {
+      const stateVal = req.query.state.trim();
+      const now = new Date();
+      if (stateVal === 'past') {
+        whereQuery.start_date = {
+          [Op.lt]: now,
+        };
+        whereQuery.end_date = {
+          [Op.lt]: now,
+        };
+      } else if (stateVal === 'coming') {
+        whereQuery.start_date = {
+          [Op.gt]: now,
+        };
+        whereQuery.end_date = {
+          [Op.gt]: now,
+        };
+      } else if (stateVal === 'current') {
+        whereQuery.start_date = {
+          [Op.lte]: now,
+        };
+        whereQuery.end_date = {
+          [Op.gte]: now,
+        };
+      }
+    }
+
     return whereQuery;
   }
 
@@ -39,6 +77,12 @@ class CampaignService extends BaseService {
       slug: input.slug,
       name: input.name,
       description: input.description || null,
+      intro_title: input.intro_title || null,
+      intro_description: input.intro_description || null,
+      presubmit_title: input.presubmit_title || null,
+      presubmit_description: input.presubmit_description || null,
+      postsubmit_title: input.postsubmit_title || null,
+      postsubmit_description: input.postsubmit_description || null,
       meta_title: input.meta_title || null,
       meta_description: input.meta_description || null,
       meta_keywords: input.meta_keywords || null,
@@ -55,6 +99,12 @@ class CampaignService extends BaseService {
         formData.cover_url = s3Url;
       }
     }
+    if (input.background?.filepath) {
+      const s3Url = await s3Upload(input.background, 'campaigns');
+      if (s3Url) {
+        formData.background_url = s3Url;
+      }
+    }
 
     const result = await this.model.create(formData, options);
 
@@ -66,6 +116,12 @@ class CampaignService extends BaseService {
       slug: getInput(input.slug, record.slug),
       name: getInput(input.name, record.name),
       description: getInput(input.description, record.description),
+      intro_title: getInput(input.intro_title, record.intro_title),
+      intro_description: getInput(input.intro_description, record.intro_description),
+      presubmit_title: getInput(input.presubmit_title, record.presubmit_title),
+      presubmit_description: getInput(input.presubmit_description, record.presubmit_description),
+      postsubmit_title: getInput(input.postsubmit_title, record.postsubmit_title),
+      postsubmit_description: getInput(input.postsubmit_description, record.postsubmit_description),
       meta_title: getInput(input.meta_title, record.meta_title),
       meta_description: getInput(input.meta_description, record.meta_description),
       meta_keywords: getInput(input.meta_keywords, record.meta_keywords),
@@ -76,6 +132,7 @@ class CampaignService extends BaseService {
       status: getInput(input.status, record.status),
       pos: getInput(input.pos, record.pos),
     };
+    // cover
     if (input.cover !== undefined && input.cover?.filepath) {
       const s3Url = await s3Upload(input.cover, 'campaigns', {
         replace: record.cover_url,
@@ -88,6 +145,20 @@ class CampaignService extends BaseService {
         await s3Remove(record.cover_url);
       }
       formData.cover_url = null;
+    }
+    // background
+    if (input.background !== undefined && input.background?.filepath) {
+      const s3Url = await s3Upload(input.background, 'campaigns', {
+        replace: record.background_url,
+      });
+      if (s3Url) {
+        formData.background_url = s3Url;
+      }
+    } else if (input.background !== undefined) {
+      if (record.background_url) {
+        await s3Remove(record.background_url);
+      }
+      formData.background_url = null;
     }
     const result = await record.update(formData, options);
 
