@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { getInput } = require('../helpers/utils');
 const { s3Upload, s3Remove } = require('../helpers/upload');
 const BaseService = require('./BaseService');
@@ -10,6 +11,23 @@ class ProductService extends BaseService {
 
   async genWhereQuery(req) {
     const whereQuery = {};
+
+    // filter - name
+    if (req.query.name?.trim()) {
+      whereQuery.name = {
+        [Op.like]: `%${req.query.name}%`,
+      };
+    }
+    // filter - status
+    if (req.query.status) {
+      whereQuery.status = req.query.status;
+    }
+    // filter - brand
+    if (req.query.brand?.trim()) {
+      whereQuery.brand = {
+        [Op.like]: `%${req.query.brand}%`,
+      };
+    }
 
     return whereQuery;
   }

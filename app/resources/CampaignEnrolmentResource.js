@@ -25,6 +25,7 @@ class CampaignEnrolmentResource {
       campaign_id: this.data.campaign_id,
       user_id: this.data.user_id,
       form_id: this.data.form_id,
+      status: this.data.status,
       submissions: this.data.submissions,
       created_at: this.data.created_at,
       updated_at: this.data.updated_at,

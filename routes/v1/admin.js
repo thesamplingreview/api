@@ -7,6 +7,7 @@ const {
   VendorController,
   FormController,
   CampaignController,
+  EnrolmentController,
   ProductController,
 } = require('../../app/controllers/admin');
 const {
@@ -15,6 +16,7 @@ const {
   VendorValidator,
   FormValidator,
   CampaignValidator,
+  CampaignEnrolmentValidator,
   ProductValidator,
 } = require('../../app/middlewares/validators');
 
@@ -61,10 +63,19 @@ router.delete('/forms/:id', FormController.remove);
 router.get('/campaigns', CampaignController.getAll);
 router.get('/campaigns/all/options', CampaignController.options);
 router.get('/campaigns/:id', CampaignController.getSingle);
+router.get('/campaigns/:id/report/stats', CampaignController.getReportStats);
+router.get('/campaigns/:id/report/counts', CampaignController.getReportCounts);
 router.post('/campaigns', CampaignValidator.createReq, CampaignController.create);
 router.put('/campaigns/:id', CampaignValidator.updateReq, CampaignController.update);
 router.delete('/campaigns/:id', CampaignController.remove);
 router.put('/campaigns/:id/products', CampaignValidator.productsReq, CampaignController.updateProducts);
+
+// enrolment module
+router.get('/enrolments', EnrolmentController.getAll);
+router.get('/enrolments/all/options', EnrolmentController.options);
+router.get('/enrolments/:id', EnrolmentController.getSingle);
+router.put('/enrolments/:id', CampaignEnrolmentValidator.settingUpdateReq, EnrolmentController.update);
+router.delete('/enrolments/:id', EnrolmentController.remove);
 
 // product module
 router.get('/products', ProductController.getAll);

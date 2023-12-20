@@ -39,6 +39,9 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
       },
+      status: {
+        type: Sequelize.STRING(30),
+      },
       submissions: {
         type: Sequelize.JSON,
       },

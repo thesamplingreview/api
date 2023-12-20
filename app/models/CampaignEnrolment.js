@@ -6,8 +6,8 @@ module.exports = (sequelize, DataTypes) => {
      * Static variables
      */
     static STATUSES = {
-      ACTIVE: 'active',
-      INACTIVE: 'inactive',
+      PENDING: 'pending',
+      COMPLETE: 'complete',
     };
 
     static associate(models) {
@@ -49,6 +49,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     form_id: {
       type: DataTypes.INTEGER,
+    },
+    status: {
+      type: DataTypes.STRING(30),
     },
     submissions: {
       type: DataTypes.JSON,

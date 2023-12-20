@@ -1,4 +1,4 @@
-// const { Op } = require('sequelize');
+const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const { getInput } = require('../helpers/utils');
 const BaseService = require('./BaseService');
@@ -12,7 +12,36 @@ class CustomerService extends BaseService {
   async genWhereQuery(req) {
     const whereQuery = {};
 
+    // filter - name
+    if (req.query.name?.trim()) {
+      whereQuery.name = {
+        [Op.like]: `%${req.query.name}%`,
+      };
+    }
+    // filter - status
+    if (req.query.status) {
+      whereQuery.status = req.query.status;
+    }
+    // filter - email
+    if (req.query.email?.trim()) {
+      whereQuery.email = {
+        [Op.like]: `%${req.query.email}%`,
+      };
+    }
+    // filter - contact
+    if (req.query.contact?.trim()) {
+      whereQuery.contact = {
+        [Op.like]: `%${req.query.contact}%`,
+      };
+    }
+
     return whereQuery;
+  }
+
+  async genOrdering(req) {
+    // currently only support single column ordering
+    const sort = super.getSortMeta(req);
+    return sort ? [sort] : [['id', 'ASC']];
   }
 
   async create(input, options) {

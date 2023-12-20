@@ -36,15 +36,17 @@ class BaseService {
   }
 
   async paginate(options = {}, page = 1, perPage = 10) {
-    const { count, rows } = await this.model.findAndCountAll({
-      ...options,
-      limit: perPage,
-      offset: (page - 1) * perPage,
-    });
-
-    // fix group_by issue
-    // @ref: https://github.com/sequelize/sequelize/issues/6148
-    const total = typeof count === 'number' ? count : count.length;
+    const [rows, total] = await Promise.all([
+      this.model.findAll({
+        ...options,
+        limit: perPage,
+        offset: (page - 1) * perPage,
+      }),
+      // count() break if having include options, hence simply using where on count query
+      this.model.count({
+        where: options.where || null,
+      }),
+    ]);
 
     return {
       data: rows,
@@ -55,6 +57,26 @@ class BaseService {
         perPage,
       },
     };
+
+    // const { count, rows } = await this.model.findAndCountAll({
+    //   ...options,
+    //   limit: perPage,
+    //   offset: (page - 1) * perPage,
+    // });
+
+    // // fix group_by issue
+    // // @ref: https://github.com/sequelize/sequelize/issues/6148
+    // const total = typeof count === 'number' ? count : count.length;
+
+    // return {
+    //   data: rows,
+    //   meta: {
+    //     count: rows.length,
+    //     total,
+    //     page,
+    //     perPage,
+    //   },
+    // };
   }
 
   async findOne(options = {}) {

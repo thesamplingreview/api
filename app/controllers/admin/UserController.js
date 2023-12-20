@@ -23,7 +23,8 @@ class UserController extends ApiController {
     try {
       const query = {
         where: await this.customerService.genWhereQuery(req),
-        include: [UserRole, Vendor],
+        order: await this.customerService.genOrdering(req),
+        include: [Vendor],
       };
       const { page, perPage } = this.getPaginate(req);
       const results = await this.customerService.paginate(query, page, perPage);

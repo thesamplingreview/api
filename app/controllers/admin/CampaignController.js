@@ -1,3 +1,4 @@
+const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
 const {
   sequelize, Campaign, Product, Form, Vendor, User,
@@ -20,7 +21,10 @@ class CampaignController extends ApiController {
       const query = {
         where: await this.campaignService.genWhereQuery(req),
         order: await this.campaignService.genOrdering(req),
-        include: [Form, Vendor],
+        include: [
+          { model: Form },
+          { model: Vendor },
+        ],
       };
       const { page, perPage } = this.getPaginate(req);
       const results = await this.campaignService.paginate(query, page, perPage);
@@ -46,6 +50,12 @@ class CampaignController extends ApiController {
           { model: Product },
           { model: User },
         ],
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id`)'), 'enrolmentsCount'],
+          ],
+        },
+        distinct: true,
       });
 
       return this.responseJson(req, res, {
@@ -180,6 +190,11 @@ class CampaignController extends ApiController {
       },
       order: [['pos', 'ASC']],
     });
+    const states = [
+      { id: 'current', name: 'Current' },
+      { id: 'coming', name: 'Coming' },
+      { id: 'past', name: 'Past' },
+    ];
 
     const options = {
       forms,
@@ -189,6 +204,7 @@ class CampaignController extends ApiController {
         id: val,
         name: val.charAt(0).toUpperCase() + val.slice(1),
       })),
+      states,
     };
 
     return this.responseJson(req, res, {
@@ -222,6 +238,28 @@ class CampaignController extends ApiController {
       t.rollback();
       return this.responseError(req, res, err);
     }
+  }
+
+  /**
+   * REPORT - overall stats
+   */
+  async getReportStats(req, res) {
+    const result = await this.campaignService.reportStats(req.params.id);
+
+    return this.responseJson(req, res, {
+      data: result,
+    });
+  }
+
+  /**
+   * REPORT - overall counts
+   */
+  async getReportCounts(req, res) {
+    const result = await this.campaignService.reportCounts(req.params.id);
+
+    return this.responseJson(req, res, {
+      data: result,
+    });
   }
 }
 

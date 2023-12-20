@@ -32,6 +32,11 @@ class CampaignResource {
       relations.enrolments = this.data.CampaignEnrolments.map((d) => new CampaignEnrolmentResource(d));
     }
 
+    const counts = {};
+    if (this.data.enrolmentsCount !== undefined) {
+      counts.enrolments_count = this.data.enrolmentsCount;
+    }
+
     return {
       id: this.data.id,
       slug: this.data.slug,
@@ -58,6 +63,7 @@ class CampaignResource {
       form_id: this.data.form_id,
       created_at: this.data.created_at,
       updated_at: this.data.updated_at,
+      ...counts,
       ...relations,
     };
   }

@@ -3,7 +3,9 @@ const { getInput, toDate } = require('../helpers/utils');
 const { s3Upload, s3Remove } = require('../helpers/upload');
 const { ModelNotFound } = require('../errors');
 const BaseService = require('./BaseService');
-const { Campaign, CampaignProduct, CampaignEnrolment } = require('../models');
+const {
+  Campaign, CampaignProduct, CampaignEnrolment, Form, FormField, Product,
+} = require('../models');
 
 class CampaignService extends BaseService {
   constructor() {
@@ -215,23 +217,101 @@ class CampaignService extends BaseService {
   }
 
   /**
-   * Campaign enrolment
+   * Calculate overall stats of campaign
    *
-   * @param  {object}  input
-   * @param  {object}  options - sequelize transaction
-   * @return {model}
+   * @param  {string}  campaignId
+   * @return {object}
    */
-  async createCampaignEnrolment(input, options = {}) {
-    const formData = {
-      campaign_id: input.campaign_id,
-      user_id: input.user_id,
-      form_id: input.form_id || null,
-      submissions: input.submissions,
+  async reportStats(campaignId) {
+    const count = await CampaignEnrolment.count({
+      where: {
+        campaign_id: campaignId,
+      },
+    });
+
+    return {
+      enrolments: count,
+    };
+  }
+
+  /**
+   * Calculate answer counts of campaign
+   *
+   * @param  {string}  campaignId
+   * @return {object}
+   */
+  async reportCounts(campaignId) {
+    const campaign = await this.findOne({
+      where: {
+        id: campaignId,
+      },
+      include: [
+        { model: CampaignEnrolment },
+        { model: Product },
+        { model: Form, include: [FormField] },
+      ],
+    });
+
+    const enrolments = campaign.CampaignEnrolments || [];
+    const genValuesCount = (key) => {
+      return enrolments.reduce((acc, item) => {
+        let values = item.submissions[key];
+        if (!Array.isArray(values)) {
+          values = [values];
+        }
+
+        values.forEach((value) => {
+          acc[value] = (acc[value] || 0) + 1;
+        });
+        return acc;
+      }, {});
     };
 
-    const result = await CampaignEnrolment.create(formData, options);
+    // @tbc - allowed counts for certains types only
+    const questions = campaign.Form?.FormFields.map((field) => {
+      let optionsCounts = null;
+      if (field.type === 'select') {
+        const options = field.options?.split('\n') || [];
+        const valuesCount = genValuesCount(field.id);
+        optionsCounts = options.map((v) => ({
+          id: v,
+          name: v,
+          count: valuesCount[v] || 0,
+        }));
+      } else if (field.type === 'yes_no') {
+        const options = ['Yes', 'No'];
+        const valuesCount = genValuesCount(field.id);
+        optionsCounts = options.map((v) => ({
+          id: v,
+          name: v,
+          count: valuesCount[v] || 0,
+        }));
+      } else if (field.type === 'products') {
+        const options = campaign.Products?.reduce((acc, cur) => ({
+          ...acc,
+          [cur.id]: cur.name,
+        }), {});
+        const valuesCount = genValuesCount(field.id);
+        optionsCounts = Object.keys(options).map((id) => ({
+          id,
+          name: options[id],
+          count: valuesCount[id] || 0,
+        }));
+      }
 
-    return result;
+      // remove non-supported fields
+      if (!optionsCounts) {
+        return null;
+      }
+      return {
+        ...field.get({ plain: true }),
+        optionsCounts,
+      };
+    })
+      .filter((d) => d) // remove non-count questions
+      .sort((a, b) => a.pos - b.pos); // manual sort
+
+    return questions;
   }
 }
 

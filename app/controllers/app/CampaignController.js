@@ -3,6 +3,7 @@ const {
   sequelize, Campaign, Product, Form, FormField, Vendor, CampaignEnrolment,
 } = require('../../models');
 const CampaignService = require('../../services/CampaignService');
+const EnrolmentService = require('../../services/EnrolmentService');
 const CampaignResource = require('../../resources/CampaignResource');
 const CampaignEnrolmentResource = require('../../resources/CampaignEnrolmentResource');
 
@@ -91,7 +92,8 @@ class CampaignController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const result = await this.campaignService.createCampaignEnrolment(formData, { transaction: t });
+      const enrolmentService = new EnrolmentService();
+      const result = await enrolmentService.create(formData, { transaction: t });
 
       t.commit();
       return this.responseJson(req, res, {

@@ -2,6 +2,8 @@ const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
 const { Campaign, CampaignEnrolment, Form } = require('../../models');
 
+const statuses = Object.values(CampaignEnrolment.STATUSES);
+
 /* eslint-disable newline-per-chained-call */
 const campaignValidator = () => body('campaign_id')
   .notEmpty().bail()
@@ -51,6 +53,15 @@ const submissionsValidator = () => body('submissions')
     }
   });
 
+const statusValidator = () => body('status')
+  .notEmpty().bail()
+  .withMessage(validatorMessage('validation.required', 'Status'))
+  .isIn(statuses).bail()
+  .withMessage(validatorMessage('validation.in', {
+    field: 'Status',
+    values: statuses.toString(),
+  }));
+
 /* eslint-enable newline-per-chained-call */
 
 // request validators
@@ -58,4 +69,8 @@ exports.createReq = [
   campaignValidator(),
   formValidator(),
   submissionsValidator(),
+];
+
+exports.settingUpdateReq = [
+  statusValidator(),
 ];
