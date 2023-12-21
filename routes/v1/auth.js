@@ -19,6 +19,9 @@ router.post('/signup', AuthValidator.signupWithPasswordReq, AuthController.signu
 router.post('/token-refresh', AuthValidator.tokenRefreshReq, AuthController.tokenRefresh);
 router.get('/validate', tokenInfoMiddleware(), AuthController.validate);
 router.post('/invalidate', tokenInfoMiddleware(), AuthController.invalidate);
+// auth - social module
+router.post('/signup/google', AuthValidator.signupWithGoogleReq, AuthController.signupWithGoogle);
+router.post('/login/google', AuthValidator.loginWithGoogleReq, AuthController.loginWithGoogle);
 
 // my module
 router.get('/my', tokenInfoMiddleware(), MyController.my);

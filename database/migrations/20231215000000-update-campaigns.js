@@ -6,7 +6,7 @@ module.exports = {
     const transaction = await queryInterface.sequelize.transaction();
     try {
       await Promise.all([
-        queryInterface.addColumn('campaigns', 'excerpt', {
+        queryInterface.addColumn('campaigns', 'intro_title', {
           type: Sequelize.STRING,
           after: 'description',
         }, { transaction }),

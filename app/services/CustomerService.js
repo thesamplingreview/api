@@ -50,6 +50,8 @@ class CustomerService extends BaseService {
       contact: input.contact || null,
       name: input.name || null,
       password: input.password ? bcrypt.hashSync(input.password, 12) : null,
+      google_id: input.google_id || null,
+      facebook_id: input.facebook_id || null,
       status: input.status || User.STATUSES.ACTIVE,
       vendor_id: input.vendor_id || null,
       role_id: User.DEFAULT_ROLE_ID,
