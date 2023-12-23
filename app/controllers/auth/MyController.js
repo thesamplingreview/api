@@ -2,8 +2,9 @@ const bcrypt = require('bcryptjs');
 const ApiController = require('../ApiController');
 const { genValidatorItem } = require('../../helpers/validator');
 const { ValidationFailed } = require('../../errors');
-const { sequelize } = require('../../models');
+const { sequelize, VerificationToken } = require('../../models');
 const UserService = require('../../services/UserService');
+const VerificationService = require('../../services/VerificationService');
 const UserResource = require('../../resources/UserResource');
 
 class MyController extends ApiController {
@@ -80,6 +81,45 @@ class MyController extends ApiController {
       await t.commit();
       return this.responseJson(req, res, {
         data: new UserResource(result),
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * PUT - change contact
+   */
+  async changeContact(req, res) {
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const user = await this.userService.findById(req.user.id);
+
+      const verificationService = new VerificationService();
+      const token = await verificationService.verifyToken(
+        VerificationToken.TYPES.PHONE,
+        req.body.contact,
+        req.body.code,
+      );
+      if (!token) {
+        throw new ValidationFailed(undefined, [
+          genValidatorItem('Code not matched.', 'Code'),
+        ]);
+      }
+
+      // update contact
+      user.contact = req.body.contact;
+      user.contact_verified_at = new Date();
+      await user.save({ transaction: t });
+
+      // remove token also
+      await verificationService.delete(token, { transaction: t });
+
+      await t.commit();
+      return this.responseJson(req, res, {
+        data: new UserResource(user),
       });
     } catch (err) {
       await t.rollback();

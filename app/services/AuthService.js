@@ -102,7 +102,7 @@ class AuthService {
     const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
     const result = await response.json();
     if (!result.sub) {
-      throw new Error('Google OAuth2.0 failed.');
+      throw new ValidationFailed('Google OAuth2.0 failed.');
     }
     return result;
   }

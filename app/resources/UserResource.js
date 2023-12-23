@@ -38,6 +38,7 @@ class UserResource {
       vendor_id: this.data.vendor_id,
       last_login: this.data.last_login || null,
       email_verified_at: this.data.email_verified_at || null,
+      contact_verified_at: this.data.contact_verified_at || null,
       created_at: this.data.created_at || null,
       updated_at: this.data.updated_at || null,
       ...relations,

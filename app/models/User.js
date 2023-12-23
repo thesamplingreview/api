@@ -106,6 +106,9 @@ module.exports = (sequelize, DataTypes) => {
     email_verified_at: {
       type: DataTypes.DATE,
     },
+    contact_verified_at: {
+      type: DataTypes.DATE,
+    },
     created_at: {
       type: DataTypes.DATE,
     },

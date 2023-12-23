@@ -1,50 +1,49 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class AuthToken extends Model {
-    static associate(models) {
-      // define association here
-      this.belongsTo(models.User, {
-        foreignKey: 'user_id',
-        targetKey: 'id',
-      });
-    }
+  class VerificationToken extends Model {
+    /**
+     * Static variables
+     */
+    static TYPES = {
+      PHONE: 'phone',
+      EMAIL: 'email',
+    };
   }
 
-  AuthToken.init({
+  VerificationToken.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      allowNull: false,
+      autoIncrement: true,
+    },
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    token_value: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     token: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
-    user_id: {
-      type: DataTypes.UUID,
+    created_at: {
+      type: DataTypes.DATE,
       allowNull: false,
-    },
-    type: {
-      type: DataTypes.STRING,
-    },
-    blacklisted: {
-      type: DataTypes.BOOLEAN,
     },
     expired_at: {
       type: DataTypes.DATE,
     },
-    created_at: {
-      type: DataTypes.DATE,
-    },
   }, {
     sequelize,
-    modelName: 'AuthToken',
+    modelName: 'VerificationToken',
     timestamps: false,
     // paranoid: true,
     underscored: true,
   });
 
-  return AuthToken;
+  return VerificationToken;
 };

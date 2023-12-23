@@ -14,7 +14,7 @@ const uniqueEmailValidator = () => body('email')
       throw new Error('Exist');
     }
     return true;
-  })
+  }).bail()
   .withMessage(validatorMessage('validation.exist', 'Email'));
 
 const existEmailValidator = () => body('email')
@@ -28,7 +28,7 @@ const existEmailValidator = () => body('email')
       throw new Error('Not exist');
     }
     return true;
-  })
+  }).bail()
   .withMessage(validatorMessage('validation.auth', 'Email'));
 
 const nameValidator = () => body('name')
@@ -46,6 +46,7 @@ const nameValidator = () => body('name')
 const contactValidator = () => body('contact')
   .notEmpty().bail()
   .withMessage(validatorMessage('validation.required', 'Contact'));
+
 /* eslint-disable newline-per-chained-call */
 
 exports.loginWithPasswordReq = [
@@ -58,7 +59,7 @@ exports.loginWithPasswordReq = [
 exports.signupWithPasswordReq = [
   uniqueEmailValidator(),
   nameValidator(),
-  contactValidator(),
+  // contactValidator(),
   body('password')
     .notEmpty().bail()
     .withMessage(validatorMessage('validation.required', 'Password'))
@@ -79,7 +80,7 @@ exports.loginWithGoogleReq = [
 exports.signupWithGoogleReq = [
   uniqueEmailValidator(),
   nameValidator(),
-  contactValidator(),
+  // contactValidator(),
   body('google_user_id')
     .notEmpty()
     .withMessage(validatorMessage('validation.required', 'Google User ID')),
@@ -93,4 +94,8 @@ exports.tokenRefreshReq = [
     .trim()
     .notEmpty()
     .withMessage(validatorMessage('validation.required')),
+];
+
+exports.createOtpReq = [
+  contactValidator(),
 ];

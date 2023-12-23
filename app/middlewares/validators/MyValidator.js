@@ -1,5 +1,7 @@
+const { Op } = require('sequelize');
 const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
+const { User } = require('../../models');
 
 /* eslint-disable newline-per-chained-call */
 const nameValidator = () => body('name')
@@ -25,12 +27,39 @@ const passwordValidator = () => body('password')
   // .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).*$/, 'g')
   // .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character');
 
-const contactValidator = () => body('contact');
+const contactValidator = () => body('contact')
+  .notEmpty().bail()
+  .withMessage(validatorMessage('validation.required', 'Contact'))
+  .custom(async (val, { req }) => {
+    const whereQuery = {
+      contact: val,
+    };
+    // ignore current user
+    if (req.user?.id) {
+      whereQuery.id = { [Op.ne]: req.user.id };
+    }
+    const exist = await User.findOne({
+      where: whereQuery,
+    });
+    if (exist) {
+      throw new Error('Exist');
+    }
+    return true;
+  }).bail()
+  .withMessage(validatorMessage('validation.exist', 'Contact'));
+
+const codeValidator = () => body('code')
+  .notEmpty().bail()
+  .withMessage(validatorMessage('validation.required', 'Code'));
 
 /* eslint-enable newline-per-chained-call */
 
 exports.updateReq = [
   nameValidator().optional(),
   passwordValidator().optional(),
-  contactValidator().optional(),
+];
+
+exports.changeContactReq = [
+  contactValidator(),
+  codeValidator(),
 ];

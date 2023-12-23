@@ -3,12 +3,14 @@ const tokenInfoMiddleware = require('../../app/middlewares/tokenInfo');
 const appKeyCheckMiddleware = require('../../app/middlewares/appKeyCheck');
 const {
   AuthValidator,
+  MyValidator,
   PasswordValidator,
 } = require('../../app/middlewares/validators');
 const {
   AuthController,
   MyController,
   PasswordController,
+  VerificationController,
 } = require('../../app/controllers/auth');
 
 const router = express.Router();
@@ -23,10 +25,29 @@ router.post('/invalidate', tokenInfoMiddleware(), AuthController.invalidate);
 router.post('/signup/google', AuthValidator.signupWithGoogleReq, AuthController.signupWithGoogle);
 router.post('/login/google', AuthValidator.loginWithGoogleReq, AuthController.loginWithGoogle);
 
+// verification
+router.post(
+  '/verify/contact/otp',
+  tokenInfoMiddleware(),
+  AuthValidator.createOtpReq,
+  VerificationController.createOtp,
+);
+
 // my module
 router.get('/my', tokenInfoMiddleware(), MyController.my);
 router.put('/my', tokenInfoMiddleware(), MyController.update);
-router.put('/my/password', tokenInfoMiddleware(), PasswordValidator.changePasswordReq, MyController.changePassword);
+router.put(
+  '/my/password',
+  tokenInfoMiddleware(),
+  PasswordValidator.changePasswordReq,
+  MyController.changePassword,
+);
+router.put(
+  '/my/contact',
+  tokenInfoMiddleware(),
+  MyValidator.changeContactReq,
+  MyController.changeContact,
+);
 
 // password reset
 // NOTE: this API should called internally!!!
