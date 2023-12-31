@@ -1,39 +1,93 @@
-const nodemailer = require('nodemailer');
-const mailConfig = require('../../config/mail');
+const client = require('@sendgrid/mail');
+const { sendgrid } = require('../../config/providers');
 
-const transporter = nodemailer.createTransport({
-  host: mailConfig.host,
-  port: mailConfig.port,
-  auth: {
-    user: mailConfig.username,
-    pass: mailConfig.password,
-  },
-});
+client.setApiKey(sendgrid.apiKey);
 
 async function sendMail({
   to,
+  toName,
   from,
   fromName,
   subject,
   content,
   useHtml = false,
 }) {
-  const mailOptions = {
-    to,
-    from: `${fromName || mailConfig.fromName} <${from || mailConfig.fromEmail}>`,
+  const message = {
+    personalizations: [
+      {
+        to: [
+          {
+            email: to,
+            name: toName || to,
+          },
+        ],
+        subject,
+      },
+    ],
+    from: {
+      email: from || sendgrid.fromEmail,
+      name: fromName || sendgrid.fromName,
+    },
     subject,
+    content: [
+      {
+        type: useHtml ? 'text/html' : 'text/plain',
+        value: content,
+      },
+    ],
   };
-  if (useHtml) {
-    mailOptions.html = content;
-  } else {
-    mailOptions.text = content;
-  }
 
-  const info = await transporter.sendMail(mailOptions);
-  return info?.messageId || false;
+  try {
+    const sent = await client.send(message);
+    // console.log(sent);
+    return sent?.[0]?.statusCode === 202;
+  } catch (err) {
+    return false;
+  }
+}
+
+async function sendMailUsingSendgridTmpl({
+  to,
+  toName,
+  from,
+  fromName,
+  subject,
+  templateId,
+  templateData,
+}) {
+  const message = {
+    personalizations: [
+      {
+        to: [
+          {
+            email: to,
+            name: toName || to,
+          },
+        ],
+        subject,
+        dynamic_template_data: templateData,
+      },
+    ],
+    from: {
+      email: from || sendgrid.fromEmail,
+      name: fromName || sendgrid.fromName,
+    },
+    subject,
+    content: [],
+    template_id: templateId,
+  };
+
+  try {
+    const sent = await client.send(message);
+    // console.log(sent);
+    return sent?.[0]?.statusCode === 202;
+  } catch (err) {
+    return false;
+  }
 }
 
 module.exports = {
-  transporter,
+  client,
   sendMail,
+  sendMailUsingSendgridTmpl,
 };

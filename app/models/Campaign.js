@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
       PUBLISH: 'publish',
     };
 
+    static REVIEW_TYPES = {
+      FORM: 'form',
+      REDIRECT: 'redirect',
+    };
+
     static associate(models) {
       this.belongsTo(models.Form, {
         foreignKey: 'form_id',
@@ -78,6 +83,15 @@ module.exports = (sequelize, DataTypes) => {
     meta_keywords: {
       type: DataTypes.STRING,
     },
+    review_type: {
+      type: DataTypes.STRING,
+    },
+    review_instruction: {
+      type: DataTypes.TEXT,
+    },
+    review_cta: {
+      type: DataTypes.STRING,
+    },
     cover_url: {
       type: DataTypes.STRING,
     },
@@ -120,7 +134,7 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'Campaign',
     timestamps: true,
     underscored: true,
-    paranoid: true,
+    // paranoid: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     deletedAt: 'deleted_at',

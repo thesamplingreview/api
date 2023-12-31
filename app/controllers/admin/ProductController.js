@@ -65,12 +65,12 @@ class ProductController extends ApiController {
     try {
       const result = await this.productService.create(formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new ProductResource(result),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -95,12 +95,12 @@ class ProductController extends ApiController {
       const record = await this.productService.findById(req.params.id);
       const updated = await this.productService.update(record, formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new ProductResource(updated),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -115,12 +115,12 @@ class ProductController extends ApiController {
       const record = await this.productService.findById(req.params.id);
       const deleted = await this.productService.delete(record, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new ProductResource(deleted),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }

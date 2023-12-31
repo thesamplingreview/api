@@ -74,12 +74,12 @@ class VendorController extends ApiController {
     try {
       const result = await this.vendorService.create(formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new VendorResource(result),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -101,12 +101,12 @@ class VendorController extends ApiController {
       const record = await this.vendorService.findById(req.params.id);
       const updated = await this.vendorService.update(record, formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new VendorResource(updated),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -121,12 +121,12 @@ class VendorController extends ApiController {
       const record = await this.vendorService.findById(req.params.id);
       const deleted = await this.vendorService.delete(record, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new VendorResource(deleted),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }

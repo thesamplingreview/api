@@ -9,6 +9,7 @@ const {
   CampaignController,
   EnrolmentController,
   ProductController,
+  ConfigController,
 } = require('../../app/controllers/admin');
 const {
   UserValidator,
@@ -18,6 +19,7 @@ const {
   CampaignValidator,
   CampaignEnrolmentValidator,
   ProductValidator,
+  ConfigValidator,
 } = require('../../app/middlewares/validators');
 
 const router = express.Router();
@@ -84,5 +86,9 @@ router.get('/products/:id', ProductController.getSingle);
 router.post('/products', ProductValidator.createReq, ProductController.create);
 router.put('/products/:id', ProductValidator.updateReq, ProductController.update);
 router.delete('/products/:id', ProductController.remove);
+
+// config module
+router.get('/configs', ConfigController.get);
+router.put('/configs', ConfigValidator.saveReq, ConfigController.save);
 
 module.exports = router;

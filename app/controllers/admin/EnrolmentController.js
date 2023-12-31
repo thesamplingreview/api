@@ -74,12 +74,12 @@ class EnrolmentController extends ApiController {
       const record = await this.enrolmentService.findById(req.params.id);
       const updated = await this.enrolmentService.update(record, formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new CampaignEnrolmentResource(updated),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -94,12 +94,12 @@ class EnrolmentController extends ApiController {
       const record = await this.enrolmentService.findById(req.params.id);
       const deleted = await this.enrolmentService.delete(record, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new CampaignEnrolmentResource(deleted),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }

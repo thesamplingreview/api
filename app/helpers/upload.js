@@ -1,9 +1,10 @@
 const path = require('path');
 const fs = require('fs');
 const formidable = require('formidable');
+const imageSize = require('image-size');
 // const { Upload } = require('@aws-sdk/lib-storage');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
-const { s3 } = require('../../config/filesystem');
+const { s3 } = require('../../config/providers');
 const { S3UploadError, BadRequest } = require('../errors');
 
 /**
@@ -33,7 +34,7 @@ function parseFormData({
     // next if request is form-data
     // else formidable will causing stuck
     const contentType = req.get('Content-Type');
-    if (!contentType.startsWith('multipart/form-data')) {
+    if (!contentType?.startsWith('multipart/form-data')) {
       next(new BadRequest());
       return;
     }
@@ -92,15 +93,17 @@ function validatorFileCheck({ field, maxFileSize, mimeTypes }) {
       error = req.__('validation.required', {
         field: fieldName,
       });
-    } else if (!mimeTypes.includes(val.mimetype)) {
+    }
+    if (!error && mimeTypes && !mimeTypes.includes(val.mimetype)) {
       error = req.__('validation.file_type', {
         field: fieldName,
         values: mimeTypes.toString(),
       });
-    } else if (val.size > maxFileSize) {
+    }
+    if (!error && maxFileSize && val.size > maxFileSize) {
       error = req.__('validation.file_size', {
         field: fieldName,
-        size: maxFileSize,
+        maxSize: `${Math.floor(maxFileSize / (1024 * 1024))}Mb`,
       });
     }
 
@@ -203,6 +206,15 @@ async function s3Upload(file, dir = '', options = {}) {
 //   }
 // }
 
+async function getImageDimension(filePath) {
+  try {
+    const dimensions = imageSize(filePath);
+    return dimensions;
+  } catch (err) {
+    return { width: 0, height: 0 };
+  }
+}
+
 module.exports = {
   parseFormData,
   validatorFileCheck,
@@ -210,4 +222,5 @@ module.exports = {
   s3PublicUrl,
   s3Upload,
   s3Remove,
+  getImageDimension,
 };

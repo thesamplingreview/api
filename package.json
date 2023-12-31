@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node index",
     "dev": "nodemon index",
+    "migrate": "npx sequelize-cli db:migrate",
+    "migrate:undo": "npx sequelize-cli db:migrate:undo",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -13,6 +15,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.445.0",
     "@aws-sdk/lib-storage": "^3.449.0",
+    "@sendgrid/mail": "^8.1.0",
     "aws-sdk": "^2.1493.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -23,6 +26,7 @@
     "formidable": "v2",
     "fs-extra": "^11.1.1",
     "i18n": "^0.15.1",
+    "image-size": "^1.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mysql2": "^3.6.2",
@@ -36,5 +40,8 @@
     "eslint-plugin-import": "^2.29.0",
     "nodemon": "^3.0.1",
     "sequelize-cli": "^6.6.1"
+  },
+  "nodemonConfig": {
+    "ignore": ["tmp/**"]
   }
 }

@@ -1,6 +1,6 @@
 const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
-const { sequelize, Campaign, FormField } = require('../../models');
+const { sequelize, Campaign, FormField, FormFieldOption } = require('../../models');
 const FormService = require('../../services/FormService');
 const FormResource = require('../../resources/FormResource');
 
@@ -48,7 +48,10 @@ class FormController extends ApiController {
     try {
       const record = await this.formService.findById(req.params.id, {
         include: [
-          { model: FormField },
+          {
+            model: FormField,
+            include: [FormFieldOption],
+          },
         ],
         order: [
           [FormField, 'pos', 'ASC'],
@@ -80,12 +83,12 @@ class FormController extends ApiController {
     try {
       const result = await this.formService.create(formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new FormResource(result),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -105,18 +108,18 @@ class FormController extends ApiController {
     const t = await sequelize.transaction();
     try {
       const record = await this.formService.findById(req.params.id, {
-        include: [
-          { model: FormField },
-        ],
+        // include: [
+        //   { model: FormField },
+        // ],
       });
       const updated = await this.formService.update(record, formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new FormResource(updated),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -140,12 +143,12 @@ class FormController extends ApiController {
       });
       const updated = await this.formService.update(record, formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new FormResource(updated),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -160,12 +163,12 @@ class FormController extends ApiController {
       const record = await this.formService.findById(req.params.id);
       const deleted = await this.formService.delete(record, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new FormResource(deleted),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }

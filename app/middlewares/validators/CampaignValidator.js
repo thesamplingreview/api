@@ -65,6 +65,17 @@ const metaDescValidator = () => body('meta_desc');
 
 const metaKeywordsValidator = () => body('meta_keywords');
 
+const reviewTypeValidator = () => body('review_type')
+  .isIn(Object.values(Campaign.REVIEW_TYPES)).bail()
+  .withMessage(validatorMessage('validation.in', {
+    field: 'Review Type',
+    values: Object.values(Campaign.REVIEW_TYPES).toString(),
+  }));
+
+const reviewInstructionValidator = () => body('review_instruction');
+
+const reviewCtaValidator = () => body('review_cta');
+
 const startDateValidator = () => body('start_date')
   .custom((val) => {
     return !(val && !toDate(val));
@@ -77,12 +88,11 @@ const endDateValidator = () => body('end_date')
   }).bail()
   .withMessage(validatorMessage('validation.date', 'End Date'));
 
-const statuses = Object.values(Campaign.STATUSES);
 const statusValidator = () => body('status')
-  .isIn(statuses).bail()
+  .isIn(Object.values(Campaign.STATUSES)).bail()
   .withMessage(validatorMessage('validation.in', {
     field: 'Status',
-    values: statuses.toString(),
+    values: Object.values(Campaign.STATUSES).toString(),
   }));
 
 const posValidator = () => body('pos')
@@ -174,6 +184,9 @@ exports.createReq = [
   metaTitleValidator().optional(),
   metaDescValidator().optional(),
   metaKeywordsValidator().optional(),
+  reviewTypeValidator().optional(),
+  reviewInstructionValidator().optional(),
+  reviewCtaValidator().optional(),
   statusValidator().optional(),
   posValidator().optional(),
 ];
@@ -182,8 +195,8 @@ exports.updateReq = [
   parseFormData({
     fileFields: ['cover', 'background'],
   }),
-  slugValidator({ paramId: 'id' }),
-  nameValidator(),
+  slugValidator({ paramId: 'id' }).optional(),
+  nameValidator().optional(),
   descValidator().optional(),
   introTitleValidator().optional(),
   introDescValidator().optional(),
@@ -200,6 +213,9 @@ exports.updateReq = [
   metaTitleValidator().optional(),
   metaDescValidator().optional(),
   metaKeywordsValidator().optional(),
+  reviewTypeValidator().optional(),
+  reviewInstructionValidator().optional(),
+  reviewCtaValidator().optional(),
   statusValidator().optional(),
   posValidator().optional(),
 ];

@@ -70,50 +70,7 @@ class CampaignController extends ApiController {
    * POST - create
    */
   async create(req, res) {
-    // validated
-    const formData = {
-      slug: req.body.slug,
-      name: req.body.name,
-      description: req.body.description,
-      intro_title: req.body.intro_title,
-      intro_description: req.body.intro_description,
-      presubmit_title: req.body.presubmit_title,
-      presubmit_description: req.body.presubmit_description,
-      postsubmit_title: req.body.postsubmit_title,
-      postsubmit_description: req.body.postsubmit_description,
-      cover: req.body.cover,
-      backgroound: req.body.background,
-      meta_title: req.body.meta_title,
-      meta_description: req.body.meta_description,
-      meta_keywords: req.body.meta_keywords,
-      start_date: req.body.start_date,
-      end_date: req.body.end_date,
-      vendor_id: req.vendor?.id,
-      form_id: req.form?.id,
-      status: req.body.status,
-      pos: req.body.pos,
-    };
-
-    // DB update
-    const t = await sequelize.transaction();
-    try {
-      const result = await this.campaignService.create(formData, { transaction: t });
-
-      t.commit();
-      return this.responseJson(req, res, {
-        data: new CampaignResource(result),
-      });
-    } catch (err) {
-      t.rollback();
-      return this.responseError(req, res, err);
-    }
-  }
-
-  /**
-   * PUT - update
-   */
-  async update(req, res) {
-    // validated
+    // define allowed fields
     const formData = {
       slug: req.body.slug,
       name: req.body.name,
@@ -129,6 +86,55 @@ class CampaignController extends ApiController {
       meta_title: req.body.meta_title,
       meta_description: req.body.meta_description,
       meta_keywords: req.body.meta_keywords,
+      review_type: req.body.review_type,
+      review_instruction: req.body.review_instruction,
+      review_cta: req.body.review_cta,
+      start_date: req.body.start_date,
+      end_date: req.body.end_date,
+      vendor_id: req.vendor?.id,
+      form_id: req.form?.id,
+      status: req.body.status,
+      pos: req.body.pos,
+    };
+
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const result = await this.campaignService.create(formData, { transaction: t });
+
+      await t.commit();
+      return this.responseJson(req, res, {
+        data: new CampaignResource(result),
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * PUT - update
+   */
+  async update(req, res) {
+    // define allowed fields
+    const formData = {
+      slug: req.body.slug,
+      name: req.body.name,
+      description: req.body.description,
+      intro_title: req.body.intro_title,
+      intro_description: req.body.intro_description,
+      presubmit_title: req.body.presubmit_title,
+      presubmit_description: req.body.presubmit_description,
+      postsubmit_title: req.body.postsubmit_title,
+      postsubmit_description: req.body.postsubmit_description,
+      cover: req.body.cover,
+      background: req.body.background,
+      meta_title: req.body.meta_title,
+      meta_description: req.body.meta_description,
+      meta_keywords: req.body.meta_keywords,
+      review_type: req.body.review_type,
+      review_instruction: req.body.review_instruction,
+      review_cta: req.body.review_cta,
       start_date: req.body.start_date,
       end_date: req.body.end_date,
       vendor_id: req.vendor?.id,
@@ -143,12 +149,12 @@ class CampaignController extends ApiController {
       const record = await this.campaignService.findById(req.params.id);
       const updated = await this.campaignService.update(record, formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new CampaignResource(updated),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -163,12 +169,12 @@ class CampaignController extends ApiController {
       const record = await this.campaignService.findById(req.params.id);
       const deleted = await this.campaignService.delete(record, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new CampaignResource(deleted),
       });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }
@@ -204,6 +210,10 @@ class CampaignController extends ApiController {
         id: val,
         name: val.charAt(0).toUpperCase() + val.slice(1),
       })),
+      review_types: Object.values(Campaign.REVIEW_TYPES).map((val) => ({
+        id: val,
+        name: val.charAt(0).toUpperCase() + val.slice(1),
+      })),
       states,
     };
 
@@ -227,7 +237,7 @@ class CampaignController extends ApiController {
       const record = await this.campaignService.findById(req.params.id);
       const updated = await this.campaignService.syncProducts(record, formData.products, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: updated,
       });
@@ -235,7 +245,7 @@ class CampaignController extends ApiController {
       //   data: new CampaignResource(updated),
       // });
     } catch (err) {
-      t.rollback();
+      await t.rollback();
       return this.responseError(req, res, err);
     }
   }

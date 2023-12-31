@@ -1,5 +1,6 @@
 const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
+const { parseFormData, validatorFileCheck } = require('../../helpers/upload');
 
 /* eslint-disable newline-per-chained-call */
 const fromValidator = () => body('from')
@@ -39,6 +40,22 @@ exports.sendEmailReq = [
   fromValidator().optional(),
   fromNameValidator().optional(),
   useHtmlValidator().optional(),
+];
+
+exports.uploadAssetReq = [
+  parseFormData({
+    fileFields: ['file'],
+  }),
+  body('file')
+    .notEmpty().bail()
+    .withMessage(validatorMessage('validation.required', 'File'))
+    .custom(validatorFileCheck({
+      maxFileSize: 4 * 1024 * 1024, // 4Mb
+      // **allow all types
+      // mimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
+    })).bail(),
+  body('caption').optional(),
+  body('tags').optional(),
 ];
 
 /* eslint-enable newline-per-chained-call */

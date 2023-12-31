@@ -1,55 +1,39 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class FormField extends Model {
+  class FormFieldOption extends Model {
     static associate(models) {
-      this.belongsTo(models.Form, {
-        foreignKey: 'form_id',
-        targetKey: 'id',
-      });
-      this.hasMany(models.FormFieldOption, {
+      this.belongsTo(models.FormField, {
         foreignKey: 'form_field_id',
         targetKey: 'id',
       });
     }
   }
 
-  FormField.init({
+  FormFieldOption.init({
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false,
       autoIncrement: true,
     },
-    form_id: {
+    key: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    label: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    sublabel: {
+      type: DataTypes.STRING,
+    },
+    image_url: {
+      type: DataTypes.STRING,
+    },
+    form_field_id: {
       type: DataTypes.INTEGER,
-    },
-    name: {
-      type: DataTypes.STRING,
       allowNull: false,
-    },
-    type: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    placeholder: {
-      type: DataTypes.STRING,
-    },
-    description: {
-      type: DataTypes.STRING,
-    },
-    hint: {
-      type: DataTypes.STRING,
-    },
-    options: {
-      type: DataTypes.STRING,
-    },
-    config: {
-      type: DataTypes.JSON,
-    },
-    mandatory: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
     },
     pos: {
       type: DataTypes.INTEGER,
@@ -57,10 +41,10 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     sequelize,
-    modelName: 'FormField',
+    modelName: 'FormFieldOption',
     timestamps: false,
     underscored: true,
   });
 
-  return FormField;
+  return FormFieldOption;
 };

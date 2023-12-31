@@ -9,7 +9,12 @@ class FormResource {
     const relations = {};
     if (this.data.FormFields !== undefined) {
       relations.fields = this.data.FormFields.map((d) => {
-        return d instanceof FormField ? d.get({ plain: true }) : d;
+        const field = d instanceof FormField ? d.get({ plain: true }) : d;
+        if (field.FormFieldOptions !== undefined) {
+          field.options = field.FormFieldOptions.sort((a, b) => a.pos - b.pos);
+          delete field.FormFieldOptions;
+        }
+        return field;
       }).sort((a, b) => a.pos - b.pos);
     }
     if (this.data.Campaigns !== undefined) {
