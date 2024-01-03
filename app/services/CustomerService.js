@@ -9,7 +9,7 @@ class CustomerService extends BaseService {
     super(User.scope('users'));
   }
 
-  async genWhereQuery(req) {
+  genWhereQuery(req) {
     const whereQuery = {};
 
     // filter - name
@@ -38,7 +38,7 @@ class CustomerService extends BaseService {
     return whereQuery;
   }
 
-  async genOrdering(req) {
+  genOrdering(req) {
     // currently only support single column ordering
     const sort = super.getSortMeta(req);
     return sort ? [sort] : [['id', 'ASC']];

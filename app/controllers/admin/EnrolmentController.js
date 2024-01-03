@@ -18,8 +18,8 @@ class EnrolmentController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.enrolmentService.genWhereQuery(req),
-        order: await this.enrolmentService.genOrdering(req),
+        where: this.enrolmentService.genWhereQuery(req),
+        order: this.enrolmentService.genOrdering(req),
         include: [
           { model: Campaign },
           { model: User },

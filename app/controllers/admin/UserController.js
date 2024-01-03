@@ -22,8 +22,8 @@ class UserController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.customerService.genWhereQuery(req),
-        order: await this.customerService.genOrdering(req),
+        where: this.customerService.genWhereQuery(req),
+        order: this.customerService.genOrdering(req),
         include: [Vendor],
       };
       const { page, perPage } = this.getPaginate(req);

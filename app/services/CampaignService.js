@@ -12,7 +12,7 @@ class CampaignService extends BaseService {
     super(Campaign);
   }
 
-  async genWhereQuery(req) {
+  genWhereQuery(req) {
     const whereQuery = {};
 
     // filter - name
@@ -56,7 +56,7 @@ class CampaignService extends BaseService {
     return whereQuery;
   }
 
-  async genOrdering(req) {
+  genOrdering(req) {
     // currently only support single column ordering
     const sort = super.getSortMeta(req);
     return sort ? [sort] : [['pos', 'ASC']];

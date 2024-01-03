@@ -17,7 +17,7 @@ const {
   VendorValidator,
   FormValidator,
   CampaignValidator,
-  CampaignEnrolmentValidator,
+  EnrolmentValidator,
   ProductValidator,
   ConfigValidator,
 } = require('../../app/middlewares/validators');
@@ -76,7 +76,7 @@ router.put('/campaigns/:id/products', CampaignValidator.productsReq, CampaignCon
 router.get('/enrolments', EnrolmentController.getAll);
 router.get('/enrolments/all/options', EnrolmentController.options);
 router.get('/enrolments/:id', EnrolmentController.getSingle);
-router.put('/enrolments/:id', CampaignEnrolmentValidator.settingUpdateReq, EnrolmentController.update);
+router.put('/enrolments/:id', EnrolmentValidator.settingUpdateReq, EnrolmentController.update);
 router.delete('/enrolments/:id', EnrolmentController.remove);
 
 // product module

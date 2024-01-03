@@ -2,14 +2,14 @@ const { Op } = require('sequelize');
 const { getInput } = require('../helpers/utils');
 const { s3Upload, s3Remove } = require('../helpers/upload');
 const BaseService = require('./BaseService');
-const { Product } = require('../models');
+const { Product, CampaignProduct } = require('../models');
 
 class ProductService extends BaseService {
   constructor() {
     super(Product);
   }
 
-  async genWhereQuery(req) {
+  genWhereQuery(req) {
     const whereQuery = {};
 
     // filter - name
@@ -32,7 +32,24 @@ class ProductService extends BaseService {
     return whereQuery;
   }
 
-  async genOrdering(req) {
+  genIncludeQuery(req) {
+    const include = [];
+
+    // filter - campaign_id
+    if (req.query.campaign_id) {
+      include.push({
+        model: CampaignProduct,
+        attributes: ['product_id', 'campaign_id'],
+        where: {
+          campaign_id: req.query.campaign_id,
+        },
+      });
+    }
+
+    return include;
+  }
+
+  genOrdering(req) {
     // currently only support single column ordering
     const sort = super.getSortMeta(req);
     return sort ? [sort] : [['pos', 'ASC']];

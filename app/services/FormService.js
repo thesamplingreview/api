@@ -9,7 +9,7 @@ class FormService extends BaseService {
     super(Form);
   }
 
-  async genWhereQuery(req) {
+  genWhereQuery(req) {
     const whereQuery = {};
     // filter - name
     if (req.query.name?.trim()) {
@@ -19,6 +19,12 @@ class FormService extends BaseService {
     }
 
     return whereQuery;
+  }
+
+  genOrdering(req) {
+    // currently only support single column ordering
+    const sort = super.getSortMeta(req);
+    return sort ? [sort] : [['created_at', 'ASC']];
   }
 
   async create(input, options = {}) {

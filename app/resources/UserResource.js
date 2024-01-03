@@ -36,6 +36,8 @@ class UserResource {
       status: this.data.status,
       role_id: this.data.role_id,
       vendor_id: this.data.vendor_id,
+      google_id: this.data.google_id || null,
+      facebook_id: this.data.facebook_id || null,
       last_login: this.data.last_login || null,
       email_verified_at: this.data.email_verified_at || null,
       contact_verified_at: this.data.contact_verified_at || null,

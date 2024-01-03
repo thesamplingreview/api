@@ -28,10 +28,12 @@ class AssetService extends BaseService {
     const dimensions = await getImageDimension(file.filepath);
 
     // upload to s3
-    const useS3 = true;
+    const useS3 = false;
     if (useS3) {
       url = await s3Upload(file, 'assets');
       disk = 's3';
+    } else {
+      url = `https://picsum.photos/800?v=${(new Date()).valueOf()}`;
     }
 
     const formData = {

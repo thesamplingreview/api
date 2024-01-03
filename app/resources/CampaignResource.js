@@ -31,6 +31,10 @@ class CampaignResource {
       const CampaignEnrolmentResource = require('./CampaignEnrolmentResource');
       relations.enrolments = this.data.CampaignEnrolments.map((d) => new CampaignEnrolmentResource(d));
     }
+    if (this.data.CampaignReviews !== undefined) {
+      const CampaignReviewResource = require('./CampaignReviewResource');
+      relations.reviews = this.data.CampaignReviews.map((d) => new CampaignReviewResource(d));
+    }
 
     const counts = {};
     if (this.data.enrolmentsCount !== undefined) {

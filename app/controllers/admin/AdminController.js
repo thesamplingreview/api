@@ -22,7 +22,7 @@ class UserController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.adminService.genWhereQuery(req),
+        where: this.adminService.genWhereQuery(req),
         include: [UserRole],
       };
       const { page, perPage } = this.getPaginate(req);

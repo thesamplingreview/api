@@ -14,6 +14,10 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsToMany(models.Campaign, {
         through: models.CampaignProduct,
       });
+      this.hasMany(models.CampaignProduct, {
+        foreignKey: 'product_id',
+        targetKey: 'id',
+      });
     }
   }
 

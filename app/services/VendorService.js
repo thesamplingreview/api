@@ -8,7 +8,7 @@ class VendorService extends BaseService {
     super(Vendor);
   }
 
-  async genWhereQuery(req) {
+  genWhereQuery() {
     const whereQuery = {};
 
     return whereQuery;

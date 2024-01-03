@@ -1,11 +1,11 @@
 const { Op } = require('sequelize');
-const { getInput, toDate } = require('../helpers/utils');
+const { toDate } = require('../helpers/utils');
 const BaseService = require('./BaseService');
-const { CampaignEnrolment } = require('../models');
+const { CampaignReview } = require('../models');
 
-class EnrolmentService extends BaseService {
+class ReviewService extends BaseService {
   constructor() {
-    super(CampaignEnrolment);
+    super(CampaignReview);
   }
 
   genWhereQuery(req) {
@@ -16,16 +16,12 @@ class EnrolmentService extends BaseService {
       whereQuery.campaign_id = req.query.campaign_id;
     }
     // filter - user_id
-    if (req.query.user_id) {
-      whereQuery.user_id = req.query.user_id;
+    if (req.query.created_by) {
+      whereQuery.created_by = req.query.created_by;
     }
-    // filter - form_id
-    if (req.query.form_id) {
-      whereQuery.form_id = req.query.form_id;
-    }
-    // filter - status
-    if (req.query.status) {
-      whereQuery.status = req.query.status;
+    // filter - rating
+    if (req.query.rating) {
+      whereQuery.rating = req.query.rating;
     }
     // filter - date
     if (req.query.date_from || req.query.date_to) {
@@ -58,24 +54,15 @@ class EnrolmentService extends BaseService {
   async create(input, options = {}) {
     const formData = {
       campaign_id: input.campaign_id,
-      user_id: input.user_id,
-      form_id: input.form_id || null,
-      submissions: input.submissions,
+      created_by: input.created_by,
+      rating: input.rating,
+      review: input.review,
     };
 
     const result = await this.model.create(formData, options);
 
     return result;
   }
-
-  async update(record, input, options = {}) {
-    const formData = {
-      status: getInput(input.status, record.status),
-    };
-    const result = await record.update(formData, options);
-
-    return result;
-  }
 }
 
-module.exports = EnrolmentService;
+module.exports = ReviewService;

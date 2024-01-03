@@ -9,7 +9,7 @@ class AdminService extends BaseService {
     super(User.scope('admins'));
   }
 
-  async genWhereQuery(req) {
+  genWhereQuery() {
     const whereQuery = {};
     // ignore sa
     whereQuery.email = {

@@ -19,8 +19,8 @@ class CampaignController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.campaignService.genWhereQuery(req),
-        order: await this.campaignService.genOrdering(req),
+        where: this.campaignService.genWhereQuery(req),
+        order: this.campaignService.genOrdering(req),
         include: [
           { model: Form },
           { model: Vendor },

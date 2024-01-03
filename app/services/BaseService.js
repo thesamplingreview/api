@@ -19,11 +19,11 @@ class BaseService {
     return [sortKey, sortOrder];
   }
 
-  async genWhereQuery() {
+  genWhereQuery() {
     return {};
   }
 
-  async genOrdering(req) {
+  genOrdering(req) {
     // currently only support single column ordering
     const sort = this.getSortMeta(req);
     return sort ? [sort] : [];
@@ -43,9 +43,9 @@ class BaseService {
         offset: (page - 1) * perPage,
       }),
       // count() break if having include options, hence simply using where on count query
-      this.model.count({
-        where: options.where || null,
-      }),
+      // this.model.count({
+      //   where: options.where || null,
+      // }),
     ]);
 
     return {

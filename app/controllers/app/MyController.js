@@ -1,6 +1,6 @@
 const ApiController = require('../ApiController');
 const {
-  Campaign, Vendor, CampaignEnrolment,
+  Campaign, Vendor, CampaignEnrolment, CampaignReview,
 } = require('../../models');
 const CampaignService = require('../../services/CampaignService');
 const CampaignResource = require('../../resources/CampaignResource');
@@ -17,12 +17,16 @@ class MyController extends ApiController {
         where: {
           status: Campaign.STATUSES.PUBLISH,
         },
-        order: await campaignService.genOrdering(req),
+        order: campaignService.genOrdering(req),
         include: [
           { model: Vendor },
           {
             model: CampaignEnrolment,
             where: { user_id: req.user.id },
+          },
+          {
+            model: CampaignReview,
+            where: { created_by: req.user.id },
           },
         ],
       };

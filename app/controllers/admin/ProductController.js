@@ -16,8 +16,9 @@ class ProductController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.productService.genWhereQuery(req),
-        order: await this.productService.genOrdering(req),
+        include: this.productService.genIncludeQuery(req),
+        where: this.productService.genWhereQuery(req),
+        order: this.productService.genOrdering(req),
       };
       const { page, perPage } = this.getPaginate(req);
       const results = await this.productService.paginate(query, page, perPage);

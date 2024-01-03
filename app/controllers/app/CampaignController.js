@@ -1,11 +1,14 @@
 const ApiController = require('../ApiController');
+const { ValidationFailed } = require('../../errors');
 const {
-  sequelize, Campaign, Product, Form, FormField, Vendor, CampaignEnrolment,
+  sequelize, Campaign, Product, Form, FormField, FormFieldOption, Vendor, CampaignEnrolment, CampaignReview,
 } = require('../../models');
 const CampaignService = require('../../services/CampaignService');
 const EnrolmentService = require('../../services/EnrolmentService');
+const ReviewService = require('../../services/ReviewService');
 const CampaignResource = require('../../resources/CampaignResource');
 const CampaignEnrolmentResource = require('../../resources/CampaignEnrolmentResource');
+const CampaignReviewResource = require('../../resources/CampaignReviewResource');
 
 class CampaignController extends ApiController {
   constructor() {
@@ -22,8 +25,8 @@ class CampaignController extends ApiController {
       // force published only
       req.query.status = Campaign.STATUSES.PUBLISH;
       const query = {
-        where: await this.campaignService.genWhereQuery(req),
-        order: await this.campaignService.genOrdering(req),
+        where: this.campaignService.genWhereQuery(req),
+        order: this.campaignService.genOrdering(req),
         include: [
           { model: Vendor },
           req.user?.id ? {
@@ -59,7 +62,9 @@ class CampaignController extends ApiController {
           { model: Vendor },
           {
             model: Form,
-            include: [FormField],
+            include: [
+              { model: FormField, include: [FormFieldOption] },
+            ],
           },
           { model: Product },
           req.user?.id ? {
@@ -85,19 +90,83 @@ class CampaignController extends ApiController {
     // validated
     const formData = {
       user_id: req.user.id,
-      campaign_id: req.body.campaign_id,
+      campaign_id: req.campaign.id,
       form_id: req.body.form_id,
       submissions: req.body.submissions,
     };
-    // DB update
+
+    const enrolmentService = new EnrolmentService();
+
     const t = await sequelize.transaction();
     try {
-      const enrolmentService = new EnrolmentService();
+      // DB validation - if user have enrolment record
+      const enrolment = await CampaignEnrolment.findOne({
+        where: {
+          campaign_id: formData.campaign_id,
+          user_id: formData.user_id,
+        },
+      });
+      if (enrolment) {
+        throw new ValidationFailed('User already enroled.');
+      }
+
+      // DB update
       const result = await enrolmentService.create(formData, { transaction: t });
 
       t.commit();
       return this.responseJson(req, res, {
         data: new CampaignEnrolmentResource(result),
+      });
+    } catch (err) {
+      t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * Create review
+   */
+  async createReview(req, res) {
+    // validated
+    const formData = {
+      created_by: req.user.id,
+      campaign_id: req.campaign.id,
+      rating: req.body.rating,
+      review: req.body.review,
+    };
+
+    const reviewService = new ReviewService();
+
+    const t = await sequelize.transaction();
+    try {
+      // DB validation - if user dont have enrolment record
+      const enrolment = await CampaignEnrolment.findOne({
+        where: {
+          campaign_id: formData.campaign_id,
+          user_id: formData.created_by,
+        },
+      });
+      if (!enrolment) {
+        throw new ValidationFailed('User do not have any enrolment on this campaign.');
+      }
+
+      // DB validation - if user have review record
+      const hasReview = await CampaignReview.findOne({
+        where: {
+          campaign_id: formData.campaign_id,
+          created_by: formData.created_by,
+        },
+      });
+      if (hasReview) {
+        throw new ValidationFailed('User already review this campaign.');
+      }
+
+      // DB update
+      const result = await reviewService.create(formData, { transaction: t });
+
+      t.commit();
+      return this.responseJson(req, res, {
+        data: new CampaignReviewResource(result),
       });
     } catch (err) {
       t.rollback();

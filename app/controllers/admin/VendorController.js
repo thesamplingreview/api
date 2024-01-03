@@ -17,7 +17,7 @@ class VendorController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.vendorService.genWhereQuery(req),
+        where: this.vendorService.genWhereQuery(req),
         include: [
           { model: User },
         ],

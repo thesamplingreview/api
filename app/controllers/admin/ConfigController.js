@@ -21,7 +21,7 @@ class ConfigController extends ApiController {
       }
 
       const query = {
-        where: await this.configService.genWhereQuery(req),
+        where: this.configService.genWhereQuery(req),
       };
       const results = await this.configService.findAll(query);
 

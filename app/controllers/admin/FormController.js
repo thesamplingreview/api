@@ -1,6 +1,8 @@
 const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
-const { sequelize, Campaign, FormField, FormFieldOption } = require('../../models');
+const {
+  sequelize, Campaign, FormField, FormFieldOption,
+} = require('../../models');
 const FormService = require('../../services/FormService');
 const FormResource = require('../../resources/FormResource');
 
@@ -17,8 +19,8 @@ class FormController extends ApiController {
   async getAll(req, res) {
     try {
       const query = {
-        where: await this.formService.genWhereQuery(req),
-        order: await this.formService.genOrdering(req),
+        where: this.formService.genWhereQuery(req),
+        order: this.formService.genOrdering(req),
         include: [
           { model: Campaign },
         ],

@@ -6,7 +6,7 @@ class ConfigService extends BaseService {
     super(SystemConfig);
   }
 
-  async genWhereQuery(req) {
+  genWhereQuery(req) {
     const whereQuery = {};
 
     // filter - keys
