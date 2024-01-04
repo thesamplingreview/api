@@ -1,8 +1,11 @@
 const crypto = require('crypto');
 const ApiController = require('../ApiController');
 const { sequelize, AuthToken, PasswordReset } = require('../../models');
-const UserService = require('../../services/UserService');
 const { ValidationFailed } = require('../../errors');
+const appConfig = require('../../../config/app');
+const UserService = require('../../services/UserService');
+const ConfigService = require('../../services/ConfigService');
+const { sendMailUsingSendgridTmpl } = require('../../helpers/mailer');
 
 class PasswordController extends ApiController {
   /**
@@ -23,8 +26,29 @@ class PasswordController extends ApiController {
         .slice(0, 36);
       reset = await reset.save();
 
+      // send email
+      const configService = new ConfigService();
+      const {
+        sendgrid_template_id_reset_password: tmpl,
+      } = await configService.getKeys([
+        'sendgrid_template_id_reset_password',
+      ]);
+      if (tmpl) {
+        const formdata = {
+          to: req.body.email,
+          subject: 'Password Reset',
+          templateId: tmpl,
+          templateData: {
+            email: req.body.email,
+            reset_link: `${appConfig.webUrl}/reset-password/${reset.token}?email=${encodeURIComponent(req.body.email)}`,
+          },
+        };
+        await sendMailUsingSendgridTmpl(formdata);
+      }
+
       return this.responseJson(req, res, {
-        data: reset,
+        // data: reset,
+        data: 'sent',
       });
     } catch (err) {
       return this.responseError(req, res, err);

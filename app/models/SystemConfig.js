@@ -8,8 +8,10 @@ module.exports = (sequelize, DataTypes) => {
     // internal keys
     // static INTERNAL_KEYS = [
     //   'sendgrid_template_id_reset_password',
-    //   'sendgrid_template_id_campaign_enrolled',
-    //   'sendgrid_template_id_signup',
+    //   'sendgrid_template_id_campaign_enrolled_user',
+    //   'sendgrid_template_id_campaign_enrolled_admin',
+    //   'sendgrid_template_id_signup_user',
+    //   'sendgrid_template_id_signup_admin',
     // ];
   }
 

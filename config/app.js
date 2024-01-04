@@ -13,6 +13,9 @@ module.exports = {
   // timezone
   timezone: getEnv(process.env.APP_TIMEZONE, '+08:00'),
 
+  // urls
+  webUrl: getEnv(process.env.WEB_URL, ''),
+
   // allowed app keys (this keys will be used to validate some endpoint)
   appKeys: [
     'rZ~3Je9>sdD*M8+QjCh}PmH2', // web key

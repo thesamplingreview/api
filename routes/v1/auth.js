@@ -1,6 +1,6 @@
 const express = require('express');
 const tokenInfoMiddleware = require('../../app/middlewares/tokenInfo');
-const appKeyCheckMiddleware = require('../../app/middlewares/appKeyCheck');
+// const appKeyCheckMiddleware = require('../../app/middlewares/appKeyCheck');
 const {
   AuthValidator,
   MyValidator,
@@ -50,13 +50,16 @@ router.put(
 );
 
 // password reset
-// NOTE: this API should called internally!!!
 router.post(
   '/password/reset-token',
-  appKeyCheckMiddleware(),
+  // appKeyCheckMiddleware(),
   PasswordValidator.resetTokenReq,
   PasswordController.resetToken,
 );
-router.post('/password/reset', PasswordValidator.resetPasswordReq, PasswordController.resetPassword);
+router.post(
+  '/password/reset',
+  PasswordValidator.resetPasswordReq,
+  PasswordController.resetPassword,
+);
 
 module.exports = router;

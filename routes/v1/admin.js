@@ -10,6 +10,7 @@ const {
   EnrolmentController,
   ProductController,
   ConfigController,
+  ReportController,
 } = require('../../app/controllers/admin');
 const {
   UserValidator,
@@ -90,5 +91,9 @@ router.delete('/products/:id', ProductController.remove);
 // config module
 router.get('/configs', ConfigController.get);
 router.put('/configs', ConfigValidator.saveReq, ConfigController.save);
+
+// report module
+router.get('/report/signup', ReportController.countSignup);
+router.get('/report/enrolments', ReportController.countEnrolments);
 
 module.exports = router;

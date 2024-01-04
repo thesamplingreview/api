@@ -18,6 +18,19 @@ class ConfigService extends BaseService {
     return whereQuery;
   }
 
+  async getKeys(keys) {
+    const results = await this.model.findAll({
+      where: {
+        key: keys,
+      },
+      raw: true,
+    });
+    return results.reduce((acc, data) => ({
+      ...acc,
+      [data.key]: data.value,
+    }), {});
+  }
+
   async save(input, options = {}) {
     let config = await this.model.findOne({
       where: { key: input.key },
