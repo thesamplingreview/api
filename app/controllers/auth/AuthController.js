@@ -2,9 +2,11 @@ const ApiController = require('../ApiController');
 const AuthService = require('../../services/AuthService');
 const JWTService = require('../../services/JWTService');
 const CustomerService = require('../../services/CustomerService');
+const ConfigService = require('../../services/ConfigService');
 const UserResource = require('../../resources/UserResource');
 const { sequelize } = require('../../models');
 const { ValidationFailed } = require('../../errors');
+const { sendMailUsingSendgridTmpl } = require('../../helpers/mailer');
 
 class AuthController extends ApiController {
   constructor() {
@@ -73,6 +75,39 @@ class AuthController extends ApiController {
       const result = await customerService.create(formData, { transaction: t });
 
       await t.commit();
+
+      // email notification
+      const configService = new ConfigService();
+      const {
+        sendgrid_template_id_signup_user: tmplUser,
+        // sendgrid_template_id_signup_admin: tmplAdmin,
+      } = await configService.getKeys([
+        'sendgrid_template_id_signup_user',
+        // 'sendgrid_template_id_signup_admin',
+      ]);
+      const tmplData = {
+        user_name: result.name,
+        user_email: result.email,
+      };
+      if (tmplUser) {
+        const formdata = {
+          to: result.email,
+          subject: 'Thank You for Interested in Sampling Programs',
+          templateId: tmplUser,
+          templateData: tmplData,
+        };
+        await sendMailUsingSendgridTmpl(formdata);
+      }
+      // if (tmplAdmin) {
+      //   const formdata = {
+      //     to: 'xxxx',
+      //     subject: 'New Sign Up',
+      //     templateId: tmplUser,
+      //     templateData: tmplData,
+      //   };
+      //   await sendMailUsingSendgridTmpl(formdata);
+      // }
+
       return this.responseJson(req, res, {
         data: new UserResource(result),
       });

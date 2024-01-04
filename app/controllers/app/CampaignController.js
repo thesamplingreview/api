@@ -6,9 +6,11 @@ const {
 const CampaignService = require('../../services/CampaignService');
 const EnrolmentService = require('../../services/EnrolmentService');
 const ReviewService = require('../../services/ReviewService');
+const ConfigService = require('../../services/ConfigService');
 const CampaignResource = require('../../resources/CampaignResource');
 const CampaignEnrolmentResource = require('../../resources/CampaignEnrolmentResource');
 const CampaignReviewResource = require('../../resources/CampaignReviewResource');
+const { sendMailUsingSendgridTmpl } = require('../../helpers/mailer');
 
 class CampaignController extends ApiController {
   constructor() {
@@ -114,6 +116,41 @@ class CampaignController extends ApiController {
       const result = await enrolmentService.create(formData, { transaction: t });
 
       t.commit();
+
+      // email notifications
+      const configService = new ConfigService();
+      const {
+        sendgrid_template_id_campaign_enrolled_user: tmplUser,
+        // sendgrid_template_id_campaign_enrolled_admin: tmplAdmin,
+      } = await configService.getKeys([
+        'sendgrid_template_id_campaign_enrolled_user',
+        // 'sendgrid_template_id_campaign_enrolled_admin',
+      ]);
+      const tmplData = {
+        enrolment_id: result.id,
+        campaign_name: req.campaign.name,
+        user_name: req.user.name,
+        user_email: req.user.email,
+      };
+      if (tmplUser) {
+        const formdata = {
+          to: req.user.email,
+          subject: 'Thank You for Interested in Sampling Programs',
+          templateId: tmplUser,
+          templateData: tmplData,
+        };
+        await sendMailUsingSendgridTmpl(formdata);
+      }
+      // if (tmplAdmin) {
+      //   const formdata = {
+      //     to: 'xxxxx',
+      //     subject: 'New Enrolment',
+      //     templateId: tmplUser,
+      //     templateData: tmplData,
+      //   };
+      //   await sendMailUsingSendgridTmpl(formdata);
+      // }
+
       return this.responseJson(req, res, {
         data: new CampaignEnrolmentResource(result),
       });
