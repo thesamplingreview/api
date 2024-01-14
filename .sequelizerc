@@ -1,6 +1,10 @@
-var path = require('path')
+var path = require('path');
+var env = require('dotenv');
+
+env.config();
 
 module.exports = {
+  'env': process.env.APP_ENV,
   'config': path.resolve('database', 'config.js'),
   'models-path': path.resolve('app', 'models'),
   'migrations-path': path.resolve('database', 'migrations'),
