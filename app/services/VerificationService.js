@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const BaseService = require('./BaseService');
+const config = require('../../config/app');
 const { VerificationToken } = require('../models');
 
 class VerificationService extends BaseService {
@@ -13,11 +14,18 @@ class VerificationService extends BaseService {
    * @return {string}
    */
   randomToken(length = 6) {
-    const characters = '0123456789';
     let otp = '';
-    for (let i = 0; i < length; i += 1) {
-      const index = Math.floor(Math.random() * characters.length);
-      otp += characters.charAt(index);
+    // force default token on dev environment
+    if (config.env !== 'production') {
+      for (let i = 0; i < length; i += 1) {
+        otp += '8';
+      }
+    } else {
+      const characters = '0123456789';
+      for (let i = 0; i < length; i += 1) {
+        const index = Math.floor(Math.random() * characters.length);
+        otp += characters.charAt(index);
+      }
     }
     return otp;
   }
