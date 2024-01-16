@@ -11,9 +11,9 @@ class CampaignReviewResource {
       const CampaignResource = require('./CampaignResource');
       relations.campaign = this.data.Campaign ? new CampaignResource(this.data.Campaign) : null;
     }
-    if (this.data.CreatedBy !== undefined) {
+    if (this.data.User !== undefined) {
       const UserResource = require('./UserResource');
-      relations.creator = this.data.CreatedBy ? new UserResource(this.data.CreatedBy) : null;
+      relations.creator = this.data.User ? new UserResource(this.data.User) : null;
     }
 
     return {

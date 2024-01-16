@@ -53,6 +53,7 @@ class CampaignController extends ApiController {
         attributes: {
           include: [
             [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id`)'), 'enrolmentsCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_reviews` AS `CampaignReviews` WHERE `CampaignReviews`.`campaign_id` = `Campaign`.`id`)'), 'reviewsCount'],
           ],
         },
         distinct: true,
