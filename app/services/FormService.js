@@ -87,9 +87,9 @@ class FormService extends BaseService {
    * @param  {object}  options - sequelize options
    * @return {model[]}
    */
-  async syncFormFields(form, newFields, oldFields, options = {}) {
+  async syncFormFields(form, newFields, oldFields, options) {
     // using oldFields to double check for fields under same form only, in order to prevent the case if passing another form's field_id
-    const promises = newFields.map((field, index) => {
+    const promises = newFields.map(async (field, index) => {
       let currField;
       if (field.id) {
         currField = oldFields.find((d) => d.id === field.id);
@@ -109,15 +109,14 @@ class FormService extends BaseService {
       currField.form_id = form.id;
       currField.pos = index;
 
-      return currField.save(options)
-        .then(async (result) => {
-          // sync formFieldOptions
-          if (result.type === 'select') {
-            const newOptions = await this.syncFormFieldOptions(result, field.options || [], options);
-            result.setDataValue('FormFieldOptions', newOptions);
-          }
-          return result;
-        });
+      const result = await currField.save(options);
+      // sync formFieldOptions
+      if (result.type === 'select') {
+        const newOptions = await this.syncFormFieldOptions(result, field.options || [], options);
+        result.setDataValue('FormFieldOptions', newOptions);
+      }
+
+      return result;
     });
     const results = await Promise.all(promises);
 
@@ -128,7 +127,8 @@ class FormService extends BaseService {
         id: { [Op.notIn]: newIds },
         form_id: form.id,
       },
-    }, options);
+      ...options,
+    });
 
     return results;
   }
@@ -177,7 +177,8 @@ class FormService extends BaseService {
         id: { [Op.notIn]: newIds },
         form_field_id: field.id,
       },
-    }, options);
+      ...options,
+    });
 
     return results;
   }
