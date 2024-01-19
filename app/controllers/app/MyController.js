@@ -27,6 +27,7 @@ class MyController extends ApiController {
           {
             model: CampaignReview,
             where: { created_by: req.user.id },
+            required: false,
           },
         ],
       };
