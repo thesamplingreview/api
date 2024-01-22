@@ -54,6 +54,9 @@ class FormController extends ApiController {
             model: FormField,
             include: [FormFieldOption],
           },
+          {
+            model: Campaign,
+          },
         ],
         order: [
           [FormField, 'pos', 'ASC'],

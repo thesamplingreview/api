@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const allOptions = require('../../config/options');
 const { getInput, toDate } = require('../helpers/utils');
 const { s3Upload, s3Remove } = require('../helpers/upload');
 const { ModelNotFound } = require('../errors');
@@ -298,6 +299,14 @@ class CampaignService extends BaseService {
           id: v,
           name: v,
           count: valuesCount[v] || 0,
+        }));
+      } else if (field.type === 'state') {
+        options = allOptions.states;
+        const valuesCount = genValuesCount(field.id);
+        optionsCounts = options.map((opt) => ({
+          id: opt.id,
+          name: opt.name,
+          count: valuesCount[opt.id] || 0,
         }));
       } else if (field.type === 'products') {
         options = campaign.Products?.reduce((acc, cur) => ({
