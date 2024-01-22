@@ -4,7 +4,7 @@ const { s3Upload, s3Remove } = require('../helpers/upload');
 const { ModelNotFound } = require('../errors');
 const BaseService = require('./BaseService');
 const {
-  Campaign, CampaignProduct, CampaignEnrolment, Form, FormField, Product,
+  Campaign, CampaignProduct, CampaignEnrolment, Form, FormField, FormFieldOption, Product,
 } = require('../models');
 
 class CampaignService extends BaseService {
@@ -254,7 +254,13 @@ class CampaignService extends BaseService {
       include: [
         { model: CampaignEnrolment },
         { model: Product },
-        { model: Form, include: [FormField] },
+        {
+          model: Form,
+          include: [{
+            model: FormField,
+            include: [FormFieldOption],
+          }],
+        },
       ],
     });
 
@@ -275,17 +281,18 @@ class CampaignService extends BaseService {
 
     // @tbc - allowed counts for certains types only
     const questions = campaign.Form?.FormFields.map((field) => {
+      let options = [];
       let optionsCounts = null;
       if (field.type === 'select') {
-        const options = field.options?.split('\n') || [];
+        options = field.FormFieldOptions || [];
         const valuesCount = genValuesCount(field.id);
-        optionsCounts = options.map((v) => ({
-          id: v,
-          name: v,
-          count: valuesCount[v] || 0,
+        optionsCounts = options.map((opt) => ({
+          id: opt.id,
+          name: opt.label,
+          count: valuesCount[opt.label] || 0,
         }));
       } else if (field.type === 'yes_no') {
-        const options = ['Yes', 'No'];
+        options = ['Yes', 'No'];
         const valuesCount = genValuesCount(field.id);
         optionsCounts = options.map((v) => ({
           id: v,
@@ -293,7 +300,7 @@ class CampaignService extends BaseService {
           count: valuesCount[v] || 0,
         }));
       } else if (field.type === 'products') {
-        const options = campaign.Products?.reduce((acc, cur) => ({
+        options = campaign.Products?.reduce((acc, cur) => ({
           ...acc,
           [cur.id]: cur.name,
         }), {});
@@ -309,8 +316,10 @@ class CampaignService extends BaseService {
       if (!optionsCounts) {
         return null;
       }
+      const { FormFieldOptions, ...attrs } = field.get({ plain: true });
       return {
-        ...field.get({ plain: true }),
+        ...attrs,
+        options,
         optionsCounts,
       };
     })
