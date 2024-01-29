@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
 const ApiController = require('../ApiController');
 const { genValidatorItem } = require('../../helpers/validator');
-const { verifyOTP } = require('../../helpers/sms');
+// const { verifyOTP } = require('../../helpers/sms');
 const { ValidationFailed } = require('../../errors');
 const { sequelize, VerificationToken } = require('../../models');
 const UserService = require('../../services/UserService');
-// const VerificationService = require('../../services/VerificationService');
+const VerificationService = require('../../services/VerificationService');
 const UserResource = require('../../resources/UserResource');
 
 class MyController extends ApiController {
@@ -98,16 +98,16 @@ class MyController extends ApiController {
     try {
       const user = await this.userService.findById(req.user.id);
 
-      // const verificationService = new VerificationService();
-      // const token = await verificationService.verifyToken(
-      //   VerificationToken.TYPES.PHONE,
-      //   req.body.contact,
-      //   req.body.code,
-      // );
-      const token = await verifyOTP({
-        to: req.body.contact,
-        code: req.body.code,
-      });
+      const verificationService = new VerificationService();
+      const token = await verificationService.verifyToken(
+        VerificationToken.TYPES.PHONE,
+        req.body.contact,
+        req.body.code,
+      );
+      // const token = await verifyOTP({
+      //   to: req.body.contact,
+      //   code: req.body.code,
+      // });
       if (!token) {
         throw new ValidationFailed(undefined, [
           genValidatorItem('Code not matched.', 'Code'),

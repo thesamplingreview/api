@@ -1,14 +1,14 @@
 const ApiController = require('../ApiController');
-// const VerificationService = require('../../services/VerificationService');
+const VerificationService = require('../../services/VerificationService');
 const { sequelize } = require('../../models');
-const { sendOTP } = require('../../helpers/sms');
+// const { sendOTP } = require('../../helpers/sms');
 const { debug } = require('../../../config/app');
 
 class VerificationController extends ApiController {
   constructor() {
     super();
 
-    // this.verificationService = new VerificationService();
+    this.verificationService = new VerificationService();
   }
 
   /**
@@ -22,10 +22,10 @@ class VerificationController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const result = await sendOTP({
-        to: formData.contact
-      });
-      // const result = await this.verificationService.sendOtp(formData);
+      // const result = await sendOTP({
+      //   to: formData.contact,
+      // });
+      const result = await this.verificationService.sendOtp(formData);
       await t.commit();
 
       return this.responseJson(req, res, {
