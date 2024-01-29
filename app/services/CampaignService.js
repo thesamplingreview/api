@@ -96,6 +96,7 @@ class CampaignService extends BaseService {
       end_date: toDate(input.end_date, null),
       vendor_id: input.vendor_id || null,
       form_id: input.form_id || null,
+      theme: input.theme || Campaign.THEMES.LIGHT,
       status: input.status || Campaign.STATUSES.DRAFT,
       pos: input.pos || 0,
     };
@@ -138,6 +139,7 @@ class CampaignService extends BaseService {
       end_date: input.end_date !== undefined ? toDate(input.end_date, null) : record.end_date,
       vendor_id: getInput(input.vendor_id, record.vendor_id),
       form_id: getInput(input.form_id, record.form_id),
+      theme: getInput(input.theme, record.theme),
       status: getInput(input.status, record.status),
       pos: getInput(input.pos, record.pos),
     };

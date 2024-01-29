@@ -72,6 +72,13 @@ const reviewTypeValidator = () => body('review_type')
     values: Object.values(Campaign.REVIEW_TYPES).toString(),
   }));
 
+const themeValidator = () => body('theme')
+  .isIn(Object.values(Campaign.THEMES)).bail()
+  .withMessage(validatorMessage('validation.in', {
+    field: 'Theme',
+    values: Object.values(Campaign.THEMES).toString(),
+  }));
+
 const reviewInstructionValidator = () => body('review_instruction');
 
 const reviewCtaValidator = () => body('review_cta');
@@ -188,6 +195,7 @@ exports.createReq = [
   reviewInstructionValidator().optional(),
   reviewCtaValidator().optional(),
   statusValidator().optional(),
+  themeValidator().optional(),
   posValidator().optional(),
 ];
 
@@ -217,6 +225,7 @@ exports.updateReq = [
   reviewInstructionValidator().optional(),
   reviewCtaValidator().optional(),
   statusValidator().optional(),
+  themeValidator().optional(),
   posValidator().optional(),
 ];
 

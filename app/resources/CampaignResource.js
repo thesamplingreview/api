@@ -68,6 +68,7 @@ class CampaignResource {
       status: this.data.status,
       state: this.generateStateAttr(this.data),
       highlight: this.data.highlight,
+      theme: this.data.theme,
       pos: this.data.pos,
       vendor_id: this.data.vendor_id,
       form_id: this.data.form_id,

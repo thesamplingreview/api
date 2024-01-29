@@ -94,6 +94,7 @@ class CampaignController extends ApiController {
       end_date: req.body.end_date,
       vendor_id: req.vendor?.id,
       form_id: req.form?.id,
+      theme: req.body.theme,
       status: req.body.status,
       pos: req.body.pos,
     };
@@ -140,6 +141,7 @@ class CampaignController extends ApiController {
       end_date: req.body.end_date,
       vendor_id: req.vendor?.id,
       form_id: req.form?.id,
+      theme: req.body.theme,
       status: req.body.status,
       pos: req.body.pos,
     };
@@ -212,6 +214,10 @@ class CampaignController extends ApiController {
         name: val.charAt(0).toUpperCase() + val.slice(1),
       })),
       review_types: Object.values(Campaign.REVIEW_TYPES).map((val) => ({
+        id: val,
+        name: val.charAt(0).toUpperCase() + val.slice(1),
+      })),
+      themes: Object.values(Campaign.THEMES).map((val) => ({
         id: val,
         name: val.charAt(0).toUpperCase() + val.slice(1),
       })),

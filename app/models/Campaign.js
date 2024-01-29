@@ -15,6 +15,11 @@ module.exports = (sequelize, DataTypes) => {
       REDIRECT: 'redirect',
     };
 
+    static THEMES = {
+      LIGHT: 'light',
+      DARK: 'dark',
+    };
+
     static associate(models) {
       this.belongsTo(models.Form, {
         foreignKey: 'form_id',
@@ -116,6 +121,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     highlight: {
       type: DataTypes.BOOLEAN,
+    },
+    theme: {
+      type: DataTypes.STRING,
     },
     status: {
       type: DataTypes.STRING,
