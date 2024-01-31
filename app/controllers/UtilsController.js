@@ -50,8 +50,8 @@ class UtilsController extends ApiController {
 
       await t.commit();
       return this.responseJson(req, res, {
-        // data: new AssetResource(result),
-        data: result,
+        data: new AssetResource(result),
+        // data: result,
       });
     } catch (err) {
       await t.rollback();

@@ -80,10 +80,12 @@ class AuthController extends ApiController {
       const configService = new ConfigService();
       const {
         sendgrid_template_id_signup_user: tmplUser,
-        // sendgrid_template_id_signup_admin: tmplAdmin,
+        sendgrid_template_id_signup_admin: tmplAdmin,
+        admin_emails,
       } = await configService.getKeys([
         'sendgrid_template_id_signup_user',
-        // 'sendgrid_template_id_signup_admin',
+        'sendgrid_template_id_signup_admin',
+        'admin_emails',
       ]);
       const tmplData = {
         user_name: result.name,
@@ -98,15 +100,16 @@ class AuthController extends ApiController {
         };
         await sendMailUsingSendgridTmpl(formdata);
       }
-      // if (tmplAdmin) {
-      //   const formdata = {
-      //     to: 'xxxx',
-      //     subject: 'New Sign Up',
-      //     templateId: tmplUser,
-      //     templateData: tmplData,
-      //   };
-      //   await sendMailUsingSendgridTmpl(formdata);
-      // }
+      const adminEmails = admin_emails?.split('\n').map((d) => d.trim());
+      if (tmplAdmin && adminEmails?.length) {
+        const formdata = {
+          to: adminEmails,
+          subject: 'New Sign Up',
+          templateId: tmplAdmin,
+          templateData: tmplData,
+        };
+        await sendMailUsingSendgridTmpl(formdata);
+      }
 
       return this.responseJson(req, res, {
         data: new UserResource(result),

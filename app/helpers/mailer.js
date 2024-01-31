@@ -5,7 +5,6 @@ client.setApiKey(sendgrid.apiKey);
 
 async function sendMail({
   to,
-  toName,
   from,
   fromName,
   subject,
@@ -13,15 +12,14 @@ async function sendMail({
   useHtml = false,
   throwErr = false,
 }) {
+  const receivers = Array.isArray(to) ? to : [to];
   const message = {
     personalizations: [
       {
-        to: [
-          {
-            email: to,
-            name: toName || to,
-          },
-        ],
+        to: receivers.map((v) => ({
+          email: v,
+          name: v,
+        })),
         subject,
       },
     ],
@@ -43,9 +41,10 @@ async function sendMail({
     // console.log(sent);
     return sent?.[0]?.statusCode === 202;
   } catch (err) {
+    const error = err?.response?.body?.errors?.[0];
+    console.log(err, error);
     if (throwErr) {
-      const error = err?.response?.body?.errors?.[0];
-      throw new Error(error.message || 'Unknown response from Sendgrid');
+      throw new Error(error?.message || 'Unknown response from Sendgrid');
     }
     return false;
   }
@@ -53,7 +52,6 @@ async function sendMail({
 
 async function sendMailUsingSendgridTmpl({
   to,
-  toName,
   from,
   fromName,
   subject,
@@ -61,15 +59,14 @@ async function sendMailUsingSendgridTmpl({
   templateData,
   throwErr = false,
 }) {
+  const receivers = Array.isArray(to) ? to : [to];
   const message = {
     personalizations: [
       {
-        to: [
-          {
-            email: to,
-            name: toName || to,
-          },
-        ],
+        to: receivers.map((v) => ({
+          email: v,
+          name: v,
+        })),
         subject,
         dynamic_template_data: templateData,
       },
@@ -85,12 +82,12 @@ async function sendMailUsingSendgridTmpl({
 
   try {
     const sent = await client.send(message);
-    // console.log(sent);
     return sent?.[0]?.statusCode === 202;
   } catch (err) {
+    const error = err?.response?.body?.errors?.[0];
+    console.log(err, error);
     if (throwErr) {
-      const error = err?.response?.body?.errors?.[0];
-      throw new Error(error.message || 'Unknown response from Sendgrid');
+      throw new Error(error?.message || 'Unknown response from Sendgrid');
     }
     return false;
   }

@@ -121,10 +121,12 @@ class CampaignController extends ApiController {
       const configService = new ConfigService();
       const {
         sendgrid_template_id_campaign_enrolled_user: tmplUser,
-        // sendgrid_template_id_campaign_enrolled_admin: tmplAdmin,
+        sendgrid_template_id_campaign_enrolled_admin: tmplAdmin,
+        admin_emails,
       } = await configService.getKeys([
         'sendgrid_template_id_campaign_enrolled_user',
-        // 'sendgrid_template_id_campaign_enrolled_admin',
+        'sendgrid_template_id_campaign_enrolled_admin',
+        'admin_emails',
       ]);
       const tmplData = {
         enrolment_id: result.id,
@@ -141,15 +143,16 @@ class CampaignController extends ApiController {
         };
         await sendMailUsingSendgridTmpl(formdata);
       }
-      // if (tmplAdmin) {
-      //   const formdata = {
-      //     to: 'xxxxx',
-      //     subject: 'New Enrolment',
-      //     templateId: tmplUser,
-      //     templateData: tmplData,
-      //   };
-      //   await sendMailUsingSendgridTmpl(formdata);
-      // }
+      const adminEmails = admin_emails?.split('\n').map((d) => d.trim());
+      if (tmplAdmin && adminEmails?.length) {
+        const formdata = {
+          to: adminEmails,
+          subject: 'New Enrolment',
+          templateId: tmplAdmin,
+          templateData: tmplData,
+        };
+        await sendMailUsingSendgridTmpl(formdata);
+      }
 
       return this.responseJson(req, res, {
         data: new CampaignEnrolmentResource(result),

@@ -18,6 +18,7 @@ const userCheck = (role = '') => {
         if (user) {
           userObj = {
             id: user.id,
+            name: user.name,
             email: user.email,
             role_id: user.role_id,
             role_code: user.UserRole.code,
@@ -30,6 +31,7 @@ const userCheck = (role = '') => {
           userObj = {
             id: user.id,
             email: user.email,
+            name: user.name,
           };
         }
       }
