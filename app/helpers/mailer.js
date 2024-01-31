@@ -42,6 +42,7 @@ async function sendMail({
     // console.log(sent);
     return sent?.[0]?.statusCode === 202;
   } catch (err) {
+    console.log(err);
     return false;
   }
 }
@@ -82,6 +83,7 @@ async function sendMailUsingSendgridTmpl({
     // console.log(sent);
     return sent?.[0]?.statusCode === 202;
   } catch (err) {
+    console.log(err);
     return false;
   }
 }

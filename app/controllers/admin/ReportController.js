@@ -33,7 +33,7 @@ class ReportController extends ApiController {
         [fn('DATE', literal('created_at')), 'day'],
         [fn('COUNT', col('User.id')), 'count'],
       ],
-      group: [literal('day')],
+      group: ['day'],
       subQuery: false,
       raw: true,
     });
@@ -64,7 +64,7 @@ class ReportController extends ApiController {
         [fn('DATE', literal('created_at')), 'day'],
         [fn('COUNT', col('id')), 'count'],
       ],
-      group: [literal('day')],
+      group: ['day'],
       raw: true,
     });
 
