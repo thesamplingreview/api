@@ -59,30 +59,24 @@ class UtilsController extends ApiController {
     }
   }
 
-  // async sendEmailTest(req, res) {
-  //   const formdata = {
-  //     to: req.body.to,
-  //     subject: req.body.subject,
-  //     // content: req.body.content,
-  //     // useHtml: true,
-  //     templateId: 'd-cd21d61c7aa1401f9a17a4f18f4616bf',
-  //     templateData: {
-  //       name: 'My Name',
-  //       cta_link: 'https://qutebox.com',
-  //     },
-  //   };
+  async sendTestEmail(req, res) {
+    const formdata = {
+      to: req.body.to,
+      subject: '[TEST] Email Testing',
+      templateId: req.body.template_id,
+      throwErr: true,
+    };
 
-  //   try {
-  //     // const result = await sendMail(formdata);
-  //     const result = await sendMailUsingSendgridTmpl(formdata);
+    try {
+      const result = await sendMailUsingSendgridTmpl(formdata);
 
-  //     return this.responseJson(req, res, {
-  //       data: result,
-  //     });
-  //   } catch (err) {
-  //     return this.responseError(req, res, err);
-  //   }
-  // }
+      return this.responseJson(req, res, {
+        data: result,
+      });
+    } catch (err) {
+      return this.responseError(req, res, err);
+    }
+  }
 }
 
 module.exports = UtilsController;

@@ -1,4 +1,4 @@
-const { getEnv } = require('../app/helpers/utils');
+const { getEnv } = require('./utils');
 
 module.exports = {
   host: getEnv(process.env.MAIL_HOST),

@@ -1,4 +1,4 @@
-const { getEnv } = require('../app/helpers/utils');
+const { getEnv } = require('./utils');
 
 module.exports = {
   secret: getEnv(process.env.JWT_SECRET, 'my_secret_key'),

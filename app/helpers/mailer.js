@@ -11,6 +11,7 @@ async function sendMail({
   subject,
   content,
   useHtml = false,
+  throwErr = false,
 }) {
   const message = {
     personalizations: [
@@ -42,7 +43,10 @@ async function sendMail({
     // console.log(sent);
     return sent?.[0]?.statusCode === 202;
   } catch (err) {
-    console.log(err);
+    if (throwErr) {
+      const error = err?.response?.body?.errors?.[0];
+      throw new Error(error.message || 'Unknown response from Sendgrid');
+    }
     return false;
   }
 }
@@ -55,6 +59,7 @@ async function sendMailUsingSendgridTmpl({
   subject,
   templateId,
   templateData,
+  throwErr = false,
 }) {
   const message = {
     personalizations: [
@@ -83,7 +88,10 @@ async function sendMailUsingSendgridTmpl({
     // console.log(sent);
     return sent?.[0]?.statusCode === 202;
   } catch (err) {
-    console.log(err);
+    if (throwErr) {
+      const error = err?.response?.body?.errors?.[0];
+      throw new Error(error.message || 'Unknown response from Sendgrid');
+    }
     return false;
   }
 }

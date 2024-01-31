@@ -25,9 +25,10 @@ router.post(
   utilsController.uploadAsset.bind(utilsController),
 );
 
-// router.post(
-//   '/send-email-test',
-//   utilsController.sendEmailTest.bind(utilsController),
-// );
+router.post(
+  '/test-email',
+  appKeyCheckMiddleware(),
+  utilsController.sendTestEmail.bind(utilsController),
+);
 
 module.exports = router;

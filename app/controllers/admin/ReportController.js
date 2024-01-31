@@ -1,6 +1,7 @@
 const {
   Op, literal, fn, col,
 } = require('sequelize');
+const { startOfDay, endOfDay } = require('date-fns');
 const { toDate } = require('../../helpers/utils');
 const ApiController = require('../ApiController');
 const {
@@ -78,17 +79,17 @@ class ReportController extends ApiController {
     const toDt = toDate(to);
     if (fromDt && toDt) {
       return {
-        [Op.between]: [fromDt, toDt],
+        [Op.between]: [startOfDay(fromDt), endOfDay(toDt)],
       };
     }
     if (fromDt) {
       return {
-        [Op.gte]: fromDt,
+        [Op.gte]: startOfDay(fromDt),
       };
     }
     if (toDt) {
       return {
-        [Op.lte]: toDt,
+        [Op.lte]: endOfDay(toDt),
       };
     }
     return {};
