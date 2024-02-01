@@ -23,7 +23,6 @@ const fieldsValidator = ({ optional = false } = {}) => {
     bodyChain,
     body(`${fieldName}.*.name`)
       .trim()
-      .escape()
       .notEmpty().bail()
       .withMessage(validatorMessage('validation.required', 'field.name')),
     body(`${fieldName}.*.type`)
