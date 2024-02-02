@@ -41,15 +41,18 @@ module.exports = (sequelize, DataTypes) => {
     hint: {
       type: DataTypes.STRING,
     },
-    options: {
-      type: DataTypes.STRING,
-    },
     config: {
       type: DataTypes.JSON,
     },
     mandatory: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    use_logic: {
+      type: DataTypes.BOOLEAN,
+    },
+    logic: {
+      type: DataTypes.JSON,
     },
     pos: {
       type: DataTypes.INTEGER,

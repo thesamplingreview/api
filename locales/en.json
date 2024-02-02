@@ -13,6 +13,7 @@
 		"file_size": "{{field}} can not larger than {{maxSize}}",
 		"array": "{{field}} must be an array",
 		"json": "{{field}} must be a JSON object",
+        "object": "{{field}} must be a valid object",
 		"date": "{{field}} must be a valid date",
 		"slug": "{{field}} must be valid slug string",
 		"alphanumeric": "{{field}} must be alpha-numeric string"

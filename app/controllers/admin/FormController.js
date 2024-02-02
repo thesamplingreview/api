@@ -106,7 +106,7 @@ class FormController extends ApiController {
     const formData = {
       name: req.body.name,
       description: req.body.description,
-      cover: req.body.cover,
+      // cover: req.body.cover,
     };
 
     // DB update

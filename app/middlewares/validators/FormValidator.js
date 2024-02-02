@@ -49,15 +49,8 @@ const fieldsValidator = ({ optional = false } = {}) => {
       })
       .optional(),
     body(`${fieldName}.*.config`)
-      .isJSON().bail()
-      .withMessage(validatorMessage('validation.json', 'field.config'))
-      .customSanitizer((value) => {
-        try {
-          return value ? JSON.parse(value) : null;
-        } catch (err) {
-          return null;
-        }
-      })
+      .isObject().bail()
+      .withMessage(validatorMessage('validation.object', 'field.config'))
       .optional({ values: 'falsy' }),
     body(`${fieldName}.*.id`)
       .toInt(),
@@ -65,6 +58,12 @@ const fieldsValidator = ({ optional = false } = {}) => {
       .toBoolean(),
     body(`${fieldName}.*.status`)
       .toBoolean(),
+    body(`${fieldName}.*.use_logic`)
+      .toBoolean(),
+    body(`${fieldName}.*.logic`)
+      .isArray().bail()
+      .withMessage(validatorMessage('validation.array', 'field.logic'))
+      .optional({ values: 'falsy' }),
   ];
 };
 

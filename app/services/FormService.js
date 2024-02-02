@@ -104,7 +104,15 @@ class FormService extends BaseService {
       currField.placeholder = field.placeholder || null;
       currField.config = field.config || null;
       currField.mandatory = field.mandatory || false;
-      // currField.options = field.options || null;
+      // logic save
+      if (field.use_logic && Array.isArray(field.logic)) {
+        const newLogic = field.logic.filter((d) => d.field && d.value);
+        currField.use_logic = newLogic.length > 0;
+        currField.logic = newLogic.length > 0 ? newLogic : null;
+      } else {
+        currField.use_logic = false;
+        currField.logic = null;
+      }
       currField.status = field.status || false;
       currField.form_id = form.id;
       currField.pos = index;
