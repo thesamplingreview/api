@@ -1,12 +1,14 @@
-const { twilio } = require('../../config/providers');
-const client = require('twilio')(twilio.sid, twilio.token);
+const twilio = require('twilio');
+const { twilio: twilioConfig } = require('../../config/providers');
+
+const client = twilio(twilioConfig.sid, twilioConfig.token);
 
 /**
  * OTP service was relying on Twilio service
  */
 async function sendOTP({ to }) {
   try {
-    const response = await client.verify.v2.services(twilio.verifySid)
+    const response = await client.verify.v2.services(twilioConfig.verifySid)
       .verifications
       .create({
         to,
@@ -21,7 +23,7 @@ async function sendOTP({ to }) {
 
 async function verifyOTP({ to, code }) {
   try {
-    const response = await client.verify.v2.services(twilio.verifySid)
+    const response = await client.verify.v2.services(twilioConfig.verifySid)
       .verificationChecks
       .create({
         to,

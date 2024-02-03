@@ -6,7 +6,7 @@ const ConfigService = require('../../services/ConfigService');
 const UserResource = require('../../resources/UserResource');
 const { sequelize } = require('../../models');
 const { ValidationFailed } = require('../../errors');
-const { sendMailUsingSendgridTmpl } = require('../../helpers/mailer');
+const { sendMailUsingTmpl } = require('../../helpers/mailer');
 
 class AuthController extends ApiController {
   constructor() {
@@ -98,7 +98,7 @@ class AuthController extends ApiController {
           templateId: tmplUser,
           templateData: tmplData,
         };
-        await sendMailUsingSendgridTmpl(formdata);
+        await sendMailUsingTmpl(formdata);
       }
       const adminEmails = admin_emails?.split('\n').map((d) => d.trim());
       if (tmplAdmin && adminEmails?.length) {
@@ -108,7 +108,7 @@ class AuthController extends ApiController {
           templateId: tmplAdmin,
           templateData: tmplData,
         };
-        await sendMailUsingSendgridTmpl(formdata);
+        await sendMailUsingTmpl(formdata);
       }
 
       return this.responseJson(req, res, {

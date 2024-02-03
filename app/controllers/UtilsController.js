@@ -2,7 +2,8 @@ const ApiController = require('./ApiController');
 const { sequelize } = require('../models');
 const AssetService = require('../services/AssetService');
 const AssetResource = require('../resources/AssetResource');
-const { sendMail, sendMailUsingSendgridTmpl } = require('../helpers/mailer');
+const { sendMail, sendMailUsingTmpl } = require('../helpers/mailer');
+const { sendOTP } = require('../helpers/sms');
 
 class UtilsController extends ApiController {
   /**
@@ -63,12 +64,40 @@ class UtilsController extends ApiController {
     const formdata = {
       to: req.body.to,
       subject: '[TEST] Email Testing',
-      templateId: req.body.template_id,
       throwErr: true,
+    };
+    if (req.body.use_content) {
+      formdata.type = 'content';
+      formdata.content = 'This is test message';
+      formdata.useHtml = true;
+    } else {
+      formdata.type = 'tmpl';
+      formdata.templateId = 'req.body.template_id';
+      formdata.templateData = {
+        user_name: 'TEST',
+        user_email: 'test@email.com',
+        cta_link: 'https://qutebox.com',
+      };
+    }
+
+    try {
+      const result = formdata.type === 'content' ? await sendMail(formdata) : await sendMailUsingTmpl(formdata);
+
+      return this.responseJson(req, res, {
+        data: result,
+      });
+    } catch (err) {
+      return this.responseError(req, res, err);
+    }
+  }
+
+  async sendTestOtp(req, res) {
+    const formdata = {
+      to: req.body.to,
     };
 
     try {
-      const result = await sendMailUsingSendgridTmpl(formdata);
+      const result = await sendOTP(formdata);
 
       return this.responseJson(req, res, {
         data: result,

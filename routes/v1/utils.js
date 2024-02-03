@@ -31,4 +31,10 @@ router.post(
   utilsController.sendTestEmail.bind(utilsController),
 );
 
+router.post(
+  '/test-otp',
+  appKeyCheckMiddleware(),
+  utilsController.sendTestOtp.bind(utilsController),
+);
+
 module.exports = router;

@@ -10,7 +10,7 @@ const ConfigService = require('../../services/ConfigService');
 const CampaignResource = require('../../resources/CampaignResource');
 const CampaignEnrolmentResource = require('../../resources/CampaignEnrolmentResource');
 const CampaignReviewResource = require('../../resources/CampaignReviewResource');
-const { sendMailUsingSendgridTmpl } = require('../../helpers/mailer');
+const { sendMailUsingTmpl } = require('../../helpers/mailer');
 
 class CampaignController extends ApiController {
   constructor() {
@@ -141,7 +141,7 @@ class CampaignController extends ApiController {
           templateId: tmplUser,
           templateData: tmplData,
         };
-        await sendMailUsingSendgridTmpl(formdata);
+        await sendMailUsingTmpl(formdata);
       }
       const adminEmails = admin_emails?.split('\n').map((d) => d.trim());
       if (tmplAdmin && adminEmails?.length) {
@@ -151,7 +151,7 @@ class CampaignController extends ApiController {
           templateId: tmplAdmin,
           templateData: tmplData,
         };
-        await sendMailUsingSendgridTmpl(formdata);
+        await sendMailUsingTmpl(formdata);
       }
 
       return this.responseJson(req, res, {

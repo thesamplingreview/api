@@ -16,6 +16,13 @@ module.exports = {
     fromEmail: getEnv(process.env.MAIL_FROM_EMAIL),
   },
 
+  // mailersend mailer
+  mailersend: {
+    apiToken: getEnv(process.env.MAILERSEND_API_TOKEN),
+    fromName: getEnv(process.env.MAIL_FROM_NAME),
+    fromEmail: getEnv(process.env.MAIL_FROM_EMAIL),
+  },
+
   // twilio SMS
   twilio: {
     sid: getEnv(process.env.TWILIO_ACCOUNT_SID),

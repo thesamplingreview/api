@@ -5,7 +5,7 @@ const { ValidationFailed } = require('../../errors');
 const appConfig = require('../../../config/app');
 const UserService = require('../../services/UserService');
 const ConfigService = require('../../services/ConfigService');
-const { sendMailUsingSendgridTmpl } = require('../../helpers/mailer');
+const { sendMailUsingTmpl } = require('../../helpers/mailer');
 
 class PasswordController extends ApiController {
   /**
@@ -44,7 +44,7 @@ class PasswordController extends ApiController {
             reset_link: `${appConfig.webUrl}/reset-password/${reset.token}?email=${encodeURIComponent(req.body.email)}`,
           },
         };
-        await sendMailUsingSendgridTmpl(formdata);
+        await sendMailUsingTmpl(formdata);
       }
 
       return this.responseJson(req, res, {

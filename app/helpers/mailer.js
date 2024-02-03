@@ -1,7 +1,14 @@
-const client = require('@sendgrid/mail');
-const { sendgrid } = require('../../config/providers');
+const {
+  MailerSend,
+  EmailParams,
+  Sender,
+  Recipient,
+} = require('mailersend');
+const { mailersend: mailersendConfig } = require('../../config/providers');
 
-client.setApiKey(sendgrid.apiKey);
+const client = new MailerSend({
+  apiKey: mailersendConfig.apiToken,
+});
 
 async function sendMail({
   to,
@@ -12,45 +19,37 @@ async function sendMail({
   useHtml = false,
   throwErr = false,
 }) {
+  const sentFrom = new Sender(
+    from || mailersendConfig.fromEmail,
+    fromName || mailersendConfig.fromName,
+  );
   const receivers = Array.isArray(to) ? to : [to];
-  const message = {
-    personalizations: [
-      {
-        to: receivers.map((v) => ({
-          email: v,
-          name: v,
-        })),
-        subject,
-      },
-    ],
-    from: {
-      email: from || sendgrid.fromEmail,
-      name: fromName || sendgrid.fromName,
-    },
-    subject,
-    content: [
-      {
-        type: useHtml ? 'text/html' : 'text/plain',
-        value: content,
-      },
-    ],
-  };
+  const sentTo = receivers.map((v) => new Recipient(v, v));
+
+  const emailParams = new EmailParams()
+    .setFrom(sentFrom)
+    .setTo(sentTo)
+    .setSubject(subject);
+  if (useHtml) {
+    emailParams.setHtml(content);
+  } else {
+    emailParams.setText(content);
+  }
 
   try {
-    const sent = await client.send(message);
-    // console.log(sent);
-    return sent?.[0]?.statusCode === 202;
+    const response = await client.email.send(emailParams);
+    return response.statusCode === 202;
   } catch (err) {
-    const error = err?.response?.body?.errors?.[0];
-    console.log(err, error);
+    console.log(err);
     if (throwErr) {
-      throw new Error(error?.message || 'Unknown response from Sendgrid');
+      const errMsg = err.body?.message;
+      throw new Error(errMsg || 'Unknown response from MailersSend');
     }
     return false;
   }
 }
 
-async function sendMailUsingSendgridTmpl({
+async function sendMailUsingTmpl({
   to,
   from,
   fromName,
@@ -59,35 +58,32 @@ async function sendMailUsingSendgridTmpl({
   templateData,
   throwErr = false,
 }) {
+  const sentFrom = new Sender(
+    from || mailersendConfig.fromEmail,
+    fromName || mailersendConfig.fromName,
+  );
   const receivers = Array.isArray(to) ? to : [to];
-  const message = {
-    personalizations: [
-      {
-        to: receivers.map((v) => ({
-          email: v,
-          name: v,
-        })),
-        subject,
-        dynamic_template_data: templateData,
-      },
-    ],
-    from: {
-      email: from || sendgrid.fromEmail,
-      name: fromName || sendgrid.fromName,
-    },
-    subject,
-    content: [],
-    template_id: templateId,
-  };
+  const sentTo = receivers.map((v) => new Recipient(v, v));
+  const personalization = receivers.map((v) => ({
+    email: v,
+    data: templateData,
+  }));
+
+  const emailParams = new EmailParams()
+    .setFrom(sentFrom)
+    .setTo(sentTo)
+    .setPersonalization(personalization)
+    .setSubject(subject)
+    .setTemplateId(templateId);
 
   try {
-    const sent = await client.send(message);
-    return sent?.[0]?.statusCode === 202;
+    const response = await client.email.send(emailParams);
+    return response.statusCode === 202;
   } catch (err) {
-    const error = err?.response?.body?.errors?.[0];
-    console.log(err, error);
+    console.log(err);
     if (throwErr) {
-      throw new Error(error?.message || 'Unknown response from Sendgrid');
+      const errMsg = err.body?.message;
+      throw new Error(errMsg || 'Unknown response from MailersSend');
     }
     return false;
   }
@@ -96,5 +92,5 @@ async function sendMailUsingSendgridTmpl({
 module.exports = {
   client,
   sendMail,
-  sendMailUsingSendgridTmpl,
+  sendMailUsingTmpl,
 };
