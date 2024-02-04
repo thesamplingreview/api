@@ -1,42 +1,39 @@
-const twilio = require('twilio');
-const { twilio: twilioConfig } = require('../../config/providers');
+const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
+const { aws: awsConfig } = require('../../config/providers');
 
-const client = twilio(twilioConfig.sid, twilioConfig.token);
+const client = new SNSClient({
+  credentials: {
+    accessKeyId: awsConfig.accessId,
+    secretAccessKey: awsConfig.secretKey,
+  },
+  region: awsConfig.region,
+});
 
 /**
- * OTP service was relying on Twilio service
+ * SMS service was relying on AWS SNS service
  */
-async function sendOTP({ to }) {
+async function sendSMS({
+  to,
+  message,
+  throwErr = false,
+}) {
   try {
-    const response = await client.verify.v2.services(twilioConfig.verifySid)
-      .verifications
-      .create({
-        to,
-        channel: 'sms',
-      });
-
-    return Boolean(response?.sid);
+    const response = await client.send(
+      new PublishCommand({
+        PhoneNumber: to,
+        Message: message,
+      }),
+    );
+    return Boolean(response?.MessageId);
   } catch (err) {
-    return false;
-  }
-}
-
-async function verifyOTP({ to, code }) {
-  try {
-    const response = await client.verify.v2.services(twilioConfig.verifySid)
-      .verificationChecks
-      .create({
-        to,
-        code,
-      });
-    return Boolean(response.status);
-  } catch (err) {
+    if (throwErr) {
+      throw err;
+    }
     return false;
   }
 }
 
 module.exports = {
   client,
-  sendOTP,
-  verifyOTP,
+  sendSMS,
 };

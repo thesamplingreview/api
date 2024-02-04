@@ -3,7 +3,7 @@ const { sequelize } = require('../models');
 const AssetService = require('../services/AssetService');
 const AssetResource = require('../resources/AssetResource');
 const { sendMail, sendMailUsingTmpl } = require('../helpers/mailer');
-const { sendOTP } = require('../helpers/sms');
+const { sendSMS } = require('../helpers/sms');
 
 class UtilsController extends ApiController {
   /**
@@ -91,13 +91,15 @@ class UtilsController extends ApiController {
     }
   }
 
-  async sendTestOtp(req, res) {
+  async sendTestSMS(req, res) {
     const formdata = {
       to: req.body.to,
+      message: 'This is SMS Test Message',
+      throwErr: true,
     };
 
     try {
-      const result = await sendOTP(formdata);
+      const result = await sendSMS(formdata);
 
       return this.responseJson(req, res, {
         data: result,

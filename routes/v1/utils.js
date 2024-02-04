@@ -32,9 +32,9 @@ router.post(
 );
 
 router.post(
-  '/test-otp',
+  '/test-sms',
   appKeyCheckMiddleware(),
-  utilsController.sendTestOtp.bind(utilsController),
+  utilsController.sendTestSMS.bind(utilsController),
 );
 
 module.exports = router;

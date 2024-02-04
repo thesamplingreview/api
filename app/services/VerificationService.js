@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const BaseService = require('./BaseService');
 const config = require('../../config/app');
 const { VerificationToken } = require('../models');
+const { sendSMS } = require('../helpers/sms');
 
 class VerificationService extends BaseService {
   constructor() {
@@ -15,17 +16,10 @@ class VerificationService extends BaseService {
    */
   randomToken(length = 6) {
     let otp = '';
-    // force default token on dev environment
-    if (config.env !== 'production') {
-      for (let i = 0; i < length; i += 1) {
-        otp += '8';
-      }
-    } else {
-      const characters = '0123456789';
-      for (let i = 0; i < length; i += 1) {
-        const index = Math.floor(Math.random() * characters.length);
-        otp += characters.charAt(index);
-      }
+    const characters = '0123456789';
+    for (let i = 0; i < length; i += 1) {
+      const index = Math.floor(Math.random() * characters.length);
+      otp += characters.charAt(index);
     }
     return otp;
   }
@@ -59,7 +53,7 @@ class VerificationService extends BaseService {
    * @return {object}
    */
   async sendOtp(input) {
-    const code = this.randomToken();
+    const code = config.env === 'production' ? this.randomToken() : '888888';
     const expiry = Math.floor(Date.now() / 1000) + (60 * 60 * 2);
 
     let token = await this.model.findOne({
@@ -74,10 +68,16 @@ class VerificationService extends BaseService {
     token.token = code;
     token.created_at = new Date();
     token.expired_at = new Date(expiry * 1000);
-
-    // send OTP using?
-
     const result = await token.save();
+
+    // send OTP through SMS (production only)
+    if (config.env === 'production') {
+      await sendSMS({
+        to: input.contact,
+        message: `Your [SamplingReview] verification code is: ${code}`,
+      });
+    }
+
     return result;
   }
 }

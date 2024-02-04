@@ -4,7 +4,7 @@ const formidable = require('formidable');
 const imageSize = require('image-size');
 // const { Upload } = require('@aws-sdk/lib-storage');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
-const { s3 } = require('../../config/providers');
+const { aws: awsConfig } = require('../../config/providers');
 const { S3UploadError, BadRequest } = require('../errors');
 
 /**
@@ -12,10 +12,10 @@ const { S3UploadError, BadRequest } = require('../errors');
  */
 const s3Client = new S3Client({
   credentials: {
-    accessKeyId: s3.accessId,
-    secretAccessKey: s3.secretKey,
+    accessKeyId: awsConfig.accessId,
+    secretAccessKey: awsConfig.secretKey,
   },
-  region: s3.region,
+  region: awsConfig.region,
 });
 
 /**
@@ -120,7 +120,7 @@ function validatorFileCheck({ field, maxFileSize, mimeTypes }) {
  * Get s3 URL
  */
 function s3PublicUrl(key) {
-  return `https://${s3.bucket}.s3.${s3.region}.amazonaws.com/${key}`;
+  return `https://${awsConfig.bucket}.s3.${awsConfig.region}.amazonaws.com/${key}`;
 }
 
 /**
@@ -137,7 +137,7 @@ async function s3Remove(s3Url) {
     const url = new URL(s3Url);
     const s3Key = url.pathname.substring(1);
     const deleteCommand = new DeleteObjectCommand({
-      Bucket: s3.bucket,
+      Bucket: awsConfig.bucket,
       Key: s3Key,
     });
     await s3Client.send(deleteCommand);
@@ -162,7 +162,7 @@ async function s3Upload(file, dir = '', options = {}) {
     const s3Key = `${dir}/${file.newFilename}`;
     const putCommand = new PutObjectCommand({
       ACL: 'public-read',
-      Bucket: s3.bucket,
+      Bucket: awsConfig.bucket,
       Key: s3Key,
       Body: fs.readFileSync(file.filepath),
       ContentType: file.mimetype,
@@ -187,7 +187,7 @@ async function s3Upload(file, dir = '', options = {}) {
 //       client: s3Client,
 //       params: {
 //         ACL: 'public-read',
-//         Bucket: s3.bucket,
+//         Bucket: awsConfig.bucket,
 //         Key: `${dir}/${file.newFilename}`,
 //         Body: fs.readFileSync(file.filepath),
 //         ContentType: file.mimetype,
