@@ -72,7 +72,7 @@ class UtilsController extends ApiController {
       formdata.useHtml = true;
     } else {
       formdata.type = 'tmpl';
-      formdata.templateId = 'req.body.template_id';
+      formdata.templateId = req.body.template_id;
       formdata.templateData = {
         user_name: 'TEST',
         user_email: 'test@email.com',
