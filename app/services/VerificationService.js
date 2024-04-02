@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const BaseService = require('./BaseService');
 const config = require('../../config/app');
 const { VerificationToken } = require('../models');
+const { consoleLog } = require('../helpers/logger');
 const { sendSMS } = require('../helpers/sms');
 
 class VerificationService extends BaseService {
@@ -55,6 +56,9 @@ class VerificationService extends BaseService {
   async sendOtp(input) {
     const code = config.env === 'production' ? this.randomToken() : '888888';
     const expiry = Math.floor(Date.now() / 1000) + (60 * 60 * 2);
+
+    // debug log
+    consoleLog(`Preparing send OTP to ${input.contact}...`);
 
     let token = await this.model.findOne({
       where: { token_value: input.contact },

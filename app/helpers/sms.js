@@ -1,4 +1,5 @@
 const { SNSClient, PublishCommand } = require('@aws-sdk/client-sns');
+const { consoleLog } = require('./logger');
 const { aws: awsConfig } = require('../../config/providers');
 
 const client = new SNSClient({
@@ -18,6 +19,8 @@ async function sendSMS({
   throwErr = false,
 }) {
   try {
+    // debug log
+    consoleLog(`Send SMS to ${to}...`);
     const response = await client.send(
       new PublishCommand({
         PhoneNumber: to,
@@ -29,6 +32,8 @@ async function sendSMS({
     if (throwErr) {
       throw err;
     }
+    // debug log
+    consoleLog('Failed to send SMS...', err);
     return false;
   }
 }
