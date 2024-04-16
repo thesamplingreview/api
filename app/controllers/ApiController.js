@@ -13,7 +13,7 @@ class ApiController {
    */
   getPaginate(req) {
     let page = 1;
-    let perPage = 10;
+    let perPage = 20;
 
     if (req.query.page) {
       page = Math.max(Number(req.query.page), 1);
