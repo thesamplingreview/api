@@ -23,6 +23,7 @@ class UserController extends ApiController {
     try {
       const query = {
         where: this.adminService.genWhereQuery(req),
+        order: this.adminService.genOrdering(req),
         include: [UserRole],
       };
       const { page, perPage } = this.getPaginate(req);

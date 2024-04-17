@@ -19,6 +19,12 @@ class AdminService extends BaseService {
     return whereQuery;
   }
 
+  genOrdering(req) {
+    // currently only support single column ordering
+    const sort = super.getSortMeta(req);
+    return sort ? [sort] : [['id', 'ASC']];
+  }
+
   async create(input) {
     const formData = {
       email: input.email,

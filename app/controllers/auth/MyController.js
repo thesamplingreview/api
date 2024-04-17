@@ -37,7 +37,7 @@ class MyController extends ApiController {
     // validated
     const formData = {
       name: req.body.name,
-      password: req.body.password,
+      // password: req.body.password,
       contact: req.body.contact,
     };
 
