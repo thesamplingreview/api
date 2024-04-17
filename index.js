@@ -29,6 +29,9 @@ app.get('/ping', (req, res) => {
 // API routes
 app.use('/v1', require('./routes/v1/index'));
 
+// API docs
+app.use('/docs', require('./routes/docs'));
+
 // 404 routes
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' });

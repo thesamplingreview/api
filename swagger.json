@@ -1,0 +1,3398 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "SamplingReview",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://{{domain}}"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer"
+            },
+            "noauthAuth": {
+                "type": "http",
+                "scheme": "noauth"
+            }
+        }
+    },
+    "security": [
+        {
+            "bearerAuth": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Admin"
+        },
+        {
+            "name": "Admin > admins"
+        },
+        {
+            "name": "Admin > users"
+        },
+        {
+            "name": "Admin > vendors"
+        },
+        {
+            "name": "Admin > forms"
+        },
+        {
+            "name": "Admin > campaigns"
+        },
+        {
+            "name": "Admin > products"
+        },
+        {
+            "name": "Admin > enrolments"
+        },
+        {
+            "name": "Admin > reviews"
+        },
+        {
+            "name": "Admin > configs"
+        },
+        {
+            "name": "Admin > report"
+        },
+        {
+            "name": "Auth"
+        },
+        {
+            "name": "App"
+        },
+        {
+            "name": "App > campaigns"
+        },
+        {
+            "name": "App > my"
+        },
+        {
+            "name": "Utils"
+        }
+    ],
+    "paths": {
+        "/v1/admin/admins": {
+            "get": {
+                "tags": [
+                    "Admin > admins"
+                ],
+                "summary": "All",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "name"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Admin > admins"
+                ],
+                "summary": "Create",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "required|unique",
+                                        "example": "admin@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "required|min:6",
+                                        "example": "123qwe"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required|min:3|max:50",
+                                        "example": "Admin name updated"
+                                    },
+                                    "role_id": {
+                                        "type": "integer",
+                                        "description": "required|in:{role_ids}",
+                                        "example": "2"
+                                    },
+                                    "contact": {
+                                        "type": "number",
+                                        "description": "optional",
+                                        "example": "+012345678"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "optional|in:active,inactive",
+                                        "example": "active"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/admins/{admin_id}": {
+            "get": {
+                "tags": [
+                    "Admin > admins"
+                ],
+                "summary": "Single",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "admin_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin > admins"
+                ],
+                "summary": "Update",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "(unable to update)",
+                                        "example": "admin@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "optional|min:6",
+                                        "example": "123qwe"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "description": "optional|min:3|max:50",
+                                        "example": "Admin name updated"
+                                    },
+                                    "contact": {
+                                        "type": "number",
+                                        "description": "optional",
+                                        "example": "+012345678"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "optional|in:active,inactive",
+                                        "example": "active"
+                                    },
+                                    "role_id": {
+                                        "type": "integer",
+                                        "description": "optional|in:{role_ids}",
+                                        "example": "2"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "admin_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/admins/{admin_id}": {
+            "delete": {
+                "tags": [
+                    "Admin > admins"
+                ],
+                "summary": "Delete",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "admin_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/admins/all/options": {
+            "get": {
+                "tags": [
+                    "Admin > admins"
+                ],
+                "summary": "Options",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/users": {
+            "get": {
+                "tags": [
+                    "Admin > users"
+                ],
+                "summary": "All",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "name"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|like_match",
+                        "example": "demo"
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|like_match"
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional"
+                    },
+                    {
+                        "name": "contact",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|like_match"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Admin > users"
+                ],
+                "summary": "Create",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "required|email|unique:users",
+                                        "example": "user@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "required|min:6",
+                                        "example": "123qwe"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required|min:3|max:50",
+                                        "example": "User name"
+                                    },
+                                    "contact": {
+                                        "type": "number",
+                                        "description": "optional",
+                                        "example": "+012345678"
+                                    },
+                                    "vendor_id": {
+                                        "type": "string",
+                                        "description": "optional|exist:{vendor_ids}",
+                                        "example": "xxxx"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "optional|in:active,inactive",
+                                        "example": "active"
+                                    },
+                                    "role_id": {
+                                        "type": "integer",
+                                        "description": "optional|in:1",
+                                        "example": "1"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/users/{user_id}": {
+            "get": {
+                "tags": [
+                    "Admin > users"
+                ],
+                "summary": "Single",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin > users"
+                ],
+                "summary": "Update",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "unable to update",
+                                        "example": "user5@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "optional|min:6",
+                                        "example": "123qwe"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "description": "optional|min:3|max:50",
+                                        "example": "User name updated"
+                                    },
+                                    "contact": {
+                                        "type": "number",
+                                        "description": "optional",
+                                        "example": "+012345678"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "optional|in:active,inactive",
+                                        "example": "inactive"
+                                    },
+                                    "role_id": {
+                                        "type": "integer",
+                                        "description": "optional|in:1",
+                                        "example": "1"
+                                    },
+                                    "vendor_id": {
+                                        "type": "string",
+                                        "description": "optional|exist:{vendor_ids}",
+                                        "example": "xxx"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Admin > users"
+                ],
+                "summary": "Delete",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/users/all/options": {
+            "get": {
+                "tags": [
+                    "Admin > users"
+                ],
+                "summary": "Options",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/vendors": {
+            "get": {
+                "tags": [
+                    "Admin > vendors"
+                ],
+                "summary": "All",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "name"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Admin > vendors"
+                ],
+                "summary": "Create",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required|min:3|max:50",
+                                        "example": "xxx 2"
+                                    },
+                                    "profile": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "lorem ipsuem"
+                                    },
+                                    "logo": {
+                                        "type": "string",
+                                        "description": "optional|max:2mb|image:jpg,png",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/vendors/{vendor_id}": {
+            "get": {
+                "tags": [
+                    "Admin > vendors"
+                ],
+                "summary": "Single",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "vendor_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin > vendors"
+                ],
+                "summary": "Update",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required|min:3|max:50",
+                                        "example": "xxx"
+                                    },
+                                    "profile": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "lorem ipsuem"
+                                    },
+                                    "logo": {
+                                        "type": "string",
+                                        "description": "optional|max:2mb|image:jpg,png",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "vendor_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Admin > vendors"
+                ],
+                "summary": "Delete",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "vendor_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/vendors/all/options": {
+            "get": {
+                "tags": [
+                    "Admin > vendors"
+                ],
+                "summary": "Options",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/forms": {
+            "get": {
+                "tags": [
+                    "Admin > forms"
+                ],
+                "summary": "All",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "name"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|like_match"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/forms/5": {
+            "get": {
+                "tags": [
+                    "Admin > forms"
+                ],
+                "summary": "Single",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/forms": {
+            "post": {
+                "tags": [
+                    "Admin > forms"
+                ],
+                "summary": "Create",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "My Form"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "lorem ipsuem"
+                                    },
+                                    "cover": {
+                                        "type": "string",
+                                        "description": "optional|image:jpg,png,webp|max:2mb",
+                                        "format": "binary"
+                                    },
+                                    "fields[0][name]": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "Text Input"
+                                    },
+                                    "fields[0][type]": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "text"
+                                    },
+                                    "fields[0][placeholder]": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    },
+                                    "fields[0][description]": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    },
+                                    "fields[0][options]": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    },
+                                    "fields[0][config]": {
+                                        "type": "string",
+                                        "description": "optional|json"
+                                    },
+                                    "fields[0][mandatory]": {
+                                        "type": "boolean",
+                                        "description": "optional|boolean",
+                                        "example": "true"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/forms/1": {
+            "put": {
+                "tags": [
+                    "Admin > forms"
+                ],
+                "summary": "Update",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "My Form"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "lorem ipsuem"
+                                    },
+                                    "cover": {
+                                        "type": "string",
+                                        "description": "optional|image:png,jpg,webp|max:2mb",
+                                        "format": "binary"
+                                    },
+                                    "fields[0][id]": {
+                                        "type": "integer",
+                                        "description": "optional",
+                                        "example": "1"
+                                    },
+                                    "fields[0][name]": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "Text 2"
+                                    },
+                                    "fields[0][type]": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "text"
+                                    },
+                                    "fields[0][placeholder]": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "text placheolder"
+                                    },
+                                    "fields[0][description]": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "desciption text"
+                                    },
+                                    "fields[0][options]": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    },
+                                    "fields[0][config]": {
+                                        "type": "string",
+                                        "description": "optional|json"
+                                    },
+                                    "fields[0][mandatory]": {
+                                        "type": "boolean",
+                                        "description": "optional|boolean",
+                                        "example": "true"
+                                    },
+                                    "fields[0][status]": {
+                                        "type": "integer",
+                                        "description": "optional|boolean",
+                                        "example": "1"
+                                    },
+                                    "fields[1][id]": {
+                                        "type": "string"
+                                    },
+                                    "fields[1][name]": {
+                                        "type": "string",
+                                        "example": "label 2"
+                                    },
+                                    "fields[1][type]": {
+                                        "type": "string",
+                                        "example": "select"
+                                    },
+                                    "fields[1][placeholder]": {
+                                        "type": "string"
+                                    },
+                                    "fields[1][description]": {
+                                        "type": "string"
+                                    },
+                                    "fields[1][options]": {
+                                        "type": "string"
+                                    },
+                                    "fields[1][config]": {
+                                        "type": "string"
+                                    },
+                                    "fields[1][mandatory]": {
+                                        "type": "string"
+                                    },
+                                    "fields[1][status]": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/forms/2": {
+            "delete": {
+                "tags": [
+                    "Admin > forms"
+                ],
+                "summary": "Delete",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/forms/5/fields": {
+            "put": {
+                "tags": [
+                    "Admin > forms"
+                ],
+                "summary": "Update Fields",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "fields": [
+                                        {
+                                            "id": 16,
+                                            "name": "Field type",
+                                            "type": "text",
+                                            "mandatory": true
+                                        },
+                                        {
+                                            "id": 19,
+                                            "name": "Select type",
+                                            "type": "select",
+                                            "options": [
+                                                {
+                                                    "id": 1,
+                                                    "key": "Key 1",
+                                                    "label": "Option 1"
+                                                },
+                                                {
+                                                    "id": 2,
+                                                    "key": "key 2",
+                                                    "label": "Option 2"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/campaigns": {
+            "get": {
+                "tags": [
+                    "Admin > campaigns"
+                ],
+                "summary": "All",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "-name"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|like_match"
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional"
+                    },
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|in:past,coming,current"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Admin > campaigns"
+                ],
+                "summary": "Create",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "Campaign Name"
+                                    },
+                                    "slug": {
+                                        "type": "string",
+                                        "description": "required|slug",
+                                        "example": "my-slug"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "lorem ipsuem"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "description": "optional|date",
+                                        "example": "2023-11-11 12:12:00"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "description": "optional|date",
+                                        "example": "2023-12-11 12:12:00"
+                                    },
+                                    "cover": {
+                                        "type": "string",
+                                        "description": "optional|image:png,jpg,webp|max:2mb",
+                                        "format": "binary"
+                                    },
+                                    "vendor_id": {
+                                        "type": "string",
+                                        "description": "optional|exist"
+                                    },
+                                    "form_id": {
+                                        "type": "string",
+                                        "description": "optional|exist"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "optional|in:draft,publish"
+                                    },
+                                    "pos": {
+                                        "type": "string",
+                                        "description": "optional|int"
+                                    },
+                                    "meta_title": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    },
+                                    "meta_description": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    },
+                                    "meta_keywords": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/campaigns/{campaign_id}": {
+            "get": {
+                "tags": [
+                    "Admin > campaigns"
+                ],
+                "summary": "Single",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "campaign_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin > campaigns"
+                ],
+                "summary": "Update",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "Campaign Name updated"
+                                    },
+                                    "slug": {
+                                        "type": "string",
+                                        "description": "required|slug",
+                                        "example": "my-slug"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "lorem ipsuem"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "description": "optional|date",
+                                        "example": "2023-11-11 12:12:00"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "description": "optional|date",
+                                        "example": "2023-12-11 12:12:00"
+                                    },
+                                    "cover": {
+                                        "type": "string",
+                                        "description": "optional|image:png,jpg,webp|max:2mb",
+                                        "format": "binary"
+                                    },
+                                    "vendor_id": {
+                                        "type": "string",
+                                        "description": "optional|exist"
+                                    },
+                                    "form_id": {
+                                        "type": "integer",
+                                        "description": "optional|exist",
+                                        "example": "1"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "optional|in:draft,publish",
+                                        "example": "publish"
+                                    },
+                                    "pos": {
+                                        "type": "string",
+                                        "description": "optional|int"
+                                    },
+                                    "meta_title": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    },
+                                    "meta_description": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    },
+                                    "meta_keywords": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "campaign_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/campaigns/all/options": {
+            "get": {
+                "tags": [
+                    "Admin > campaigns"
+                ],
+                "summary": "Options",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/campaigns/2": {
+            "delete": {
+                "tags": [
+                    "Admin > campaigns"
+                ],
+                "summary": "Delete",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/campaigns/{campaign_id}/products": {
+            "put": {
+                "tags": [
+                    "Admin > campaigns"
+                ],
+                "summary": "Assign Products",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "products[0][id]": {
+                                        "type": "integer",
+                                        "description": "required|exist",
+                                        "example": "1"
+                                    },
+                                    "products[0][filterable]": {
+                                        "type": "integer",
+                                        "description": "optional|boolean",
+                                        "example": "1"
+                                    },
+                                    "products[0][config]": {
+                                        "type": "string",
+                                        "description": "optional|json",
+                                        "example": "{\"filters\":[{\"field\":\"field key\",\"value\":\"filter value\"}]}"
+                                    },
+                                    "products[1][id]": {
+                                        "type": "integer",
+                                        "example": "2"
+                                    },
+                                    "products[1][filterable]": {
+                                        "type": "integer",
+                                        "example": "1"
+                                    },
+                                    "products[1][config]": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "campaign_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/campaigns/{campaign_id}/report/stats": {
+            "get": {
+                "tags": [
+                    "Admin > campaigns"
+                ],
+                "summary": "Report - Stats",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "campaign_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/campaigns/{campaign_id}/report/counts": {
+            "get": {
+                "tags": [
+                    "Admin > campaigns"
+                ],
+                "summary": "Report - Counts",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "campaign_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/products": {
+            "get": {
+                "tags": [
+                    "Admin > products"
+                ],
+                "summary": "All",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "-name"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|like_match"
+                    },
+                    {
+                        "name": "brand",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|like_match"
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "stoptionalring"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Admin > products"
+                ],
+                "summary": "Create",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "Product 2"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "lorem ipsuem"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "description": "optional|image:png,jpg,webp|max:2mb",
+                                        "format": "binary"
+                                    },
+                                    "brand": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "Product Brand"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "optional|in:active,inactive"
+                                    },
+                                    "pos": {
+                                        "type": "string",
+                                        "description": "optional|int"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/products/{product_id}": {
+            "get": {
+                "tags": [
+                    "Admin > products"
+                ],
+                "summary": "Single",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin > products"
+                ],
+                "summary": "Update",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "Product Name updated"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "lorem ipsuem"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "description": "optional|image:png,jpg,webp|max:2mb",
+                                        "format": "binary"
+                                    },
+                                    "brand": {
+                                        "type": "string",
+                                        "description": "optional"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "description": "optional|in:active,inactive"
+                                    },
+                                    "pos": {
+                                        "type": "string",
+                                        "description": "optional|int"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Admin > products"
+                ],
+                "summary": "Delete",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/products/all/options": {
+            "get": {
+                "tags": [
+                    "Admin > products"
+                ],
+                "summary": "Options",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/enrolments": {
+            "get": {
+                "tags": [
+                    "Admin > enrolments"
+                ],
+                "summary": "All",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "created_at"
+                    },
+                    {
+                        "name": "campaign_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional"
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional"
+                    },
+                    {
+                        "name": "form_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional"
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|date_string"
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|date_string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/enrolments/{enrolment_id}": {
+            "get": {
+                "tags": [
+                    "Admin > enrolments"
+                ],
+                "summary": "Single",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "enrolment_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin > enrolments"
+                ],
+                "summary": "Update",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "description": "required|in:pending,complete",
+                                        "example": "pending"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "enrolment_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Admin > enrolments"
+                ],
+                "summary": "Delete",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "enrolment_id",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/enrolments/all/options": {
+            "get": {
+                "tags": [
+                    "Admin > enrolments"
+                ],
+                "summary": "Options",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/reviews": {
+            "get": {
+                "tags": [
+                    "Admin > reviews"
+                ],
+                "summary": "All",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "-created_at"
+                    },
+                    {
+                        "name": "campaign_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional"
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|date_string"
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|date_string"
+                    },
+                    {
+                        "name": "created_by",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional"
+                    },
+                    {
+                        "name": "rating",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/configs": {
+            "get": {
+                "tags": [
+                    "Admin > configs"
+                ],
+                "summary": "Get",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "keys",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "string|comma_separator_array",
+                        "example": "some_key,some_some_key"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Admin > configs"
+                ],
+                "summary": "Save",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "configs[0][key]": {
+                                        "type": "string",
+                                        "description": "required|string",
+                                        "example": "some_key"
+                                    },
+                                    "configs[0][value]": {
+                                        "type": "string",
+                                        "description": "required|string",
+                                        "example": "some value"
+                                    },
+                                    "configs[1][key]": {
+                                        "type": "string",
+                                        "example": "some_key_2"
+                                    },
+                                    "configs[1][value]": {
+                                        "type": "string",
+                                        "example": "some value 2"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/report/signup": {
+            "get": {
+                "tags": [
+                    "Admin > report"
+                ],
+                "summary": "Signup",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "date_string",
+                        "example": "2023-11-01"
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "date_string",
+                        "example": "2023-11-30"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/admin/report/enrolments": {
+            "get": {
+                "tags": [
+                    "Admin > report"
+                ],
+                "summary": "Enrolments",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "date_string",
+                        "example": "2024-01-01"
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "date_string",
+                        "example": "2024-01-31"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "required|email",
+                                        "example": "sa@admin.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "123qwe"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/validate": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Validate",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/token-refresh": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh-Token",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "refresh_token": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "{{refresh}}"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/invalidate": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Revoke",
+                "requestBody": {
+                    "content": {}
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/my": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "My",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "My Profile Update",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "optional|min:3|max:50",
+                                        "example": "System"
+                                    },
+                                    "contact": {
+                                        "type": "number",
+                                        "description": "optional",
+                                        "example": "+012345678"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/my/password": {
+            "put": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "My Change Password",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "new_password": {
+                                        "type": "string",
+                                        "description": "required|min:6",
+                                        "example": "123qwe"
+                                    },
+                                    "old_password": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "123qwe"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/password/reset-token": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Password Gen Reset Token",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "required|email|exist",
+                                        "example": "email@email.com"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "noauthAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/password/reset": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Password Reset",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "token": {
+                                        "type": "string",
+                                        "description": "required|exist",
+                                        "example": "af8f43d211108ba826850f06f930d3009461"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "description": "required|matched",
+                                        "example": "email@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "required|min:6",
+                                        "example": "123qwe"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "noauthAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/signup": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Signup",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "required|email|unique",
+                                        "example": "newsignup@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "description": "required|min:6",
+                                        "example": "123qwe"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required|min:3|max:50",
+                                        "example": "new-signup"
+                                    },
+                                    "contact": {
+                                        "type": "number",
+                                        "description": "optional",
+                                        "example": "+0123456789"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/login/google": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login (Google)",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "required|email",
+                                        "example": "tathuaooi@gmail.com"
+                                    },
+                                    "token": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "ya29.a0AfB_byCxlORaagoIT0Iy6av4mKcXJVoz1UGOAiszirepMQJ6Tlz7TKgn3-GJmtffYUb6JIJ3HjXaNlMPLZbNWURETyrd5QeQYG9vnowVBWhZEBYnZbb2T8sfFlsFQwx4y2-9Pdp-ux4nRIlS1GY2bEtoE3v0uW-mLQaCgYKASUSARESFQHGX2MiovlqBnfn_pyzH2yXvq65bQ0169"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/signup/google": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Signup (Google)",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "description": "required|email|unique",
+                                        "example": "tathuaooi@gmail.com"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "new-signup"
+                                    },
+                                    "contact": {
+                                        "type": "number",
+                                        "description": "optiona",
+                                        "example": "+0123456789"
+                                    },
+                                    "token": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "ya29.a0AfB_byCxlORaagoIT0Iy6av4mKcXJVoz1UGOAiszirepMQJ6Tlz7TKgn3-GJmtffYUb6JIJ3HjXaNlMPLZbNWURETyrd5QeQYG9vnowVBWhZEBYnZbb2T8sfFlsFQwx4y2-9Pdp-ux4nRIlS1GY2bEtoE3v0uW-mLQaCgYKASUSARESFQHGX2MiovlqBnfn_pyzH2yXvq65bQ0169"
+                                    },
+                                    "google_user_id": {
+                                        "type": "integer",
+                                        "description": "required",
+                                        "example": "109348337745144872211"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/my/contact": {
+            "put": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Update Contact + OTP validate",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "contact": {
+                                        "type": "number",
+                                        "description": "required",
+                                        "example": "+60188728179"
+                                    },
+                                    "code": {
+                                        "type": "integer",
+                                        "description": "required",
+                                        "example": "952784"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/auth/verify/contact/otp": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Request  OTP (phone)",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "contact": {
+                                        "type": "number",
+                                        "description": "required",
+                                        "example": "+60188728179"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/app/campaigns": {
+            "get": {
+                "tags": [
+                    "App > campaigns"
+                ],
+                "summary": "All",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "-name"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|like_match"
+                    },
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|in:current,past,coming"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/app/campaigns/{campaign_slug}": {
+            "get": {
+                "tags": [
+                    "App > campaigns"
+                ],
+                "summary": "Single",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "campaign_slug",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/app/campaigns/{campaign_slug}/enrolment": {
+            "post": {
+                "tags": [
+                    "App > campaigns"
+                ],
+                "summary": "Enrolment",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "campaign_id": {
+                                        "type": "string",
+                                        "description": "required|exist",
+                                        "example": "82313a22-d850-42fb-8ac5-f6028edd09ed"
+                                    },
+                                    "form_id": {
+                                        "type": "integer",
+                                        "description": "required|exist",
+                                        "example": "1"
+                                    },
+                                    "submissions": {
+                                        "type": "string",
+                                        "description": "required|json",
+                                        "example": "{ \"key\": \"value\" }"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "campaign_slug",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/app/campaigns/{campaign_slug}/review": {
+            "post": {
+                "tags": [
+                    "App > campaigns"
+                ],
+                "summary": "Review",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "rating": {
+                                        "type": "integer",
+                                        "description": "required|numeric",
+                                        "example": "5"
+                                    },
+                                    "review": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "lorem ipsuem"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "campaign_slug",
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/app/my/campaigns": {
+            "get": {
+                "tags": [
+                    "App > my"
+                ],
+                "summary": "Campaigns",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "1"
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "int",
+                        "example": "10"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "{field_name}|-{field_name}",
+                        "example": "-name"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "optional|like_match"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/utils/upload-asset": {
+            "post": {
+                "tags": [
+                    "Utils"
+                ],
+                "summary": "Upload Asset (public)",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "description": "required|file",
+                                        "format": "binary"
+                                    },
+                                    "caption": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "abc"
+                                    },
+                                    "tags": {
+                                        "type": "string",
+                                        "description": "optional",
+                                        "example": "campaign"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "app-key",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "rZ~3Je9>sdD*M8+QjCh}PmH2"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/utils/test-email": {
+            "post": {
+                "tags": [
+                    "Utils"
+                ],
+                "summary": "Send Email (test)",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "to": {
+                                        "type": "string",
+                                        "description": "required|email",
+                                        "example": "kenny@qutebox.com"
+                                    },
+                                    "template_id": {
+                                        "type": "string",
+                                        "description": "required",
+                                        "example": "x2p0347qvn9lzdrn"
+                                    },
+                                    "use_content": {
+                                        "type": "boolean",
+                                        "description": "boolean",
+                                        "example": "false"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "app-key",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "rZ~3Je9>sdD*M8+QjCh}PmH2"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/utils/test-sms": {
+            "post": {
+                "tags": [
+                    "Utils"
+                ],
+                "summary": "Send SMS (test)",
+                "requestBody": {
+                    "content": {
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "to": {
+                                        "type": "number",
+                                        "description": "required",
+                                        "example": "+60188728179"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "app-key",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "rZ~3Je9>sdD*M8+QjCh}PmH2"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        },
+        "/ping": {
+            "get": {
+                "tags": [
+                    "General"
+                ],
+                "summary": "Ping",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {}
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

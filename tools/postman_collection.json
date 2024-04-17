@@ -1,0 +1,3635 @@
+{
+	"info": {
+		"_postman_id": "53444ced-c638-4fc7-872b-0ef40da2cd5e",
+		"name": "SamplingReview",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30947886"
+	},
+	"item": [
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "admins",
+					"item": [
+						{
+							"name": "All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/admins?page=1&per_page=10&sort=name",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"admins"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "name",
+											"description": "{field_name}|-{field_name}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Single",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/admins/{{admin_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"admins",
+										"{{admin_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "email",
+											"value": "admin@email.com",
+											"description": "required|unique",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "123qwe",
+											"description": "required|min:6",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "Admin name updated",
+											"description": "required|min:3|max:50",
+											"type": "text"
+										},
+										{
+											"key": "role_id",
+											"value": "2",
+											"description": "required|in:{role_ids}",
+											"type": "text"
+										},
+										{
+											"key": "contact",
+											"value": "+012345678",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "status",
+											"value": "active",
+											"description": "optional|in:active,inactive",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/admins",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"admins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "email",
+											"value": "admin@email.com",
+											"description": "(unable to update)",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "password",
+											"value": "123qwe",
+											"description": "optional|min:6",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "Admin name updated",
+											"description": "optional|min:3|max:50",
+											"type": "text"
+										},
+										{
+											"key": "contact",
+											"value": "+012345678",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "status",
+											"value": "active",
+											"description": "optional|in:active,inactive",
+											"type": "text"
+										},
+										{
+											"key": "role_id",
+											"value": "2",
+											"description": "optional|in:{role_ids}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/admins/{{admin_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"admins",
+										"{{admin_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/admin/admins/{{admin_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"admin",
+										"admins",
+										"{{admin_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Options",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/admin/admins/all/options",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"admin",
+										"admins",
+										"all",
+										"options"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "users",
+					"item": [
+						{
+							"name": "All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/users?page=1&per_page=10&sort=name&name=demo&email=&status=&contact=",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"users"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "name",
+											"description": "{field_name}|-{field_name}"
+										},
+										{
+											"key": "name",
+											"value": "demo",
+											"description": "optional|like_match"
+										},
+										{
+											"key": "email",
+											"value": "",
+											"description": "optional|like_match"
+										},
+										{
+											"key": "status",
+											"value": "",
+											"description": "optional"
+										},
+										{
+											"key": "contact",
+											"value": "",
+											"description": "optional|like_match"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Single",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/users/{{user_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"users",
+										"{{user_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "email",
+											"value": "user@email.com",
+											"description": "required|email|unique:users",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "123qwe",
+											"description": "required|min:6",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "User name",
+											"description": "required|min:3|max:50",
+											"type": "text"
+										},
+										{
+											"key": "contact",
+											"value": "+012345678",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "vendor_id",
+											"value": "xxxx",
+											"description": "optional|exist:{vendor_ids}",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "status",
+											"value": "active",
+											"description": "optional|in:active,inactive",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "role_id",
+											"value": "1",
+											"description": "optional|in:1",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/users",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "email",
+											"value": "user5@email.com",
+											"description": "unable to update",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "password",
+											"value": "123qwe",
+											"description": "optional|min:6",
+											"type": "text",
+											"disabled": true
+										},
+										{
+											"key": "name",
+											"value": "User name updated",
+											"description": "optional|min:3|max:50",
+											"type": "text"
+										},
+										{
+											"key": "contact",
+											"value": "+012345678",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "status",
+											"value": "inactive",
+											"description": "optional|in:active,inactive",
+											"type": "text"
+										},
+										{
+											"key": "role_id",
+											"value": "1",
+											"description": "optional|in:1",
+											"type": "text"
+										},
+										{
+											"key": "vendor_id",
+											"value": "xxx",
+											"description": "optional|exist:{vendor_ids}",
+											"type": "text",
+											"disabled": true
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/users/{{user_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"users",
+										"{{user_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/users/{{user_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"users",
+										"{{user_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Options",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/admin/users/all/options",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"admin",
+										"users",
+										"all",
+										"options"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "vendors",
+					"item": [
+						{
+							"name": "All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/vendors?page=1&per_page=10&sort=name",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"vendors"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "name",
+											"description": "{field_name}|-{field_name}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Single",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/vendors/{{vendor_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"vendors",
+										"{{vendor_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "xxx 2",
+											"description": "required|min:3|max:50",
+											"type": "text"
+										},
+										{
+											"key": "profile",
+											"value": "lorem ipsuem",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "logo",
+											"description": "optional|max:2mb|image:jpg,png",
+											"type": "file",
+											"src": "/C:/Users/User/Downloads/New folder/clay-banks-kiv1ggvkgQk-unsplash.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/vendors",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"vendors"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "xxx",
+											"description": "required|min:3|max:50",
+											"type": "text"
+										},
+										{
+											"key": "profile",
+											"value": "lorem ipsuem",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "logo",
+											"description": "optional|max:2mb|image:jpg,png",
+											"type": "file",
+											"src": "/C:/Users/User/Downloads/New folder/clay-banks-kiv1ggvkgQk-unsplash.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/vendors/{{vendor_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"vendors",
+										"{{vendor_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/vendors/{{vendor_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"vendors",
+										"{{vendor_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Options",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/vendors/all/options",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"vendors",
+										"all",
+										"options"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "forms",
+					"item": [
+						{
+							"name": "All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/forms?page=1&per_page=10&sort=name&name=",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"forms"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "name",
+											"description": "{field_name}|-{field_name}"
+										},
+										{
+											"key": "name",
+											"value": "",
+											"description": "optional|like_match"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Single",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/forms/5",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"forms",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "My Form",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "lorem ipsuem",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "cover",
+											"description": "optional|image:jpg,png,webp|max:2mb",
+											"type": "file",
+											"src": "/C:/Users/User/Downloads/New folder/clay-banks-kiv1ggvkgQk-unsplash.jpg",
+											"disabled": true
+										},
+										{
+											"key": "fields[0][name]",
+											"value": "Text Input",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][type]",
+											"value": "text",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][placeholder]",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][description]",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][options]",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][config]",
+											"value": "",
+											"description": "optional|json",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][mandatory]",
+											"value": "true",
+											"description": "optional|boolean",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/admin/forms",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"admin",
+										"forms"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "My Form",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "lorem ipsuem",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "cover",
+											"description": "optional|image:png,jpg,webp|max:2mb",
+											"type": "file",
+											"src": "/C:/Users/User/Downloads/New folder/clay-banks-kiv1ggvkgQk-unsplash.jpg",
+											"disabled": true
+										},
+										{
+											"key": "fields[0][id]",
+											"value": "1",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][name]",
+											"value": "Text 2",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][type]",
+											"value": "text",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][placeholder]",
+											"value": "text placheolder",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][description]",
+											"value": "desciption text",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][options]",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][config]",
+											"value": "",
+											"description": "optional|json",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][mandatory]",
+											"value": "true",
+											"description": "optional|boolean",
+											"type": "text"
+										},
+										{
+											"key": "fields[0][status]",
+											"value": "1",
+											"description": "optional|boolean",
+											"type": "text"
+										},
+										{
+											"key": "fields[1][id]",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "fields[1][name]",
+											"value": "label 2",
+											"type": "text"
+										},
+										{
+											"key": "fields[1][type]",
+											"value": "select",
+											"type": "text"
+										},
+										{
+											"key": "fields[1][placeholder]",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "fields[1][description]",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "fields[1][options]",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "fields[1][config]",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "fields[1][mandatory]",
+											"value": "",
+											"type": "text"
+										},
+										{
+											"key": "fields[1][status]",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/admin/forms/1",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"admin",
+										"forms",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/admin/forms/2",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"admin",
+										"forms",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Fields",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fields\": [\r\n        {\r\n            \"id\": 16,\r\n            \"name\": \"Field type\",\r\n            \"type\": \"text\",\r\n            \"mandatory\": true\r\n        },\r\n        {\r\n            \"id\": 19,\r\n            \"name\": \"Select type\",\r\n            \"type\": \"select\",\r\n            \"options\": [\r\n                {\r\n                    \"id\": 1,\r\n                    \"key\": \"Key 1\",\r\n                    \"label\": \"Option 1\"\r\n                },\r\n                {\r\n                    \"id\": 2,\r\n                    \"key\": \"key 2\",\r\n                    \"label\": \"Option 2\"\r\n                }\r\n            ]\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/forms/5/fields",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"forms",
+										"5",
+										"fields"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "campaigns",
+					"item": [
+						{
+							"name": "All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/campaigns?page=1&per_page=10&sort=-name&name=&status&state",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"campaigns"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "-name",
+											"description": "{field_name}|-{field_name}"
+										},
+										{
+											"key": "name",
+											"value": "",
+											"description": "optional|like_match"
+										},
+										{
+											"key": "status",
+											"value": null,
+											"description": "optional"
+										},
+										{
+											"key": "state",
+											"value": null,
+											"description": "optional|in:past,coming,current"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Single",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/campaigns/{{campaign_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"campaigns",
+										"{{campaign_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "Campaign Name",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "slug",
+											"value": "my-slug",
+											"description": "required|slug",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "lorem ipsuem",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "start_date",
+											"value": "2023-11-11 12:12:00",
+											"description": "optional|date",
+											"type": "text"
+										},
+										{
+											"key": "end_date",
+											"value": "2023-12-11 12:12:00",
+											"description": "optional|date",
+											"type": "text"
+										},
+										{
+											"key": "cover",
+											"description": "optional|image:png,jpg,webp|max:2mb",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "vendor_id",
+											"value": "",
+											"description": "optional|exist",
+											"type": "text"
+										},
+										{
+											"key": "form_id",
+											"value": "",
+											"description": "optional|exist",
+											"type": "text"
+										},
+										{
+											"key": "status",
+											"value": "",
+											"description": "optional|in:draft,publish",
+											"type": "text"
+										},
+										{
+											"key": "pos",
+											"value": "",
+											"description": "optional|int",
+											"type": "text"
+										},
+										{
+											"key": "meta_title",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "meta_description",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "meta_keywords",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/campaigns",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"campaigns"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "Campaign Name updated",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "slug",
+											"value": "my-slug",
+											"description": "required|slug",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "lorem ipsuem",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "start_date",
+											"value": "2023-11-11 12:12:00",
+											"description": "optional|date",
+											"type": "text"
+										},
+										{
+											"key": "end_date",
+											"value": "2023-12-11 12:12:00",
+											"description": "optional|date",
+											"type": "text"
+										},
+										{
+											"key": "cover",
+											"description": "optional|image:png,jpg,webp|max:2mb",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "vendor_id",
+											"value": "",
+											"description": "optional|exist",
+											"type": "text"
+										},
+										{
+											"key": "form_id",
+											"value": "1",
+											"description": "optional|exist",
+											"type": "text"
+										},
+										{
+											"key": "status",
+											"value": "publish",
+											"description": "optional|in:draft,publish",
+											"type": "text"
+										},
+										{
+											"key": "pos",
+											"value": "",
+											"description": "optional|int",
+											"type": "text"
+										},
+										{
+											"key": "meta_title",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "meta_description",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "meta_keywords",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/campaigns/{{campaign_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"campaigns",
+										"{{campaign_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Options",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/campaigns/all/options",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"campaigns",
+										"all",
+										"options"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/admin/campaigns/2",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"admin",
+										"campaigns",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Assign Products",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "products[0][id]",
+											"value": "1",
+											"description": "required|exist",
+											"type": "text"
+										},
+										{
+											"key": "products[0][filterable]",
+											"value": "1",
+											"description": "optional|boolean",
+											"type": "text"
+										},
+										{
+											"key": "products[0][config]",
+											"value": "{\"filters\":[{\"field\":\"field key\",\"value\":\"filter value\"}]}",
+											"description": "optional|json",
+											"type": "text"
+										},
+										{
+											"key": "products[1][id]",
+											"value": "2",
+											"type": "text"
+										},
+										{
+											"key": "products[1][filterable]",
+											"value": "1",
+											"type": "text"
+										},
+										{
+											"key": "products[1][config]",
+											"value": "",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/campaigns/{{campaign_id}}/products",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"campaigns",
+										"{{campaign_id}}",
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Report - Stats",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/campaigns/{{campaign_id}}/report/stats",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"campaigns",
+										"{{campaign_id}}",
+										"report",
+										"stats"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Report - Counts",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/campaigns/{{campaign_id}}/report/counts",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"campaigns",
+										"{{campaign_id}}",
+										"report",
+										"counts"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "products",
+					"item": [
+						{
+							"name": "All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/products?page=1&per_page=10&sort=-name&name=&brand=&status",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"products"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "-name",
+											"description": "{field_name}|-{field_name}"
+										},
+										{
+											"key": "name",
+											"value": "",
+											"description": "optional|like_match"
+										},
+										{
+											"key": "brand",
+											"value": "",
+											"description": "optional|like_match"
+										},
+										{
+											"key": "status",
+											"value": null,
+											"description": "stoptionalring"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Single",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/products/{{product_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"products",
+										"{{product_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "Product 2",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "lorem ipsuem",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "image",
+											"description": "optional|image:png,jpg,webp|max:2mb",
+											"type": "file",
+											"src": "/C:/Users/User/Downloads/New folder/clay-banks-kiv1ggvkgQk-unsplash.jpg"
+										},
+										{
+											"key": "brand",
+											"value": "Product Brand",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "status",
+											"value": "",
+											"description": "optional|in:active,inactive",
+											"type": "text"
+										},
+										{
+											"key": "pos",
+											"value": "",
+											"description": "optional|int",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/products",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "name",
+											"value": "Product Name updated",
+											"description": "required",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "lorem ipsuem",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "image",
+											"description": "optional|image:png,jpg,webp|max:2mb",
+											"type": "file",
+											"src": []
+										},
+										{
+											"key": "brand",
+											"value": "",
+											"description": "optional",
+											"type": "text"
+										},
+										{
+											"key": "status",
+											"value": "",
+											"description": "optional|in:active,inactive",
+											"type": "text"
+										},
+										{
+											"key": "pos",
+											"value": "",
+											"description": "optional|int",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/products/{{product_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"products",
+										"{{product_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/products/{{product_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"products",
+										"{{product_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Options",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/products/all/options",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"products",
+										"all",
+										"options"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "enrolments",
+					"item": [
+						{
+							"name": "All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/enrolments?page=1&per_page=10&sort=created_at&campaign_id=&user_id=&form_id=&date_from&date_to",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"enrolments"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "created_at",
+											"description": "{field_name}|-{field_name}"
+										},
+										{
+											"key": "campaign_id",
+											"value": "",
+											"description": "optional"
+										},
+										{
+											"key": "user_id",
+											"value": "",
+											"description": "optional"
+										},
+										{
+											"key": "form_id",
+											"value": "",
+											"description": "optional"
+										},
+										{
+											"key": "date_from",
+											"value": null,
+											"description": "optional|date_string"
+										},
+										{
+											"key": "date_to",
+											"value": null,
+											"description": "optional|date_string"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Single",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/enrolments/{{enrolment_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"enrolments",
+										"{{enrolment_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "status",
+											"value": "pending",
+											"description": "required|in:pending,complete",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/enrolments/{{enrolment_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"enrolments",
+										"{{enrolment_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Options",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/enrolments/all/options",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"enrolments",
+										"all",
+										"options"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "status",
+											"value": "pending",
+											"description": "required|in:",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/enrolments/{{enrolment_id}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"enrolments",
+										"{{enrolment_id}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "reviews",
+					"item": [
+						{
+							"name": "All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/reviews?page=1&per_page=10&sort=-created_at&campaign_id=&date_from=&date_to=&created_by&rating",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"reviews"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "-created_at",
+											"description": "{field_name}|-{field_name}"
+										},
+										{
+											"key": "campaign_id",
+											"value": "",
+											"description": "optional"
+										},
+										{
+											"key": "date_from",
+											"value": "",
+											"description": "optional|date_string"
+										},
+										{
+											"key": "date_to",
+											"value": "",
+											"description": "optional|date_string"
+										},
+										{
+											"key": "created_by",
+											"value": null,
+											"description": "optional"
+										},
+										{
+											"key": "rating",
+											"value": null,
+											"description": "optional"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "configs",
+					"item": [
+						{
+							"name": "Get",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/configs?keys=some_key,some_some_key",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"configs"
+									],
+									"query": [
+										{
+											"key": "keys",
+											"value": "some_key,some_some_key",
+											"description": "string|comma_separator_array"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Save",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "configs[0][key]",
+											"value": "some_key",
+											"description": "required|string",
+											"type": "text"
+										},
+										{
+											"key": "configs[0][value]",
+											"value": "some value",
+											"description": "required|string",
+											"type": "text"
+										},
+										{
+											"key": "configs[1][key]",
+											"value": "some_key_2",
+											"type": "text"
+										},
+										{
+											"key": "configs[1][value]",
+											"value": "some value 2",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/admin/configs",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"configs"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "report",
+					"item": [
+						{
+							"name": "Signup",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/report/signup?date_from=2023-11-01&date_to=2023-11-30",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"report",
+										"signup"
+									],
+									"query": [
+										{
+											"key": "date_from",
+											"value": "2023-11-01",
+											"description": "date_string"
+										},
+										{
+											"key": "date_to",
+											"value": "2023-11-30",
+											"description": "date_string"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Enrolments",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/admin/report/enrolments?date_from=2024-01-01&date_to=2024-01-31",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"admin",
+										"report",
+										"enrolments"
+									],
+									"query": [
+										{
+											"key": "date_from",
+											"value": "2024-01-01",
+											"description": "date_string"
+										},
+										{
+											"key": "date_to",
+											"value": "2024-01-31",
+											"description": "date_string"
+										},
+										{
+											"key": "campaign_id",
+											"value": "xxx",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "sa@admin.com",
+									"description": "required|email",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123qwe",
+									"description": "required",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/login",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Validate",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/v1/auth/validate",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"validate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh-Token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "refresh_token",
+									"value": "{{refresh}}",
+									"description": "required",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/token-refresh",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"token-refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Revoke",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/v1/auth/invalidate",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"invalidate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "My",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/v1/auth/my",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "My Profile Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "System",
+									"description": "optional|min:3|max:50",
+									"type": "text"
+								},
+								{
+									"key": "contact",
+									"value": "+012345678",
+									"description": "optional",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/my",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"my"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "My Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "new_password",
+									"value": "123qwe",
+									"description": "required|min:6",
+									"type": "text"
+								},
+								{
+									"key": "old_password",
+									"value": "123qwe",
+									"description": "required",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/my/password",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"my",
+								"password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Password Gen Reset Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "email@email.com",
+									"description": "required|email|exist",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/password/reset-token",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"password",
+								"reset-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Password Reset",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "token",
+									"value": "af8f43d211108ba826850f06f930d3009461",
+									"description": "required|exist",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "email@email.com",
+									"description": "required|matched",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123qwe",
+									"description": "required|min:6",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/password/reset",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"password",
+								"reset"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "newsignup@email.com",
+									"description": "required|email|unique",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123qwe",
+									"description": "required|min:6",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "new-signup",
+									"description": "required|min:3|max:50",
+									"type": "text"
+								},
+								{
+									"key": "contact",
+									"value": "+0123456789",
+									"description": "optional",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/signup",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Google)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "tathuaooi@gmail.com",
+									"description": "required|email",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "ya29.a0AfB_byCxlORaagoIT0Iy6av4mKcXJVoz1UGOAiszirepMQJ6Tlz7TKgn3-GJmtffYUb6JIJ3HjXaNlMPLZbNWURETyrd5QeQYG9vnowVBWhZEBYnZbb2T8sfFlsFQwx4y2-9Pdp-ux4nRIlS1GY2bEtoE3v0uW-mLQaCgYKASUSARESFQHGX2MiovlqBnfn_pyzH2yXvq65bQ0169",
+									"description": "required",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/login/google",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"login",
+								"google"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup (Google)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "tathuaooi@gmail.com",
+									"description": "required|email|unique",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "new-signup",
+									"description": "required",
+									"type": "text"
+								},
+								{
+									"key": "contact",
+									"value": "+0123456789",
+									"description": "optiona",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "ya29.a0AfB_byCxlORaagoIT0Iy6av4mKcXJVoz1UGOAiszirepMQJ6Tlz7TKgn3-GJmtffYUb6JIJ3HjXaNlMPLZbNWURETyrd5QeQYG9vnowVBWhZEBYnZbb2T8sfFlsFQwx4y2-9Pdp-ux4nRIlS1GY2bEtoE3v0uW-mLQaCgYKASUSARESFQHGX2MiovlqBnfn_pyzH2yXvq65bQ0169",
+									"description": "required",
+									"type": "text"
+								},
+								{
+									"key": "google_user_id",
+									"value": "109348337745144872211",
+									"description": "required",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/signup/google",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"signup",
+								"google"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Contact + OTP validate",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "contact",
+									"value": "+60188728179",
+									"description": "required",
+									"type": "text"
+								},
+								{
+									"key": "code",
+									"value": "952784",
+									"description": "required",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/my/contact",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"my",
+								"contact"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request  OTP (phone)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "contact",
+									"value": "+60188728179",
+									"description": "required",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/auth/verify/contact/otp",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"auth",
+								"verify",
+								"contact",
+								"otp"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "App",
+			"item": [
+				{
+					"name": "campaigns",
+					"item": [
+						{
+							"name": "All",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/app/campaigns?page=1&per_page=10&sort=-name&name=&state=",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"app",
+										"campaigns"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "-name",
+											"description": "{field_name}|-{field_name}"
+										},
+										{
+											"key": "name",
+											"value": "",
+											"description": "optional|like_match"
+										},
+										{
+											"key": "state",
+											"value": "",
+											"description": "optional|in:current,past,coming"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Single",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/app/campaigns/{{campaign_slug}}",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"app",
+										"campaigns",
+										"{{campaign_slug}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Enrolment",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "campaign_id",
+											"value": "82313a22-d850-42fb-8ac5-f6028edd09ed",
+											"description": "required|exist",
+											"type": "text"
+										},
+										{
+											"key": "form_id",
+											"value": "1",
+											"description": "required|exist",
+											"type": "text"
+										},
+										{
+											"key": "submissions",
+											"value": "{ \"key\": \"value\" }",
+											"description": "required|json",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/app/campaigns/{{campaign_slug}}/enrolment",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"app",
+										"campaigns",
+										"{{campaign_slug}}",
+										"enrolment"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Review",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "rating",
+											"value": "5",
+											"description": "required|numeric",
+											"type": "text"
+										},
+										{
+											"key": "review",
+											"value": "lorem ipsuem",
+											"description": "optional",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{domain}}/v1/app/campaigns/{{campaign_slug}}/review",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"app",
+										"campaigns",
+										"{{campaign_slug}}",
+										"review"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "my",
+					"item": [
+						{
+							"name": "Campaigns",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{domain}}/v1/app/my/campaigns?page=1&per_page=10&sort=-name&name=",
+									"host": [
+										"{{domain}}"
+									],
+									"path": [
+										"v1",
+										"app",
+										"my",
+										"campaigns"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "int"
+										},
+										{
+											"key": "per_page",
+											"value": "10",
+											"description": "int"
+										},
+										{
+											"key": "sort",
+											"value": "-name",
+											"description": "{field_name}|-{field_name}"
+										},
+										{
+											"key": "name",
+											"value": "",
+											"description": "optional|like_match"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Utils",
+			"item": [
+				{
+					"name": "Upload Asset (public)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "app-key",
+								"value": "rZ~3Je9>sdD*M8+QjCh}PmH2",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"description": "required|file",
+									"type": "file",
+									"src": "/C:/Users/User/Downloads/FeLbYfgtHUyDd2BWf7SOtITFSX5if4whPqCYPZik.jpg"
+								},
+								{
+									"key": "caption",
+									"value": "abc",
+									"description": "optional",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "campaign",
+									"description": "optional",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/utils/upload-asset",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"utils",
+								"upload-asset"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send Email (test)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "app-key",
+								"value": "rZ~3Je9>sdD*M8+QjCh}PmH2",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "to",
+									"value": "kenny@qutebox.com",
+									"description": "required|email",
+									"type": "text"
+								},
+								{
+									"key": "template_id",
+									"value": "x2p0347qvn9lzdrn",
+									"description": "required",
+									"type": "text"
+								},
+								{
+									"key": "use_content",
+									"value": "false",
+									"description": "boolean",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/utils/test-email",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"utils",
+								"test-email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send SMS (test)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "app-key",
+								"value": "rZ~3Je9>sdD*M8+QjCh}PmH2",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "to",
+									"value": "+60188728179",
+									"description": "required",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{domain}}/v1/utils/test-sms",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"v1",
+								"utils",
+								"test-sms"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Ping",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/ping",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "xxx",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "domain",
+			"value": "http://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "vendor_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "campaign_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "product_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "enrolment_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "campaign_slug",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
