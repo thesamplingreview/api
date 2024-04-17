@@ -34,6 +34,10 @@ class MyController extends ApiController {
       const { page, perPage } = this.getPaginate(req);
       const results = await campaignService.paginate(query, page, perPage);
 
+      // @fix: paginate() not support for include.where conditions
+      const count = await campaignService.count(query);
+      results.meta.total = count;
+
       return this.responsePaginate(req, res, {
         data: CampaignResource.collection(results.data),
         meta: results.meta,
