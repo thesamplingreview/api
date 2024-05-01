@@ -54,12 +54,12 @@ const statusValidator = () => body('status')
     values: statuses.toString(),
   }));
 
-const roleValidator = () => body('role_id')
+const roleValidator = (scope) => body('role_id')
   .toInt()
   .notEmpty().bail()
   .withMessage(validatorMessage('validation.required', 'Role'))
   .custom(async (val, { req }) => {
-    const roles = await UserRole.scope('admins').findAll({
+    const roles = await UserRole.scope(scope).findAll({
       attributes: ['id'],
     });
     const roleIds = roles.map((d) => d.id);
@@ -79,7 +79,7 @@ exports.createReq = [
   passwordValidator(),
   contactValidator().optional(),
   statusValidator().optional(),
-  roleValidator(),
+  roleValidator('admins'),
 ];
 
 exports.updateReq = [
@@ -87,7 +87,24 @@ exports.updateReq = [
   passwordValidator().optional(),
   contactValidator().optional(),
   statusValidator().optional(),
-  roleValidator().optional(),
+  roleValidator('admins').optional(),
+];
+
+exports.vendorCreateReq = [
+  emailValidator(),
+  nameValidator(),
+  passwordValidator(),
+  contactValidator().optional(),
+  statusValidator().optional(),
+  roleValidator('vendors'),
+];
+
+exports.vendorUpdateReq = [
+  nameValidator().optional(),
+  passwordValidator().optional(),
+  contactValidator().optional(),
+  statusValidator().optional(),
+  roleValidator('vendors').optional(),
 ];
 
 /* eslint-enable newline-per-chained-call */

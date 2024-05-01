@@ -1,7 +1,6 @@
 const ApiController = require('../ApiController');
 const allOptions = require('../../../config/options');
 const {
-  sequelize,
   User,
   UserRole,
   Campaign,
@@ -20,12 +19,22 @@ class UserController extends ApiController {
    * GET - all
    */
   async getAll(req, res) {
+    // inject vendor-only filter
+    // req.query.vendor_id = req.user.vendor_id;
+    // *using include.where due to m2m relationship
+
     try {
       const query = {
         where: this.customerService.genWhereQuery(req),
         order: this.customerService.genOrdering(req),
         include: [
-          { model: Campaign, required: true },
+          {
+            model: Campaign,
+            required: true,
+            where: {
+              vendor_id: req.user.vendor_id,
+            },
+          },
         ],
       };
       const { page, perPage } = this.getPaginate(req);
@@ -46,9 +55,18 @@ class UserController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.customerService.findById(req.params.id, {
+      const record = await this.customerService.findOne({
+        where: {
+          id: req.params.id,
+        },
         include: [
           { model: UserRole },
+          {
+            model: Campaign,
+            where: {
+              vendor_id: req.user.vendor_id,
+            },
+          },
         ],
       });
 
@@ -62,80 +80,21 @@ class UserController extends ApiController {
 
   /**
    * POST - create
+   *
+   * vendor are unable to create user
    */
-  async create(req, res) {
-    // validated
-    const formData = {
-      email: req.body.email,
-      password: req.body.password,
-      contact: req.body.contact,
-      name: req.body.name,
-      status: req.body.status,
-    };
-
-    // DB update
-    const t = await sequelize.transaction();
-    try {
-      const result = await this.customerService.create(formData, { transaction: t });
-
-      await t.commit();
-      return this.responseJson(req, res, {
-        data: new UserResource(result),
-      });
-    } catch (err) {
-      await t.rollback();
-      return this.responseError(req, res, err);
-    }
-  }
 
   /**
    * PUT - update
+   *
+   * vendor are unable to update user
    */
-  async update(req, res) {
-    // validated
-    const formData = {
-      password: req.body.password,
-      contact: req.body.contact,
-      name: req.body.name,
-      status: req.body.status,
-      role_id: req.body.role_id,
-    };
-
-    // DB update
-    const t = await sequelize.transaction();
-    try {
-      const record = await this.customerService.findById(req.params.id);
-      const updated = await this.customerService.update(record, formData, { transaction: t });
-
-      await t.commit();
-      return this.responseJson(req, res, {
-        data: new UserResource(updated),
-      });
-    } catch (err) {
-      await t.rollback();
-      return this.responseError(req, res, err);
-    }
-  }
 
   /**
    * DELETE - remove
+   *
+   * vendor are unable to delete user
    */
-  async remove(req, res) {
-    // DB update
-    const t = await sequelize.transaction();
-    try {
-      const record = await this.customerService.findById(req.params.id);
-      const deleted = await this.customerService.delete(record, { transaction: t });
-
-      await t.commit();
-      return this.responseJson(req, res, {
-        data: new UserResource(deleted),
-      });
-    } catch (err) {
-      await t.rollback();
-      return this.responseError(req, res, err);
-    }
-  }
 
   /**
    * GET - options

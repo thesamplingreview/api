@@ -35,6 +35,9 @@ module.exports = (sequelize, DataTypes) => {
     cover_url: {
       type: DataTypes.STRING,
     },
+    vendor_id: {
+      type: DataTypes.UUID,
+    },
     created_at: {
       type: DataTypes.DATE,
     },

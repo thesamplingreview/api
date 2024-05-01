@@ -17,6 +17,9 @@ class CampaignController extends ApiController {
    * GET - all
    */
   async getAll(req, res) {
+    // inject vendor-only filter
+    req.query.vendor_id = req.user.vendor_id;
+
     try {
       const query = {
         where: this.campaignService.genWhereQuery(req),
@@ -43,7 +46,11 @@ class CampaignController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.campaignService.findById(req.params.id, {
+      const record = await this.campaignService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
         include: [
           { model: Vendor },
           { model: Form },
@@ -93,12 +100,13 @@ class CampaignController extends ApiController {
       start_date: req.body.start_date,
       end_date: req.body.end_date,
       quota: req.body.quota,
-      vendor_id: req.vendor?.id,
       form_id: req.form?.id,
       theme: req.body.theme,
       status: req.body.status,
       pos: req.body.pos,
     };
+    // system data
+    formData.vendor_id = req.user.vendor_id;
 
     // DB update
     const t = await sequelize.transaction();
@@ -141,7 +149,6 @@ class CampaignController extends ApiController {
       start_date: req.body.start_date,
       end_date: req.body.end_date,
       quota: req.body.quota,
-      vendor_id: req.vendor?.id,
       form_id: req.form?.id,
       theme: req.body.theme,
       status: req.body.status,
@@ -151,7 +158,12 @@ class CampaignController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.campaignService.findById(req.params.id);
+      const record = await this.campaignService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
+      });
       const updated = await this.campaignService.update(record, formData, { transaction: t });
 
       await t.commit();
@@ -171,7 +183,12 @@ class CampaignController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.campaignService.findById(req.params.id);
+      const record = await this.campaignService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
+      });
       const deleted = await this.campaignService.delete(record, { transaction: t });
 
       await t.commit();
@@ -190,14 +207,15 @@ class CampaignController extends ApiController {
   async options(req, res) {
     const forms = await Form.findAll({
       attributes: ['id', 'name'],
-    });
-    const vendors = await Vendor.findAll({
-      attributes: ['id', 'name'],
+      where: {
+        vendor_id: req.user.vendor_id,
+      },
     });
     const products = await Product.findAll({
       attributes: ['id', 'name'],
       where: {
         status: Product.STATUSES.ACTIVE,
+        vendor_id: req.user.vendor_id,
       },
       order: [['pos', 'ASC']],
     });
@@ -209,7 +227,6 @@ class CampaignController extends ApiController {
 
     const options = {
       forms,
-      vendors,
       products,
       statuses: Object.values(Campaign.STATUSES).map((val) => ({
         id: val,
@@ -243,16 +260,18 @@ class CampaignController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.campaignService.findById(req.params.id);
+      const record = await this.campaignService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
+      });
       const updated = await this.campaignService.syncProducts(record, formData.products, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {
         data: updated,
       });
-      // return this.responseJson(req, res, {
-      //   data: new CampaignResource(updated),
-      // });
     } catch (err) {
       await t.rollback();
       return this.responseError(req, res, err);
@@ -263,22 +282,44 @@ class CampaignController extends ApiController {
    * REPORT - overall stats
    */
   async getReportStats(req, res) {
-    const result = await this.campaignService.reportStats(req.params.id);
+    // DB validation
+    try {
+      await this.campaignService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
+      });
+      const result = await this.campaignService.reportStats(req.params.id);
 
-    return this.responseJson(req, res, {
-      data: result,
-    });
+      return this.responseJson(req, res, {
+        data: result,
+      });
+    } catch (err) {
+      return this.responseError(req, res, err);
+    }
   }
 
   /**
    * REPORT - overall counts
    */
   async getReportCounts(req, res) {
-    const result = await this.campaignService.reportCounts(req.params.id);
+    // DB validation
+    try {
+      await this.campaignService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
+      });
+      const result = await this.campaignService.reportCounts(req.params.id);
 
-    return this.responseJson(req, res, {
-      data: result,
-    });
+      return this.responseJson(req, res, {
+        data: result,
+      });
+    } catch (err) {
+      return this.responseError(req, res, err);
+    }
   }
 }
 

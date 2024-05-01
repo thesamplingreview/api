@@ -5,12 +5,18 @@ const BaseService = require('./BaseService');
 const { User } = require('../models');
 
 class AdminService extends BaseService {
-  constructor() {
-    super(User.scope('admins'));
+  constructor(roleGroup) {
+    super(User.scope(roleGroup));
   }
 
-  genWhereQuery() {
+  genWhereQuery(req) {
     const whereQuery = {};
+
+    // filter - vendor_id
+    if (req.query.vendor_id?.trim()) {
+      whereQuery.vendor_id = req.query.vendor_id;
+    }
+
     // ignore sa
     whereQuery.email = {
       [Op.ne]: 'sa@admin.com',
@@ -33,6 +39,7 @@ class AdminService extends BaseService {
       password: input.password ? bcrypt.hashSync(input.password, 12) : null,
       status: input.status || User.STATUSES.ACTIVE,
       role_id: input.role_id || null,
+      vendor_id: input.vendor_id || null,
     };
     const result = await this.model.create(formData);
 

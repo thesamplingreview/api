@@ -41,7 +41,7 @@ exports.createReq = [
   descValidator().optional(),
   imageValidator().optional(),
   brandValidator().optional(),
-  statusValidator().optional(),
+  statusValidator().optional({ values: 'falsy' }),
   posValidator().optional(),
 ];
 

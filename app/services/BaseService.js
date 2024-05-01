@@ -45,6 +45,8 @@ class BaseService {
       // count() break if having include options, hence simply using where on count query
       this.model.count({
         where: options.where || null,
+        include: options.countInclude || options.include || null,
+        distinct: true,
       }),
     ]);
 

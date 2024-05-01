@@ -61,6 +61,15 @@ module.exports = (sequelize, DataTypes) => {
           },
         ],
       });
+
+      this.addScope('vendors', {
+        include: [
+          {
+            model: models.UserRole,
+            where: { group: models.UserRole.GROUPS.VENDOR },
+          },
+        ],
+      });
     }
   }
 

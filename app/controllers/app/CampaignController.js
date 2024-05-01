@@ -75,6 +75,11 @@ class CampaignController extends ApiController {
             where: { user_id: req.user.id },
           } : undefined,
         ].filter((d) => d),
+        attributes: {
+          include: [
+            [sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id`)'), 'enrolmentsCount'],
+          ],
+        },
       });
 
       return this.responseJson(req, res, {
@@ -98,9 +103,23 @@ class CampaignController extends ApiController {
     };
 
     const enrolmentService = new EnrolmentService();
+    // eslint-disable-next-line prefer-destructuring
+    const campaign = req.campaign;
 
     const t = await sequelize.transaction();
     try {
+      // DB validation - enrolment quota
+      if (campaign.quota) {
+        const count = await enrolmentService.count({
+          where: {
+            campaign_id: formData.campaign_id,
+          },
+        });
+        if (count >= campaign.quota) {
+          throw new ValidationFailed('This campaign already reached maximum of enrolments.');
+        }
+      }
+
       // DB validation - if user have enrolment record
       const enrolment = await CampaignEnrolment.findOne({
         where: {

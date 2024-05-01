@@ -6,7 +6,12 @@ const nameValidator = () => body('name')
   .trim()
   .escape()
   .notEmpty().bail()
-  .withMessage(validatorMessage('validation.required', 'Name'));
+  .withMessage(validatorMessage('validation.required', 'Name'))
+  .isLength({ min: 3 }).bail()
+  .withMessage(validatorMessage('validation.length_min', {
+    field: 'Name',
+    min: 3,
+  }));
 
 const descValidator = () => body('description');
 
@@ -71,11 +76,11 @@ const fieldsValidator = ({ optional = false } = {}) => {
 exports.createReq = [
   nameValidator(),
   descValidator().optional(),
-  fieldsValidator({ optional: true }),
+  // fieldsValidator({ optional: true }),
 ];
 
 exports.updateReq = [
-  nameValidator(),
+  nameValidator().optional(),
   descValidator().optional(),
 ];
 

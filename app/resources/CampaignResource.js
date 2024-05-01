@@ -65,6 +65,7 @@ class CampaignResource {
       background_url: this.data.background_url,
       start_date: this.data.start_date,
       end_date: this.data.end_date,
+      quota: this.data.quota,
       status: this.data.status,
       state: this.generateStateAttr(this.data),
       highlight: this.data.highlight,

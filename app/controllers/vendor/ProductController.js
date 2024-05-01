@@ -1,39 +1,33 @@
 const ApiController = require('../ApiController');
-const allOptions = require('../../../config/options');
-const {
-  sequelize,
-  User,
-  UserRole,
-  Campaign,
-} = require('../../models');
-const CustomerService = require('../../services/CustomerService');
-const UserResource = require('../../resources/UserResource');
+const { sequelize, Product } = require('../../models');
+const ProductService = require('../../services/ProductService');
+const ProductResource = require('../../resources/ProductResource');
 
-class UserController extends ApiController {
+class ProductController extends ApiController {
   constructor() {
     super();
 
-    this.customerService = new CustomerService();
+    this.productService = new ProductService();
   }
 
   /**
    * GET - all
    */
   async getAll(req, res) {
+    // inject vendor-only filter
+    req.query.vendor_id = req.user.vendor_id;
+
     try {
       const query = {
-        where: this.customerService.genWhereQuery(req),
-        order: this.customerService.genOrdering(req),
-        include: [
-          { model: Campaign, required: true },
-        ],
+        include: this.productService.genIncludeQuery(req),
+        where: this.productService.genWhereQuery(req),
+        order: this.productService.genOrdering(req),
       };
       const { page, perPage } = this.getPaginate(req);
-      const results = await this.customerService.paginate(query, page, perPage);
+      const results = await this.productService.paginate(query, page, perPage);
 
       return this.responsePaginate(req, res, {
-        data: UserResource.collection(results.data),
-        // data: results.data,
+        data: ProductResource.collection(results.data),
         meta: results.meta,
       });
     } catch (err) {
@@ -46,14 +40,15 @@ class UserController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.customerService.findById(req.params.id, {
-        include: [
-          { model: UserRole },
-        ],
+      const record = await this.productService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
       });
 
       return this.responseJson(req, res, {
-        data: new UserResource(record),
+        data: new ProductResource(record),
       });
     } catch (err) {
       return this.responseError(req, res, err);
@@ -66,21 +61,24 @@ class UserController extends ApiController {
   async create(req, res) {
     // validated
     const formData = {
-      email: req.body.email,
-      password: req.body.password,
-      contact: req.body.contact,
       name: req.body.name,
+      brand: req.body.brand,
+      description: req.body.description,
+      image: req.body.image,
       status: req.body.status,
+      pos: req.body.pos,
     };
+    // system data
+    formData.vendor_id = req.user.vendor_id;
 
     // DB update
     const t = await sequelize.transaction();
     try {
-      const result = await this.customerService.create(formData, { transaction: t });
+      const result = await this.productService.create(formData, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {
-        data: new UserResource(result),
+        data: new ProductResource(result),
       });
     } catch (err) {
       await t.rollback();
@@ -94,22 +92,28 @@ class UserController extends ApiController {
   async update(req, res) {
     // validated
     const formData = {
-      password: req.body.password,
-      contact: req.body.contact,
       name: req.body.name,
+      brand: req.body.brand,
+      description: req.body.description,
+      image: req.body.image,
       status: req.body.status,
-      role_id: req.body.role_id,
+      pos: req.body.pos,
     };
 
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.customerService.findById(req.params.id);
-      const updated = await this.customerService.update(record, formData, { transaction: t });
+      const record = await this.productService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
+      });
+      const updated = await this.productService.update(record, formData, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {
-        data: new UserResource(updated),
+        data: new ProductResource(updated),
       });
     } catch (err) {
       await t.rollback();
@@ -124,12 +128,17 @@ class UserController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.customerService.findById(req.params.id);
-      const deleted = await this.customerService.delete(record, { transaction: t });
+      const record = await this.productService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
+      });
+      const deleted = await this.productService.delete(record, { transaction: t });
 
       await t.commit();
       return this.responseJson(req, res, {
-        data: new UserResource(deleted),
+        data: new ProductResource(deleted),
       });
     } catch (err) {
       await t.rollback();
@@ -141,17 +150,11 @@ class UserController extends ApiController {
    * GET - options
    */
   async options(req, res) {
-    const roles = await UserRole.scope('users').findAll({
-      attributes: ['id', 'name'],
-    });
-
     const options = {
-      roles,
-      statuses: Object.values(User.STATUSES).map((val) => ({
+      statuses: Object.values(Product.STATUSES).map((val) => ({
         id: val,
         name: val.charAt(0).toUpperCase() + val.slice(1),
       })),
-      phone_prefixes: allOptions.phonePrefixes,
     };
 
     return this.responseJson(req, res, {
@@ -160,4 +163,4 @@ class UserController extends ApiController {
   }
 }
 
-module.exports = UserController;
+module.exports = ProductController;

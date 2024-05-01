@@ -41,6 +41,10 @@ class ReviewService extends BaseService {
         };
       }
     }
+    // filter - vendor_id (need campaign relations)
+    if (req.query.vendor_id) {
+      whereQuery['$Campaign.vendor_id$'] = req.user.vendor_id;
+    }
 
     return whereQuery;
   }

@@ -4,37 +4,9 @@ const {
 const { startOfDay, endOfDay } = require('date-fns');
 const { toDate } = require('../../helpers/utils');
 const ApiController = require('../ApiController');
-const { User, CampaignEnrolment } = require('../../models');
+const { Campaign, CampaignEnrolment } = require('../../models');
 
 class ReportController extends ApiController {
-  /**
-   * GET - signup
-   */
-  async countSignup(req, res) {
-    const whereQuery = {};
-    if (req.query.date_from || req.query.date_to) {
-      whereQuery.created_at = this.genDateFilterConditions(
-        req.query.date_from,
-        req.query.date_to,
-      );
-    }
-
-    const result = await User.findAll({
-      where: whereQuery,
-      attributes: [
-        [fn('DATE', literal('created_at')), 'day'],
-        [fn('COUNT', col('User.id')), 'count'],
-      ],
-      group: ['day'],
-      subQuery: false,
-      raw: true,
-    });
-
-    return this.responseJson(req, res, {
-      data: result,
-    });
-  }
-
   /**
    * GET - enrolments
    */
@@ -53,8 +25,18 @@ class ReportController extends ApiController {
     const result = await CampaignEnrolment.findAll({
       where: whereQuery,
       attributes: [
-        [fn('DATE', literal('created_at')), 'day'],
-        [fn('COUNT', col('id')), 'count'],
+        [fn('DATE', literal('CampaignEnrolment.created_at')), 'day'],
+        [fn('COUNT', col('CampaignEnrolment.id')), 'count'],
+      ],
+      include: [
+        {
+          model: Campaign,
+          attributes: [],
+          required: true,
+          where: {
+            vendor_id: req.user.vendor_id,
+          },
+        },
       ],
       group: ['day'],
       raw: true,

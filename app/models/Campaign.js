@@ -113,6 +113,9 @@ module.exports = (sequelize, DataTypes) => {
     end_date: {
       type: DataTypes.DATE,
     },
+    quota: {
+      type: DataTypes.INTEGER,
+    },
     vendor_id: {
       type: DataTypes.UUID,
     },

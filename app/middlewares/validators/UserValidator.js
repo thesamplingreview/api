@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
-const { User, UserRole, Vendor } = require('../../models');
+const { User, UserRole } = require('../../models');
 
 const statuses = Object.values(User.STATUSES);
 
@@ -54,19 +54,6 @@ const statusValidator = () => body('status')
     values: statuses.toString(),
   }));
 
-const vendorValidator = () => body('vendor_id')
-  .notEmpty().bail()
-  .withMessage(validatorMessage('validation.required', 'Vendor'))
-  .custom(async (val, { req }) => {
-    const vendor = await Vendor.findByPk(val);
-    if (!vendor) {
-      throw new Error('Invalid');
-    }
-    req.vendor = vendor;
-    return true;
-  }).bail()
-  .withMessage(validatorMessage('validation.not_exist', 'Vendor'));
-
 const roleValidator = () => body('role_id')
   .toInt()
   .notEmpty().bail()
@@ -92,7 +79,6 @@ exports.createReq = [
   passwordValidator(),
   contactValidator().optional(),
   statusValidator().optional(),
-  vendorValidator().optional(),
   roleValidator().optional(),
 ];
 
@@ -101,7 +87,6 @@ exports.updateReq = [
   passwordValidator().optional(),
   contactValidator().optional(),
   statusValidator().optional(),
-  vendorValidator().optional(),
   roleValidator().optional(),
 ];
 

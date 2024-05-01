@@ -35,7 +35,7 @@ const slugValidator = ({ paramId } = {}) => body('slug')
     const exist = await Campaign.count({
       where: whereQuery,
     });
-    return exist === 0;
+    return exist === 0 ? Promise.resolve() : Promise.reject();
   })
   .withMessage(validatorMessage('validation.exist', 'Slug'));
 
@@ -95,6 +95,10 @@ const endDateValidator = () => body('end_date')
   }).bail()
   .withMessage(validatorMessage('validation.date', 'End Date'));
 
+const quotaValidator = () => body('quota')
+  .isNumeric().bail()
+  .withMessage(validatorMessage('validation.number', 'Quota'));
+
 const statusValidator = () => body('status')
   .isIn(Object.values(Campaign.STATUSES)).bail()
   .withMessage(validatorMessage('validation.in', {
@@ -111,10 +115,10 @@ const vendorValidator = () => body('vendor_id')
   .custom(async (val, { req }) => {
     const vendor = await Vendor.findByPk(val);
     if (!vendor) {
-      throw new Error('Invalid');
+      return Promise.reject();
     }
     req.vendor = vendor;
-    return true;
+    return Promise.resolve();
   }).bail()
   .withMessage(validatorMessage('validation.not_exist', 'Vendor'));
 
@@ -186,6 +190,7 @@ exports.createReq = [
   backgroundValidator().optional(),
   startDateValidator().optional({ values: 'falsy' }),
   endDateValidator().optional({ values: 'falsy' }),
+  quotaValidator().optional({ values: 'falsy' }),
   vendorValidator().optional({ values: 'falsy' }),
   formValidator().optional({ values: 'falsy' }),
   metaTitleValidator().optional(),
@@ -194,7 +199,7 @@ exports.createReq = [
   reviewTypeValidator().optional(),
   reviewInstructionValidator().optional(),
   reviewCtaValidator().optional(),
-  statusValidator().optional(),
+  statusValidator().optional({ values: 'falsy' }),
   themeValidator().optional(),
   posValidator().optional(),
 ];
@@ -216,6 +221,7 @@ exports.updateReq = [
   backgroundValidator().optional(),
   startDateValidator().optional({ values: 'falsy' }),
   endDateValidator().optional({ values: 'falsy' }),
+  quotaValidator().optional({ values: 'falsy' }),
   vendorValidator().optional({ values: 'falsy' }),
   formValidator().optional({ values: 'falsy' }),
   metaTitleValidator().optional(),
@@ -224,7 +230,7 @@ exports.updateReq = [
   reviewTypeValidator().optional(),
   reviewInstructionValidator().optional(),
   reviewCtaValidator().optional(),
-  statusValidator().optional(),
+  statusValidator().optional({ values: 'falsy' }),
   themeValidator().optional(),
   posValidator().optional(),
 ];
