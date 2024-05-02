@@ -1,4 +1,4 @@
-const { AuthError } = require('../errors');
+const { ForbiddenError } = require('../errors');
 const AuthService = require('../services/AuthService');
 const UserService = require('../services/UserService');
 const { UserRole } = require('../models');
@@ -7,7 +7,7 @@ const userCheck = (role = '') => {
   return async (req, res, next) => {
     const userId = req.user.id;
     if (!userId) {
-      next(new AuthError());
+      next(new ForbiddenError());
     }
 
     try {
@@ -53,7 +53,7 @@ const userCheck = (role = '') => {
       next();
     } catch (err) {
       // throw authError
-      next(new AuthError(err.message));
+      next(new ForbiddenError(err.message));
     }
   };
 };

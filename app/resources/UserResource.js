@@ -12,6 +12,7 @@ class UserResource {
         id: this.data.UserRole.id,
         name: this.data.UserRole.name,
         code: this.data.UserRole.code,
+        group: this.data.UserRole.group,
       } : null;
     }
     if (this.data.Vendor !== undefined) {

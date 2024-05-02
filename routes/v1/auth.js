@@ -48,6 +48,11 @@ router.put(
   MyValidator.changeContactReq,
   MyController.changeContact,
 );
+router.get(
+  '/my/permissions',
+  tokenInfoMiddleware(),
+  MyController.permissions,
+);
 
 // password reset
 router.post(
