@@ -14,7 +14,7 @@ const slugValidator = () => param('slug')
     req.campaign = campaign;
     return true;
   })
-  .withMessage(validatorMessage('validation.exist', 'Slug'));
+  .withMessage(validatorMessage('validation.not_exist', 'Slug'));
 
 // request validators
 exports.createEnrolmentReq = [

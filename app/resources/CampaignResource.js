@@ -40,6 +40,9 @@ class CampaignResource {
     if (this.data.enrolmentsCount !== undefined) {
       counts.enrolments_count = this.data.enrolmentsCount;
     }
+    if (this.data.enrolmentsAcceptedCount !== undefined) {
+      counts.enrolments_accepted_count = this.data.enrolmentsAcceptedCount;
+    }
     if (this.data.reviewsCount !== undefined) {
       counts.reviews_count = this.data.reviewsCount;
     }

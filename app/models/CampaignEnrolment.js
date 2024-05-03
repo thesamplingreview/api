@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     static STATUSES = {
       PENDING: 'pending',
       COMPLETE: 'complete',
+      REJECT: 'reject',
     };
 
     static associate(models) {

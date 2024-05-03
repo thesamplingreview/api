@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const ApiController = require('../ApiController');
 const { ValidationFailed } = require('../../errors');
 const {
@@ -77,7 +78,8 @@ class CampaignController extends ApiController {
         ].filter((d) => d),
         attributes: {
           include: [
-            [sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id`)'), 'enrolmentsCount'],
+            // [sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id`)'), 'enrolmentsCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id` AND (`CampaignEnrolments`.`status` <> "reject" OR `CampaignEnrolments`.`status` IS NULL))'), 'enrolmentsAcceptedCount'],
           ],
         },
       });
@@ -113,6 +115,12 @@ class CampaignController extends ApiController {
         const count = await enrolmentService.count({
           where: {
             campaign_id: formData.campaign_id,
+            status: {
+              [Op.or]: [
+                { [Op.ne]: CampaignEnrolment.STATUSES.REJECT },
+                { [Op.is]: null },
+              ],
+            },
           },
         });
         if (count >= campaign.quota) {
