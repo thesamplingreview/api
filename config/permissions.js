@@ -24,6 +24,11 @@ const allPermissions = [
   'products:create',
   'products:edit',
   'products:delete',
+  // reviews
+  'reviews:view',
+  'reviews:create',
+  'reviews:edit',
+  'reviews:delete',
   // users
   'users:view',
   'users:create',
@@ -41,6 +46,9 @@ const allPermissions = [
   'admins:delete',
   // system
   'system:view',
+  // report
+  'report:enrolments',
+  'report:signup',
 ];
 
 function genModulePermissions(modules) {
@@ -56,11 +64,15 @@ module.exports = {
   vendor: [
     ...genModulePermissions([
       'campaigns',
-      'enrolments',
       'products',
       'forms',
-      'admins',
     ]),
+    'enrolments:view',
+    'enrolments:edit',
+    'reviews:view',
     'users:view',
+    'admins:view',
+    'admins:edit',
+    'report:enrolments',
   ],
 };
