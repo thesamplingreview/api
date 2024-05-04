@@ -11,6 +11,12 @@ class VendorResource {
       counts.users_count = this.data.usersCount;
     }
 
+    const relations = {};
+    if (this.data.Users !== undefined) {
+      const UserResource = require('./UserResource');
+      relations.users = this.data.Users.map((d) => new UserResource(d));
+    }
+
     return {
       id: this.data.id,
       name: this.data.name,
@@ -19,6 +25,7 @@ class VendorResource {
       created_at: this.data.created_at || null,
       updated_at: this.data.updated_at || null,
       ...counts,
+      ...relations,
     };
   }
 

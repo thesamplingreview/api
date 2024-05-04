@@ -17,7 +17,7 @@ class UserResource {
     }
     if (this.data.Vendor !== undefined) {
       const VendorResource = require('./VendorResource');
-      relations.vendors = this.data.Vendor ? new VendorResource(this.data.Vendor) : null;
+      relations.vendor = this.data.Vendor ? new VendorResource(this.data.Vendor) : null;
     }
     if (this.data.CampaignEnrolment !== undefined) {
       relations.campaign_enrolment = {

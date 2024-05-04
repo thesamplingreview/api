@@ -1,8 +1,10 @@
 const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
-const { sequelize, User } = require('../../models');
+const { sequelize, User, UserRole } = require('../../models');
 const VendorService = require('../../services/VendorService');
+const AdminService = require('../../services/AdminService');
 const VendorResource = require('../../resources/VendorResource');
+const UserResource = require('../../resources/UserResource');
 
 class VendorController extends ApiController {
   constructor() {
@@ -67,6 +69,9 @@ class VendorController extends ApiController {
       name: req.body.name,
       profile: req.body.profile,
       logo: req.body.logo,
+      admin_name: req.body.admin_name,
+      admin_email: req.body.admin_email,
+      admin_password: req.body.admin_password,
     };
 
     // DB update
@@ -74,7 +79,29 @@ class VendorController extends ApiController {
     try {
       const result = await this.vendorService.create(formData, { transaction: t });
 
+      // create vendor admin
+      const vendorRole = await UserRole.findOne({
+        where: { group: UserRole.GROUPS.VENDOR },
+        raw: true,
+      });
+      const adminService = new AdminService();
+      await adminService.create({
+        name: formData.admin_name,
+        email: formData.admin_email,
+        password: formData.admin_password,
+        role_id: vendorRole.id,
+        vendor_id: result.id,
+      }, { transaction: t });
+
       await t.commit();
+
+      // force refersh result
+      await result.reload({
+        include: [
+          { model: User },
+        ],
+      });
+
       return this.responseJson(req, res, {
         data: new VendorResource(result),
       });

@@ -12,6 +12,10 @@ class AdminService extends BaseService {
   genWhereQuery(req) {
     const whereQuery = {};
 
+    // filter - role_id
+    if (req.query.role_id?.trim()) {
+      whereQuery.role_id = req.query.role_id;
+    }
     // filter - vendor_id
     if (req.query.vendor_id?.trim()) {
       whereQuery.vendor_id = req.query.vendor_id;
@@ -31,7 +35,7 @@ class AdminService extends BaseService {
     return sort ? [sort] : [['id', 'ASC']];
   }
 
-  async create(input) {
+  async create(input, options = {}) {
     const formData = {
       email: input.email,
       name: input.name || null,
@@ -41,12 +45,12 @@ class AdminService extends BaseService {
       role_id: input.role_id || null,
       vendor_id: input.vendor_id || null,
     };
-    const result = await this.model.create(formData);
+    const result = await this.model.create(formData, options);
 
     return result;
   }
 
-  async update(record, input) {
+  async update(record, input, options = {}) {
     const formData = {
       name: getInput(input.name, record.name),
       contact: getInput(input.contact, record.contact),
@@ -56,7 +60,7 @@ class AdminService extends BaseService {
     if (input.password) {
       formData.password = bcrypt.hashSync(input.password, 12);
     }
-    const result = await record.update(formData);
+    const result = await record.update(formData, options);
 
     return result;
   }

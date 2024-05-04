@@ -43,6 +43,7 @@ const allPermissions = [
   'admins:view',
   'admins:create',
   'admins:edit',
+  'admins:password',
   'admins:delete',
   // system
   'system:view',
