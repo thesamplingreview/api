@@ -45,6 +45,11 @@ const allPermissions = [
   'admins:edit',
   'admins:password',
   'admins:delete',
+  // workflows
+  'workflows:view',
+  'workflows:create',
+  'workflows:edit',
+  'workflows:delete',
   // system
   'system:view',
   // report
