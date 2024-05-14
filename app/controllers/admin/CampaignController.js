@@ -1,10 +1,14 @@
 const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
+const { ValidationFailed } = require('../../errors');
+const allOptions = require('../../../config/options');
 const {
-  sequelize, Campaign, Product, Form, Vendor, User,
+  sequelize, Campaign, Product, Form, Vendor, User, WorkflowTask,
 } = require('../../models');
 const CampaignService = require('../../services/CampaignService');
+const WorkflowService = require('../../services/WorkflowService');
 const CampaignResource = require('../../resources/CampaignResource');
+const WorkflowResource = require('../../resources/WorkflowResource');
 
 class CampaignController extends ApiController {
   constructor() {
@@ -225,6 +229,7 @@ class CampaignController extends ApiController {
         name: val.charAt(0).toUpperCase() + val.slice(1),
       })),
       states,
+      phone_prefixes: allOptions.phonePrefixes,
     };
 
     return this.responseJson(req, res, {
@@ -233,7 +238,7 @@ class CampaignController extends ApiController {
   }
 
   /**
-   * PUT - add products
+   * PUT - update products
    */
   async updateProducts(req, res) {
     // validated
@@ -261,7 +266,7 @@ class CampaignController extends ApiController {
   }
 
   /**
-   * REPORT - overall stats
+   * GET - report overall stats
    */
   async getReportStats(req, res) {
     const result = await this.campaignService.reportStats(req.params.id);
@@ -272,7 +277,7 @@ class CampaignController extends ApiController {
   }
 
   /**
-   * REPORT - overall counts
+   * GET - report overall counts
    */
   async getReportCounts(req, res) {
     const result = await this.campaignService.reportCounts(req.params.id);
@@ -280,6 +285,89 @@ class CampaignController extends ApiController {
     return this.responseJson(req, res, {
       data: result,
     });
+  }
+
+  /**
+   * GET - get enrolment workflow
+   */
+  async getWorkflow(req, res) {
+    try {
+      const campaign = await this.campaignService.findById(req.params.id);
+      const record = await campaign.getWorkflow({
+        include: [WorkflowTask],
+      });
+
+      return this.responseJson(req, res, {
+        data: record ? new WorkflowResource(record) : null,
+      });
+    } catch (err) {
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * PUT - update workflow
+   */
+  async updateWorkflow(req, res, next) {
+    // validated
+    const formData = {
+      tasks: req.body.tasks,
+    };
+
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const campaign = await this.campaignService.findById(req.params.id);
+      // create workflow if haven't
+      const workflowService = new WorkflowService();
+
+      let record = await campaign.getWorkflow();
+      if (!record) {
+        record = await workflowService.create({
+          name: campaign.name,
+          vendor_id: campaign.vendor_id || null,
+          created_by: req.user.id,
+        }, { transaction: t });
+
+        campaign.enrolment_workflow_id = record.id;
+        await campaign.save({ transaction: t });
+      }
+
+      // DB validated - task doesn't belongs to other workflow
+      // *note 1: id can be new (not exists in DB)
+      const taskIds = formData.tasks.map((d) => d.id);
+      const tasks = await WorkflowTask.findAll({
+        attributes: ['id', 'workflow_id'],
+        where: {
+          id: taskIds,
+        },
+        raw: true,
+      });
+      const invalid = tasks.some((d) => d.workflow_id !== record.id);
+      if (invalid) {
+        return next(new ValidationFailed('Invalid or duplicated task_id detected.'));
+      }
+
+      // update tasks
+      const oldTasks = await record.getWorkflowTasks();
+      await workflowService.syncTasks(record, formData.tasks, oldTasks, { transaction: t });
+
+      await t.commit();
+
+      // reload
+      await record.reload({
+        include: [
+          { model: WorkflowTask },
+        ],
+      });
+
+      return this.responseJson(req, res, {
+        data: new WorkflowResource(record),
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
   }
 }
 

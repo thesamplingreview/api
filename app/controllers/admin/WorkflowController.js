@@ -3,6 +3,7 @@ const {
   sequelize, WorkflowTask, Vendor,
 } = require('../../models');
 const WorkflowService = require('../../services/WorkflowService');
+const QueueService = require('../../services/QueueService');
 const WorkflowResource = require('../../resources/WorkflowResource');
 const { ValidationFailed } = require('../../errors');
 
@@ -188,6 +189,54 @@ class WorkflowController extends ApiController {
       });
     } catch (err) {
       await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * GET - trigger workflow
+   */
+  async triggerWorkflow(req, res) {
+    // validated
+    const formData = {
+      campaign_id: 1,
+    };
+
+    const queueService = new QueueService();
+
+    // DB update
+    const transaction = await sequelize.transaction();
+    try {
+      const record = await this.workflowService.findById(req.params.id);
+      const queueTasks = await queueService.generateQueueTasks(record, formData, { transaction });
+
+      await transaction.commit();
+
+      return this.responseJson(req, res, {
+        data: queueTasks,
+      });
+    } catch (err) {
+      await transaction.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  async triggerQueue(req, res) {
+    // validated
+    // const queueId = '1715586003534_1';
+    const taskId = '1715508652456';
+
+    const queueService = new QueueService();
+
+    // DB update
+    try {
+      await queueService.pushQueueTask(taskId, { campaign: 2 });
+
+      return this.responseJson(req, res, {
+        data: [],
+      });
+    } catch (err) {
+      throw err;
       return this.responseError(req, res, err);
     }
   }

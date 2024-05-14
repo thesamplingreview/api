@@ -37,13 +37,10 @@ const tasksValidator = ({ optional = false } = {}) => {
       .trim()
       .notEmpty().bail()
       .withMessage(validatorMessage('validation.required', 'field.id')),
-    body(`${fieldName}.*.name`)
-      .trim()
+    body(`${fieldName}.*.action`)
       .notEmpty().bail()
-      .withMessage(validatorMessage('validation.required', 'field.name')),
-    body(`${fieldName}.*.type`)
-      .notEmpty().bail()
-      .withMessage(validatorMessage('validation.required', 'field.type')),
+      .withMessage(validatorMessage('validation.required', 'field.action')),
+    body(`${fieldName}.*.pos`),
     body(`${fieldName}.*.config`)
       .isObject().bail()
       .withMessage(validatorMessage('validation.object', 'field.config'))

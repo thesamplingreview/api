@@ -7,9 +7,8 @@ module.exports = {
     try {
       await queryInterface.createTable('queue_tasks', {
         id: {
-          type: Sequelize.INTEGER,
+          type: Sequelize.STRING,
           allowNull: false,
-          autoIncrement: true,
           primaryKey: true,
         },
         task_id: {
@@ -25,22 +24,33 @@ module.exports = {
         task_parent_id: {
           type: Sequelize.STRING,
         },
-        workflow_id: {
-          type: Sequelize.UUID,
+        parent_queue_id: {
+          type: Sequelize.STRING,
         },
-        task_name: {
+        grand_parent_queue_id: {
+          type: Sequelize.STRING,
+        },
+        task_action: {
           type: Sequelize.STRING,
           allowNull: false,
         },
-        task_type: {
+        task_pos: {
           type: Sequelize.STRING,
-          allowNull: false,
         },
         task_data: {
           type: Sequelize.JSON,
         },
         task_config: {
           type: Sequelize.JSON,
+        },
+        workflow_id: {
+          type: Sequelize.UUID,
+          references: {
+            model: 'workflows',
+            key: 'id',
+          },
+          onUpdate: 'CASCADE',
+          onDelete: 'CASCADE',
         },
         status: {
           type: Sequelize.STRING(30),
@@ -69,17 +79,6 @@ module.exports = {
           allowNull: false,
           defaultValue: Sequelize.fn('NOW'),
         },
-      }, { transaction });
-
-      await queryInterface.addColumn('queue_tasks', 'parent_queue_id', {
-        after: 'status',
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'queue_tasks',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
       }, { transaction });
 
       await transaction.commit();

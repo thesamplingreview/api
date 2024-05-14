@@ -75,9 +75,9 @@ class WorkflowService extends BaseService {
         currTask = new WorkflowTask();
       }
       currTask.id = task.id;
-      currTask.name = task.name;
-      currTask.type = task.type || null;
+      currTask.action = task.action;
       currTask.config = task.config || null;
+      currTask.pos = task.pos || null;
       currTask.parent_task_id = task.parent_task_id || null;
       currTask.workflow_id = record.id;
 

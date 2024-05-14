@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       PENDING: 'pending',
       COMPLETED: 'completed',
       FAILED: 'failed',
+      SKIPPED: 'skipped',
     };
 
     /**
@@ -32,9 +33,8 @@ module.exports = (sequelize, DataTypes) => {
 
   QueueTask.init({
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
-      autoIncrement: true,
       primaryKey: true,
     },
     task_id: {
@@ -44,22 +44,27 @@ module.exports = (sequelize, DataTypes) => {
     task_parent_id: {
       type: DataTypes.INTEGER,
     },
-    workflow_id: {
-      type: DataTypes.UUID,
+    parent_queue_id: {
+      type: DataTypes.STRING,
     },
-    task_name: {
+    grand_parent_queue_id: {
+      type: DataTypes.STRING,
+    },
+    task_action: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    task_type: {
+    task_pos: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     task_data: {
       type: DataTypes.JSON,
     },
     task_config: {
       type: DataTypes.JSON,
+    },
+    workflow_id: {
+      type: DataTypes.UUID,
     },
     status: {
       type: DataTypes.STRING(30),

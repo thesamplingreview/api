@@ -22,13 +22,12 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       primaryKey: true,
     },
-    name: {
+    action: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    type: {
+    pos: {
       type: DataTypes.STRING,
-      allowNull: false,
     },
     config: {
       type: DataTypes.JSON,

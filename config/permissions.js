@@ -9,6 +9,7 @@ const allPermissions = [
   'campaigns:create',
   'campaigns:edit',
   'campaigns:delete',
+  'campaigns:workflow',
   // enrolments
   'enrolments:view',
   'enrolments:create',
@@ -46,10 +47,10 @@ const allPermissions = [
   'admins:password',
   'admins:delete',
   // workflows
-  'workflows:view',
-  'workflows:create',
-  'workflows:edit',
-  'workflows:delete',
+  // 'workflows:view',
+  // 'workflows:create',
+  // 'workflows:edit',
+  // 'workflows:delete',
   // system
   'system:view',
   // report

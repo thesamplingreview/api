@@ -75,6 +75,8 @@ router.post('/campaigns', CampaignValidator.createReq, CampaignController.create
 router.put('/campaigns/:id', CampaignValidator.updateReq, CampaignController.update);
 router.delete('/campaigns/:id', CampaignController.remove);
 router.put('/campaigns/:id/products', CampaignValidator.productsReq, CampaignController.updateProducts);
+router.get('/campaigns/:id/workflow', CampaignController.getWorkflow);
+router.put('/campaigns/:id/workflow', WorkflowValidator.updateTasksReq, CampaignController.updateWorkflow);
 
 // enrolment module
 router.get('/enrolments', EnrolmentController.getAll);
@@ -114,5 +116,8 @@ router.post('/workflows', WorkflowValidator.createReq, WorkflowController.create
 router.put('/workflows/:id', WorkflowValidator.updateReq, WorkflowController.update);
 router.put('/workflows/:id/tasks', WorkflowValidator.updateTasksReq, WorkflowController.updateTasks);
 router.delete('/workflows/:id', WorkflowController.remove);
+
+router.get('/workflows/:id/trigger', WorkflowController.triggerWorkflow);
+router.get('/queue/test-run', WorkflowController.triggerQueue);
 
 module.exports = router;
