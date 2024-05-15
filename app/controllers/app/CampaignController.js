@@ -144,6 +144,7 @@ class CampaignController extends ApiController {
 
       t.commit();
 
+      // Deprecated - replace with workflow tasks
       // email notifications
       const configService = new ConfigService();
       const {

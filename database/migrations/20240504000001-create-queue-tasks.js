@@ -7,10 +7,17 @@ module.exports = {
     try {
       await queryInterface.createTable('queue_tasks', {
         id: {
-          type: Sequelize.STRING,
+          type: Sequelize.INTEGER,
+          autoIncrement: true,
           allowNull: false,
           primaryKey: true,
         },
+        parent_queue_id: {
+          type: Sequelize.INTEGER,
+        },
+        // grand_parent_queue_id: {
+        //   type: Sequelize.STRING,
+        // },
         task_id: {
           type: Sequelize.STRING,
           allowNull: false,
@@ -22,12 +29,6 @@ module.exports = {
           onDelete: 'CASCADE',
         },
         task_parent_id: {
-          type: Sequelize.STRING,
-        },
-        parent_queue_id: {
-          type: Sequelize.STRING,
-        },
-        grand_parent_queue_id: {
           type: Sequelize.STRING,
         },
         task_action: {

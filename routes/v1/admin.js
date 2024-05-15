@@ -117,7 +117,4 @@ router.put('/workflows/:id', WorkflowValidator.updateReq, WorkflowController.upd
 router.put('/workflows/:id/tasks', WorkflowValidator.updateTasksReq, WorkflowController.updateTasks);
 router.delete('/workflows/:id', WorkflowController.remove);
 
-router.get('/workflows/:id/trigger', WorkflowController.triggerWorkflow);
-router.get('/queue/test-run', WorkflowController.triggerQueue);
-
 module.exports = router;

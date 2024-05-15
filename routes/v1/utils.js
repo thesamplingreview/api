@@ -4,6 +4,7 @@ const userCheckMiddleware = require('../../app/middlewares/userCheck');
 const appKeyCheckMiddleware = require('../../app/middlewares/appKeyCheck');
 const { UtilsValidator } = require('../../app/middlewares/validators');
 const UtilsController = require('../../app/controllers/UtilsController');
+const CronController = require('../../app/controllers/CronController');
 
 const router = express.Router();
 
@@ -35,6 +36,19 @@ router.post(
   '/test-sms',
   appKeyCheckMiddleware(),
   utilsController.sendTestSMS.bind(utilsController),
+);
+
+// cron module
+const cronController = new CronController();
+
+router.get(
+  '/run-cron-queue',
+  appKeyCheckMiddleware(),
+  cronController.triggerQueueTask.bind(cronController),
+);
+router.get(
+  '/test-trigger',
+  cronController.testWorkflowTrigger.bind(cronController),
 );
 
 module.exports = router;

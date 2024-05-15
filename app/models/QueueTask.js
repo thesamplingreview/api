@@ -33,22 +33,23 @@ module.exports = (sequelize, DataTypes) => {
 
   QueueTask.init({
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
       allowNull: false,
       primaryKey: true,
     },
+    parent_queue_id: {
+      type: DataTypes.INTEGER,
+    },
+    // grand_parent_queue_id: {
+    //   type: DataTypes.STRING,
+    // },
     task_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
     task_parent_id: {
       type: DataTypes.INTEGER,
-    },
-    parent_queue_id: {
-      type: DataTypes.STRING,
-    },
-    grand_parent_queue_id: {
-      type: DataTypes.STRING,
     },
     task_action: {
       type: DataTypes.STRING,
