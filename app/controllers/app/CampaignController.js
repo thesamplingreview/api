@@ -7,11 +7,12 @@ const {
 const CampaignService = require('../../services/CampaignService');
 const EnrolmentService = require('../../services/EnrolmentService');
 const ReviewService = require('../../services/ReviewService');
-const ConfigService = require('../../services/ConfigService');
+const WorkflowService = require('../../services/WorkflowService');
+// const ConfigService = require('../../services/ConfigService');
 const CampaignResource = require('../../resources/CampaignResource');
 const CampaignEnrolmentResource = require('../../resources/CampaignEnrolmentResource');
 const CampaignReviewResource = require('../../resources/CampaignReviewResource');
-const { sendMailUsingTmpl } = require('../../helpers/mailer');
+// const { sendMailUsingTmpl } = require('../../helpers/mailer');
 
 class CampaignController extends ApiController {
   constructor() {
@@ -105,6 +106,7 @@ class CampaignController extends ApiController {
     };
 
     const enrolmentService = new EnrolmentService();
+    const workflowService = new WorkflowService();
     // eslint-disable-next-line prefer-destructuring
     const campaign = req.campaign;
 
@@ -124,7 +126,10 @@ class CampaignController extends ApiController {
           },
         });
         if (count >= campaign.quota) {
-          throw new ValidationFailed('This campaign already reached maximum of enrolments.');
+          throw new ValidationFailed('quota limit hit', [{
+            field: 'quota',
+            msg: 'This campaign already reached maximum of enrolments.',
+          }]);
         }
       }
 
@@ -136,51 +141,57 @@ class CampaignController extends ApiController {
         },
       });
       if (enrolment) {
-        throw new ValidationFailed('User already enroled.');
+        throw new ValidationFailed('invalid_enrolment', [{
+          field: 'user_id',
+          msg: 'User already enrolled previously.',
+        }]);
       }
 
       // DB update
       const result = await enrolmentService.create(formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
+
+      // trigger submission workflow
+      await workflowService.triggerEnrolmentWorkflow(result.id);
 
       // Deprecated - replace with workflow tasks
       // email notifications
-      const configService = new ConfigService();
-      const {
-        sendgrid_template_id_campaign_enrolled_user: tmplUser,
-        sendgrid_template_id_campaign_enrolled_admin: tmplAdmin,
-        admin_emails,
-      } = await configService.getKeys([
-        'sendgrid_template_id_campaign_enrolled_user',
-        'sendgrid_template_id_campaign_enrolled_admin',
-        'admin_emails',
-      ]);
-      const tmplData = {
-        enrolment_id: result.id,
-        campaign_name: req.campaign.name,
-        user_name: req.user.name,
-        user_email: req.user.email,
-      };
-      if (tmplUser) {
-        const formdata = {
-          to: req.user.email,
-          subject: 'Thank You for Interested in Sampling Programs',
-          templateId: tmplUser,
-          templateData: tmplData,
-        };
-        await sendMailUsingTmpl(formdata);
-      }
-      const adminEmails = admin_emails?.split('\n').map((d) => d.trim());
-      if (tmplAdmin && adminEmails?.length) {
-        const formdata = {
-          to: adminEmails,
-          subject: 'New Enrolment',
-          templateId: tmplAdmin,
-          templateData: tmplData,
-        };
-        await sendMailUsingTmpl(formdata);
-      }
+      // const configService = new ConfigService();
+      // const {
+      //   sendgrid_template_id_campaign_enrolled_user: tmplUser,
+      //   sendgrid_template_id_campaign_enrolled_admin: tmplAdmin,
+      //   admin_emails,
+      // } = await configService.getKeys([
+      //   'sendgrid_template_id_campaign_enrolled_user',
+      //   'sendgrid_template_id_campaign_enrolled_admin',
+      //   'admin_emails',
+      // ]);
+      // const tmplData = {
+      //   enrolment_id: result.id,
+      //   campaign_name: req.campaign.name,
+      //   user_name: req.user.name,
+      //   user_email: req.user.email,
+      // };
+      // if (tmplUser) {
+      //   const formdata = {
+      //     to: req.user.email,
+      //     subject: 'Thank You for Interested in Sampling Programs',
+      //     templateId: tmplUser,
+      //     templateData: tmplData,
+      //   };
+      //   await sendMailUsingTmpl(formdata);
+      // }
+      // const adminEmails = admin_emails?.split('\n').map((d) => d.trim());
+      // if (tmplAdmin && adminEmails?.length) {
+      //   const formdata = {
+      //     to: adminEmails,
+      //     subject: 'New Enrolment',
+      //     templateId: tmplAdmin,
+      //     templateData: tmplData,
+      //   };
+      //   await sendMailUsingTmpl(formdata);
+      // }
 
       return this.responseJson(req, res, {
         data: new CampaignEnrolmentResource(result),
@@ -232,7 +243,7 @@ class CampaignController extends ApiController {
       // DB update
       const result = await reviewService.create(formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
       return this.responseJson(req, res, {
         data: new CampaignReviewResource(result),
       });

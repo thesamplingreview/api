@@ -96,6 +96,10 @@ exports.tokenRefreshReq = [
     .withMessage(validatorMessage('validation.required')),
 ];
 
-exports.createOtpReq = [
+exports.requestSMSOtpReq = [
+  contactValidator(),
+];
+
+exports.requestWAOtpReq = [
   contactValidator(),
 ];

@@ -9,6 +9,7 @@ const allPermissions = [
   'campaigns:create',
   'campaigns:edit',
   'campaigns:delete',
+  'campaigns:setting',
   'campaigns:workflow',
   // enrolments
   'enrolments:view',
@@ -70,10 +71,13 @@ module.exports = {
   admin: allPermissions,
   vendor: [
     ...genModulePermissions([
-      'campaigns',
       'products',
       'forms',
     ]),
+    'campaigns:view',
+    'campaigns:create',
+    'campaigns:edit',
+    'campaigns:workflow',
     'enrolments:view',
     'enrolments:edit',
     'reviews:view',

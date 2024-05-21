@@ -29,4 +29,10 @@ module.exports = {
     verifySid: getEnv(process.env.TWILIO_VERIFY_SID),
     token: getEnv(process.env.TWILIO_TOKEN),
   },
+
+  // whatsapp
+  whatsapp: {
+    numberId: getEnv(process.env.WHATSAPP_NUMBER_ID),
+    token: getEnv(process.env.WHATSAPP_TOKEN),
+  },
 };

@@ -4,7 +4,6 @@ const { sequelize, User, UserRole } = require('../../models');
 const VendorService = require('../../services/VendorService');
 const AdminService = require('../../services/AdminService');
 const VendorResource = require('../../resources/VendorResource');
-const UserResource = require('../../resources/UserResource');
 
 class VendorController extends ApiController {
   constructor() {
@@ -25,9 +24,7 @@ class VendorController extends ApiController {
         ],
         attributes: {
           include: [
-            // NOTE: these only works on findAll
-            // [Sequelize.fn('COUNT', Sequelize.col('Users.id')), 'count_users'],
-            [Sequelize.literal('(SELECT COUNT(*) FROM `users` AS `Users` WHERE `Users`.`vendor_id` = `Vendor`.`id`)'), 'usersCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `users` AS `Users` WHERE `Users`.`vendor_id` = `Vendor`.`id`)'), 'adminsCount'],
           ],
         },
         distinct: true,
@@ -50,7 +47,13 @@ class VendorController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.vendorService.findById(req.params.id);
+      const record = await this.vendorService.findById(req.params.id, {
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `users` AS `Users` WHERE `Users`.`vendor_id` = `Vendor`.`id`)'), 'adminsCount'],
+          ],
+        },
+      });
 
       return this.responseJson(req, res, {
         data: new VendorResource(record),

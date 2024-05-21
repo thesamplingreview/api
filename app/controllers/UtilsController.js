@@ -4,6 +4,7 @@ const AssetService = require('../services/AssetService');
 const AssetResource = require('../resources/AssetResource');
 const { sendMail, sendMailUsingTmpl } = require('../helpers/mailer');
 const { sendSMS } = require('../helpers/sms');
+const { sendWhatsAppCode } = require('../helpers/whatsapp');
 
 class UtilsController extends ApiController {
   /**
@@ -100,6 +101,25 @@ class UtilsController extends ApiController {
 
     try {
       const result = await sendSMS(formdata);
+
+      return this.responseJson(req, res, {
+        data: result,
+      });
+    } catch (err) {
+      return this.responseError(req, res, err);
+    }
+  }
+
+  async sendTestWhatsapp(req, res) {
+    const formdata = {
+      to: req.body.to,
+      templateName: req.body.template_name,
+      code: '123123',
+      throwErr: true,
+    };
+
+    try {
+      const result = await sendWhatsAppCode(formdata);
 
       return this.responseJson(req, res, {
         data: result,

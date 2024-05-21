@@ -1,7 +1,11 @@
 const { Op } = require('sequelize');
 const { getInput } = require('../helpers/utils');
+const { consoleLog } = require('../helpers/logger');
 const BaseService = require('./BaseService');
-const { Workflow, WorkflowTask } = require('../models');
+const QueueService = require('./QueueService');
+const {
+  Workflow, WorkflowTask, CampaignEnrolment, Campaign, User,
+} = require('../models');
 
 class WorkflowService extends BaseService {
   constructor() {
@@ -97,6 +101,61 @@ class WorkflowService extends BaseService {
     });
 
     return results;
+  }
+
+  /**
+   * Trigger enrolment submission workflow
+   *
+   * @param  {string}  enrolmentId
+   * @return {int}
+   */
+  async triggerEnrolmentWorkflow(enrolmentId) {
+    consoleLog('Worlflow:', 'Trigger by enrolment', enrolmentId);
+    const enrolment = await CampaignEnrolment.findByPk(enrolmentId, {
+      include: [
+        { model: Campaign },
+        { model: User },
+      ],
+    });
+
+    let promises = [];
+    if (enrolment?.Campaign?.enrolment_workflow_id) {
+      const rootTasks = await WorkflowTask.findAll({
+        where: {
+          workflow_id: enrolment.Campaign.enrolment_workflow_id,
+          parent_task_id: null,
+        },
+      });
+      if (rootTasks?.length) {
+        const queueService = new QueueService();
+        // cache minimum info only
+        const queueData = {
+          enrolment_id: enrolment.id,
+          campaign: {
+            id: enrolment.Campaign.id,
+            name: enrolment.Campaign.name,
+          },
+          user: {
+            id: enrolment.User?.id,
+            name: enrolment.User?.name,
+            email: enrolment.User?.email,
+            contact: enrolment.User?.contact,
+          },
+        };
+        promises = rootTasks.map(async (task) => {
+          await queueService.pushQueueTask(task.id, queueData);
+        });
+        try {
+          await Promise.all(promises);
+        } catch (err) {
+          consoleLog('WorlflowErr: Trigger by enrolment', enrolmentId, err.message);
+          return 0;
+        }
+      }
+    }
+
+    consoleLog('Worlflow:', 'Trigger by enrolment end', enrolmentId);
+    return promises.length;
   }
 }
 

@@ -29,6 +29,11 @@ class UserResource {
       };
     }
 
+    const counts = {};
+    if (this.data.enrolmentsCount !== undefined) {
+      counts.enrolments_count = this.data.enrolmentsCount;
+    }
+
     return {
       id: this.data.id,
       email: this.data.email,
@@ -44,6 +49,7 @@ class UserResource {
       contact_verified_at: this.data.contact_verified_at || null,
       created_at: this.data.created_at || null,
       updated_at: this.data.updated_at || null,
+      ...counts,
       ...relations,
     };
   }

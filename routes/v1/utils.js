@@ -38,6 +38,12 @@ router.post(
   utilsController.sendTestSMS.bind(utilsController),
 );
 
+router.post(
+  '/test-whatsapp',
+  appKeyCheckMiddleware(),
+  utilsController.sendTestWhatsapp.bind(utilsController),
+);
+
 // cron module
 const cronController = new CronController();
 

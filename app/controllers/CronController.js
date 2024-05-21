@@ -3,6 +3,7 @@ const {
   WorkflowTask, CampaignEnrolment, Campaign, User,
 } = require('../models');
 const QueueService = require('../services/QueueService');
+const WorkflowService = require('../services/WorkflowService');
 
 class CronController extends ApiController {
   /**
@@ -32,51 +33,13 @@ class CronController extends ApiController {
    */
   async testWorkflowTrigger(req, res) {
     // @test data
-    const enrolmentId = 14;
-    const enrolment = await CampaignEnrolment.findByPk(enrolmentId, {
-      include: [
-        { model: Campaign },
-        { model: User },
-      ],
-    });
+    const enrolmentId = 42;
 
-    let promises = [];
-    if (enrolment?.Campaign?.enrolment_workflow_id) {
-      const rootTasks = await WorkflowTask.findAll({
-        where: {
-          workflow_id: enrolment.Campaign.enrolment_workflow_id,
-          parent_task_id: null,
-        },
-      });
-      if (rootTasks?.length) {
-        const queueService = new QueueService();
-        // cache minimum info only
-        const queueData = {
-          enrolment_id: enrolment.id,
-          campaign: {
-            id: enrolment.Campaign.id,
-            name: enrolment.Campaign.name,
-          },
-          user: {
-            id: enrolment.User?.id,
-            name: enrolment.User?.name,
-            email: enrolment.User?.email,
-            contact: enrolment.User?.contact,
-          },
-        };
-        promises = rootTasks.map(async (task) => {
-          await queueService.pushQueueTask(task.id, queueData);
-        });
-        try {
-          await Promise.all(promises);
-        } catch (err) {
-          return this.responseError(req, res, err);
-        }
-      }
-    }
+    const workflowService = new WorkflowService();
+    const queueTaskCount = await workflowService.triggerEnrolmentWorkflow(enrolmentId);
 
     return this.responseJson(req, res, {
-      data: `${promises.length} tasks scheduled.`,
+      data: `${queueTaskCount} tasks scheduled.`,
     });
   }
 }

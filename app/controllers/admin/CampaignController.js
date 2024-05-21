@@ -157,11 +157,22 @@ class CampaignController extends ApiController {
     const t = await sequelize.transaction();
     try {
       const record = await this.campaignService.findById(req.params.id);
-      const updated = await this.campaignService.update(record, formData, { transaction: t });
+      const result = await this.campaignService.update(record, formData, { transaction: t });
 
       await t.commit();
+
+      // force refersh result
+      await result.reload({
+        include: [
+          { model: Vendor },
+          { model: Form },
+          { model: Product },
+          { model: User },
+        ],
+      });
+
       return this.responseJson(req, res, {
-        data: new CampaignResource(updated),
+        data: new CampaignResource(result),
       });
     } catch (err) {
       await t.rollback();

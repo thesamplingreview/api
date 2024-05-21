@@ -1,3 +1,4 @@
+const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
 const allOptions = require('../../../config/options');
 const {
@@ -68,6 +69,11 @@ class UserController extends ApiController {
             },
           },
         ],
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`user_id` = `User`.`id`)'), 'enrolmentsCount'],
+          ],
+        },
       });
 
       return this.responseJson(req, res, {

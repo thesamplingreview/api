@@ -7,8 +7,8 @@ class VendorResource {
 
   toJSON() {
     const counts = {};
-    if (this.data.usersCount !== undefined) {
-      counts.users_count = this.data.usersCount;
+    if (this.data.adminsCount !== undefined) {
+      counts.admins_count = this.data.adminsCount;
     }
 
     const relations = {};
