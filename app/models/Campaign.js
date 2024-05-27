@@ -29,15 +29,15 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'vendor_id',
         targetKey: 'id',
       });
-      this.belongsTo(models.Workflow, {
-        foreignKey: 'enrolment_workflow_id',
-        targetKey: 'id',
-      });
       this.hasMany(models.CampaignEnrolment, {
         foreignKey: 'campaign_id',
         targetKey: 'id',
       });
       this.hasMany(models.CampaignReview, {
+        foreignKey: 'campaign_id',
+        targetKey: 'id',
+      });
+      this.hasMany(models.CampaignWorkflow, {
         foreignKey: 'campaign_id',
         targetKey: 'id',
       });
@@ -125,9 +125,6 @@ module.exports = (sequelize, DataTypes) => {
     },
     form_id: {
       type: DataTypes.INTEGER,
-    },
-    enrolment_workflow_id: {
-      type: DataTypes.UUID,
     },
     highlight: {
       type: DataTypes.BOOLEAN,

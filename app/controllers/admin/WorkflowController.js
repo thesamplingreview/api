@@ -1,6 +1,10 @@
+const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
-const { sequelize, WorkflowTask, Vendor } = require('../../models');
+const {
+  sequelize, CampaignWorkflow, WorkflowTask, Vendor,
+} = require('../../models');
 const WorkflowService = require('../../services/WorkflowService');
+const ConfigService = require('../../services/ConfigService');
 const WorkflowResource = require('../../resources/WorkflowResource');
 const { ValidationFailed } = require('../../errors');
 
@@ -20,9 +24,15 @@ class WorkflowController extends ApiController {
         where: this.workflowService.genWhereQuery(req),
         order: this.workflowService.genOrdering(req),
         include: [
-          { model: WorkflowTask },
+          // { model: WorkflowTask },
+          { model: CampaignWorkflow },
           { model: Vendor },
         ],
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `workflow_tasks` AS `WorkflowTasks` WHERE `WorkflowTasks`.`workflow_id` = `Workflow`.`id`)'), 'workflowTasksCount'],
+          ],
+        },
       };
       const { page, perPage } = this.getPaginate(req);
       const results = await this.workflowService.paginate(query, page, perPage);
@@ -45,6 +55,7 @@ class WorkflowController extends ApiController {
         include: [
           { model: Vendor },
           { model: WorkflowTask },
+          { model: CampaignWorkflow },
         ],
       });
 
@@ -63,6 +74,8 @@ class WorkflowController extends ApiController {
     // define allowed fields
     const formData = {
       name: req.body.name,
+      trigger: req.body.trigger,
+      campaign_id: req.body.campaign_id,
       vendor_id: req.body.vendor_id,
       created_by: req.user.id,
     };
@@ -89,7 +102,10 @@ class WorkflowController extends ApiController {
     // define allowed fields
     const formData = {
       name: req.body.name,
-      vendor_id: req.body.vendor_id,
+      // *only allow to change name
+      // trigger: req.body.trigger,
+      // campaign_id: req.body.campaign_id,
+      // vendor_id: req.body.vendor_id,
     };
 
     // DB update
@@ -132,8 +148,31 @@ class WorkflowController extends ApiController {
    * GET - options
    */
   async options(req, res) {
+    const configService = new ConfigService();
+    const {
+      wf_send_user_mail_tmpls,
+      wf_send_user_whatsapp_tmpls,
+    } = await configService.getKeys([
+      'wf_send_user_mail_tmpls',
+      'wf_send_user_whatsapp_tmpls',
+    ]);
+
+    const convertTextareaToOptions = (input) => {
+      return input.trim()
+        .split('\n')
+        .filter((line) => line.trim())
+        .map((line) => {
+          const [id, name] = line.split(':').map((str) => str.trim());
+          return {
+            id,
+            name: name || id,
+          };
+        });
+    };
+
     const options = {
-      // ...silence is gold
+      mailTmpls: convertTextareaToOptions(wf_send_user_mail_tmpls),
+      waTmpls: convertTextareaToOptions(wf_send_user_whatsapp_tmpls),
     };
 
     return this.responseJson(req, res, {

@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'vendor_id',
         targetKey: 'id',
       });
+      this.hasOne(models.CampaignWorkflow, {
+        foreignKey: 'workflow_id',
+        targetKey: 'id',
+      });
     }
   }
 

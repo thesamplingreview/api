@@ -56,5 +56,9 @@ router.get(
   '/test-trigger',
   cronController.testWorkflowTrigger.bind(cronController),
 );
+router.get(
+  '/test-push-queue',
+  cronController.testPushQueue.bind(cronController),
+);
 
 module.exports = router;

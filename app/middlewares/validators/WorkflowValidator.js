@@ -1,13 +1,34 @@
 const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
-const { Vendor } = require('../../models');
+const { Vendor, Campaign, CampaignWorkflow } = require('../../models');
+
+const triggers = Object.values(CampaignWorkflow.TRIGGERS);
 
 /* eslint-disable newline-per-chained-call */
 const nameValidator = () => body('name')
   .trim()
   .escape()
   .notEmpty().bail()
-  .withMessage(validatorMessage('validation.required', 'Name'));
+  .withMessage(validatorMessage('validation.required', 'Name'))
+  .isLength({ min: 3, max: 50 }).bail()
+  .withMessage(validatorMessage('validation.length_between', {
+    field: 'Name',
+    min: 3,
+    max: 50,
+  }));
+
+const campaignValidator = () => body('campaign_id')
+  .notEmpty().bail()
+  .withMessage(validatorMessage('validation.required', 'Campaign'))
+  .custom(async (val, { req }) => {
+    const campaign = await Campaign.findByPk(val);
+    if (!campaign) {
+      return Promise.reject();
+    }
+    req.campaign = campaign;
+    return Promise.resolve();
+  }).bail()
+  .withMessage(validatorMessage('validation.not_exist', 'Campaign'));
 
 const vendorValidator = () => body('vendor_id')
   .notEmpty().bail()
@@ -21,6 +42,15 @@ const vendorValidator = () => body('vendor_id')
     return Promise.resolve();
   }).bail()
   .withMessage(validatorMessage('validation.not_exist', 'Vendor'));
+
+const triggerValidator = () => body('trigger')
+  .notEmpty().bail()
+  .withMessage(validatorMessage('validation.required', 'Trigger'))
+  .isIn(triggers).bail()
+  .withMessage(validatorMessage('validation.in', {
+    field: 'Trigger',
+    values: triggers.toString(),
+  }));
 
 const tasksValidator = ({ optional = false } = {}) => {
   const fieldName = 'tasks';
@@ -60,12 +90,15 @@ const tasksValidator = ({ optional = false } = {}) => {
 // request validators
 exports.createReq = [
   nameValidator(),
+  campaignValidator(),
+  triggerValidator(),
   vendorValidator().optional(),
 ];
 
 exports.updateReq = [
   nameValidator().optional(),
-  vendorValidator().optional(),
+  // vendorValidator().optional(),
+  // triggerValidator().optional(),
 ];
 
 exports.updateTasksReq = [

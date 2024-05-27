@@ -27,6 +27,31 @@ module.exports = {
   },
 
   /**
+   * Get object value by dotted string
+   *
+   * @param  {object}  obj
+   * @param  {string}  path
+   * @return {mixed}
+   */
+  getProp(obj, path) {
+    return path
+      .replace(/\[|\]\.?/g, '.')
+      .split('.')
+      .reduce((acc, key) => acc && acc[key], obj);
+  },
+
+  /**
+   * Replace string variable
+   *
+   * @param  {string}  str
+   * @param  {object}  obj
+   * @return {string}
+   */
+  strMap(str, obj, notFound = '') {
+    return str.replace(/{{(\w+)}}/g, (match, key) => this.getProp(obj, key) || notFound);
+  },
+
+  /**
    * Generate uuidv4
    *
    * @return {string}

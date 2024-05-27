@@ -1,9 +1,7 @@
 const ApiController = require('./ApiController');
-const {
-  WorkflowTask, CampaignEnrolment, Campaign, User,
-} = require('../models');
 const QueueService = require('../services/QueueService');
 const WorkflowService = require('../services/WorkflowService');
+const { pushQueue } = require('../helpers/queue');
 
 class CronController extends ApiController {
   /**
@@ -11,7 +9,16 @@ class CronController extends ApiController {
    */
   async triggerQueueTask(req, res) {
     const queueService = new QueueService();
-    const queueTask = await queueService.getNextQueue();
+    let queueTask;
+    if (req.query.queue_id) {
+      try {
+        queueTask = await queueService.findById(req.query.queue_id);
+      } catch (err) {
+        // ...
+      }
+    } else {
+      queueTask = await queueService.getNextQueue();
+    }
     if (!queueTask) {
       return this.responseJson(req, res, {
         data: 'No task',
@@ -33,13 +40,27 @@ class CronController extends ApiController {
    */
   async testWorkflowTrigger(req, res) {
     // @test data
-    const enrolmentId = 42;
+    const campaignId = '82313a22-d850-42fb-8ac5-f6028edd09ed';
 
     const workflowService = new WorkflowService();
-    const queueTaskCount = await workflowService.triggerEnrolmentWorkflow(enrolmentId);
+    const queueTaskCount = await workflowService.triggerEnrolmentWorkflow(campaignId);
 
     return this.responseJson(req, res, {
       data: `${queueTaskCount} tasks scheduled.`,
+    });
+  }
+
+  /**
+   * TEST - push queue
+   */
+  async testPushQueue(req, res) {
+    const result = await pushQueue({
+      data: { foo: 'Foo' },
+      delay: 300,
+    });
+
+    return this.responseJson(req, res, {
+      data: result,
     });
   }
 }

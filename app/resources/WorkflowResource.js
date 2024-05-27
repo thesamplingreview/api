@@ -20,6 +20,9 @@ class WorkflowResource {
     }
 
     const counts = {};
+    if (this.data.workflowTasksCount !== undefined) {
+      counts.workflow_tasks_count = this.data.workflowTasksCount;
+    }
 
     return {
       id: this.data.id,
@@ -27,6 +30,10 @@ class WorkflowResource {
       vendor_id: this.data.vendor_id,
       created_by: this.data.created_by,
       created_at: this.data.created_at,
+      // one-on-one pattern
+      trigger: this.data.CampaignWorkflow?.trigger || null,
+      campaign_id: this.data.CampaignWorkflow?.campaign_id || null,
+      campaign_workflow_id: this.data.CampaignWorkflow?.id || null,
       ...counts,
       ...relations,
     };

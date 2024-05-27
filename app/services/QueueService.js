@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { addHours } = require('date-fns');
+const { strMap } = require('../helpers/utils');
 const { consoleLog } = require('../helpers/logger');
 const { sendMail, sendMailUsingTmpl } = require('../helpers/mailer');
 const { sendSMS } = require('../helpers/sms');
@@ -380,10 +381,12 @@ class QueueService extends BaseService {
       if (!config?.email || !config?.message) {
         throw new Error('Invalid send_email node config');
       }
+
+      const message = strMap(config.message, data);
       const params = {
-        subject: `New Campaign Enrolment ${data.campaign?.name}`,
+        subject: `New Enrolment for ${data.campaign?.name}`,
         to: config?.email,
-        content: config?.message,
+        content: message,
         throwErr: true,
       };
       await sendMail(params);
@@ -398,18 +401,19 @@ class QueueService extends BaseService {
       if (!config?.template) {
         throw new Error('Invalid send_user_email node config');
       }
-      if (!data?.user?.email) {
-        throw new Error('Invalid user.email');
-      }
-      // @tbc
-      // const params = {
-      //   subject: `Campaign Enrolment: ${data.campaign?.name}`,
-      //   to: config?.email,
-      //   templateId: config.template,
-      //   templateData: data,
-      //   throwErr: true,
-      // };
-      // await sendMailUsingTmpl(params);
+      const promises = data?.enrolments
+        .filter((enrolment) => enrolment?.user?.email)
+        .map((enrolment) => {
+          const params = {
+            subject: `Campaign Enrolment: ${data.campaign?.name}`,
+            templateId: config.template,
+            templateData: enrolment,
+            to: enrolment.user.email,
+          };
+          return sendMailUsingTmpl(params);
+        });
+      await promises.all();
+
       return {
         pos: null,
         result: null,
@@ -423,9 +427,11 @@ class QueueService extends BaseService {
       if (!config?.number || !config?.message) {
         throw new Error('Invalid send_sms node config');
       }
+
+      const message = strMap(config.message, data);
       const params = {
         to: config?.number,
-        message: config?.message,
+        message,
         throwErr: true,
       };
       await sendSMS(params);

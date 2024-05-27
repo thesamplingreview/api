@@ -153,7 +153,7 @@ class CampaignController extends ApiController {
       await t.commit();
 
       // trigger submission workflow
-      await workflowService.triggerEnrolmentWorkflow(result.id);
+      await workflowService.triggerEnrolmentWorkflow(campaign.id, [result.id]);
 
       // Deprecated - replace with workflow tasks
       // email notifications
