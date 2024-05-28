@@ -4,6 +4,7 @@ const { strMap } = require('../helpers/utils');
 const { consoleLog } = require('../helpers/logger');
 const { sendMail, sendMailUsingTmpl } = require('../helpers/mailer');
 const { sendSMS } = require('../helpers/sms');
+const { pushQueue } = require('../helpers/queue');
 const BaseService = require('./BaseService');
 const { sequelize, QueueTask, WorkflowTask } = require('../models');
 
@@ -87,6 +88,11 @@ class QueueService extends BaseService {
 
       // sync drive
       // await this.runQueueTask(queue);
+      // push to sqs
+      await pushQueue({
+        data: { queue_id: queue.id },
+        // delay: 300,
+      });
     } catch (err) {
       await transaction.rollback();
       consoleLog('PushQueueErr:', err.message);

@@ -52,6 +52,9 @@ const triggerValidator = () => body('trigger')
     values: triggers.toString(),
   }));
 
+const enableValidator = () => body('enable')
+  .toBoolean();
+
 const tasksValidator = ({ optional = false } = {}) => {
   const fieldName = 'tasks';
   const bodyChain = body(fieldName)
@@ -97,6 +100,7 @@ exports.createReq = [
 
 exports.updateReq = [
   nameValidator().optional(),
+  enableValidator().optional(),
   // vendorValidator().optional(),
   // triggerValidator().optional(),
 ];

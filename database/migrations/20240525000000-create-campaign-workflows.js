@@ -22,6 +22,10 @@ module.exports = {
             type: Sequelize.INTEGER,
             defaultValue: 0,
           },
+          enable: {
+            type: Sequelize.BOOLEAN,
+            defaultValue: 0,
+          },
           campaign_id: {
             type: Sequelize.UUID,
             references: {

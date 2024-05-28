@@ -12,7 +12,8 @@ const sequelize = new Sequelize(
     host: db.host,
     dialect: 'mysql',
     timezone: appConfig.timezone,
-    logging: appConfig.env === 'local' ? console.log : false,
+    // logging: appConfig.env === 'local' ? console.log : false,
+    logging: false,
   },
 );
 

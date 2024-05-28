@@ -48,6 +48,7 @@ class WorkflowService extends BaseService {
       campaign_id: formData.campaign_id,
       workflow_id: result.id,
       trigger: formData.trigger,
+      enable: true,
     }, options);
 
     return result;
@@ -60,6 +61,13 @@ class WorkflowService extends BaseService {
     };
 
     const result = await record.update(formData, options);
+
+    if (record.CampaignWorkflow) {
+      const linkedFormData = {
+        enable: getInput(input.enable, record.CampaignWorkflow.enable),
+      };
+      await record.CampaignWorkflow.update(linkedFormData, options);
+    }
 
     if (input.tasks?.length) {
       const oldTasks = await record.getWorkflowTasks();
@@ -206,7 +214,11 @@ class WorkflowService extends BaseService {
   async triggerEnrolmentWorkflow(campaignId, enrolmentIds = null) {
     consoleLog('Worlflow:', 'Trigger by campaign', campaignId);
     const campaign = await Campaign.findByPk(campaignId);
-    const workflows = await campaign.getCampaignWorkflows();
+    const workflows = await campaign.getCampaignWorkflows({
+      where: {
+        enable: true,
+      },
+    });
 
     // no workflows
     if (!workflows) {

@@ -56,9 +56,11 @@ class CampaignController extends ApiController {
         ],
         attributes: {
           include: [
-            [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id`)'), 'enrolmentsCount'],
+            // [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id`)'), 'enrolmentsCount'],
             [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id` AND (`CampaignEnrolments`.`status` <> "reject" OR `CampaignEnrolments`.`status` IS NULL))'), 'enrolmentsAcceptedCount'],
             [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_reviews` AS `CampaignReviews` WHERE `CampaignReviews`.`campaign_id` = `Campaign`.`id`)'), 'reviewsCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_products` AS `CampaignProducts` WHERE `CampaignProducts`.`campaign_id` = `Campaign`.`id`)'), 'productsCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_workflows` AS `CampaignWorkflows` WHERE `CampaignWorkflows`.`campaign_id` = `Campaign`.`id`)'), 'workflowsCount'],
           ],
         },
         distinct: true,

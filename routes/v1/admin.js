@@ -116,5 +116,6 @@ router.post('/workflows', WorkflowValidator.createReq, WorkflowController.create
 router.put('/workflows/:id', WorkflowValidator.updateReq, WorkflowController.update);
 router.put('/workflows/:id/tasks', WorkflowValidator.updateTasksReq, WorkflowController.updateTasks);
 router.delete('/workflows/:id', WorkflowController.remove);
+router.put('/campaign-workflow/:id/trigger', WorkflowController.triggerCampaignWorkflow);
 
 module.exports = router;

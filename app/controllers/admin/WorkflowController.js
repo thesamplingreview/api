@@ -1,12 +1,12 @@
-const { Sequelize } = require('sequelize');
+const { Sequelize, Op } = require('sequelize');
 const ApiController = require('../ApiController');
 const {
-  sequelize, CampaignWorkflow, WorkflowTask, Vendor,
+  sequelize, CampaignWorkflow, CampaignEnrolment, WorkflowTask, Vendor, User,
 } = require('../../models');
 const WorkflowService = require('../../services/WorkflowService');
 const ConfigService = require('../../services/ConfigService');
 const WorkflowResource = require('../../resources/WorkflowResource');
-const { ValidationFailed } = require('../../errors');
+const { ValidationFailed, ModelNotFound } = require('../../errors');
 
 class WorkflowController extends ApiController {
   constructor() {
@@ -102,6 +102,7 @@ class WorkflowController extends ApiController {
     // define allowed fields
     const formData = {
       name: req.body.name,
+      enable: req.body.enable,
       // *only allow to change name
       // trigger: req.body.trigger,
       // campaign_id: req.body.campaign_id,
@@ -111,7 +112,9 @@ class WorkflowController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.workflowService.findById(req.params.id);
+      const record = await this.workflowService.findById(req.params.id, {
+        include: [CampaignWorkflow],
+      });
       const updated = await this.workflowService.update(record, formData, { transaction: t });
 
       await t.commit();
@@ -225,6 +228,45 @@ class WorkflowController extends ApiController {
       });
     } catch (err) {
       await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * PUT - trigger campaign workflow
+   */
+  async triggerCampaignWorkflow(req, res) {
+    try {
+      const campaignWorkflow = await CampaignWorkflow.findByPk(req.params.id);
+      if (!campaignWorkflow) {
+        throw new ModelNotFound('Data not found');
+      }
+
+      const enrolments = await CampaignEnrolment.findAll({
+        where: {
+          campaign_id: campaignWorkflow.campaign_id,
+          status: {
+            [Op.ne]: CampaignEnrolment.STATUSES.REJECT,
+          },
+        },
+        include: [
+          { model: User },
+        ],
+      });
+      // no enrolments
+      if (!enrolments?.length) {
+        throw new ValidationFailed('No available enrolments');
+      }
+      // trigger
+      const count = await this.workflowService.triggerWorkflow(campaignWorkflow.id, enrolments);
+      if (!count) {
+        throw new ValidationFailed('No available actions');
+      }
+
+      return this.responseJson(req, res, {
+        data: `${count} tasks scheduled.`,
+      });
+    } catch (err) {
       return this.responseError(req, res, err);
     }
   }

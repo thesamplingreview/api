@@ -46,6 +46,12 @@ class CampaignResource {
     if (this.data.reviewsCount !== undefined) {
       counts.reviews_count = this.data.reviewsCount;
     }
+    if (this.data.productsCount !== undefined) {
+      counts.products_count = this.data.productsCount;
+    }
+    if (this.data.workflowsCount !== undefined) {
+      counts.workflows_count = this.data.workflowsCount;
+    }
 
     return {
       id: this.data.id,

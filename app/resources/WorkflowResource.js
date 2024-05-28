@@ -34,6 +34,7 @@ class WorkflowResource {
       trigger: this.data.CampaignWorkflow?.trigger || null,
       campaign_id: this.data.CampaignWorkflow?.campaign_id || null,
       campaign_workflow_id: this.data.CampaignWorkflow?.id || null,
+      enable: !!this.data.CampaignWorkflow?.enable,
       ...counts,
       ...relations,
     };
