@@ -83,7 +83,9 @@ module.exports = {
     'reviews:view',
     'users:view',
     'admins:view',
+    'admins:create',
     'admins:edit',
+    'admins:delete',
     'report:enrolments',
   ],
 };

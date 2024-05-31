@@ -123,198 +123,145 @@ class WorkflowService extends BaseService {
   }
 
   /**
-   * Trigger workflow
+   * Trigger campaign workflow
    *
    * @param  {string}  campaignWorkflowId
-   * @param  {array}  enrolments
+   * @param  {string}  enrolmentId
    * @return {int}
    */
-  async triggerWorkflow(campaignWorkflowId, enrolments) {
-    consoleLog('Worlflow:', 'Trigger campaign workflow', campaignWorkflowId);
+  async triggerCampaignWorkflow(campaignWorkflowId, enrolmentId = '') {
+    consoleLog('Worlflow:', 'Run campaign workflow', campaignWorkflowId);
     const campaignWorkflow = await CampaignWorkflow.findByPk(campaignWorkflowId, {
       include: [
         { model: Campaign },
-        {
-          model: Workflow,
-          include: {
-            model: WorkflowTask,
-            where: { parent_task_id: null },
+      ],
+    });
+    // validate - campaign
+    const campaign = campaignWorkflow?.Campaign;
+    if (!campaign) {
+      consoleLog('Worlflow:', 'CampaignWorkflow does not have linked campaign', campaignWorkflowId);
+      return 0;
+    }
+
+    // validate - enrolment(s)
+    let enrolments = [];
+    if (enrolmentId) {
+      // case 1 - trigger for single enrolment only
+      const enrolment = await CampaignEnrolment.findByPk(enrolmentId, {
+        include: [
+          { model: User },
+        ],
+      });
+      if (enrolment) {
+        enrolments.push(enrolment);
+      }
+    } else {
+      // case 2 - trigger for all campaign enrolments
+      enrolments = await CampaignEnrolment.findAll({
+        where: {
+          campaign_id: campaignWorkflow.Campaign.id,
+          status: {
+            [Op.ne]: CampaignEnrolment.STATUSES.REJECT,
           },
+        },
+        include: [
+          { model: User },
+        ],
+      });
+    }
+    if (!enrolments.length) {
+      consoleLog('Worlflow:', 'Linked campaign does not have available enrolments', campaignWorkflowId);
+      return 0;
+    }
+
+    // validate - workflow tasks
+    const workflow = await campaignWorkflow.getWorkflow({
+      include: [
+        {
+          model: WorkflowTask,
+          where: { parent_task_id: null }, // get root task only
         },
       ],
     });
-
-    // invalid - no enrolments
-    if (!enrolments?.length) {
-      consoleLog('Worlflow:', 'Workflow has no enrolments', campaignWorkflowId);
-      return 0;
-    }
-    // invalid - no workflow / no workflow tasks
-    if (!campaignWorkflow?.Workflow?.WorkflowTasks?.length) {
-      consoleLog('Worlflow:', 'Invalid workflow_id / workflow no tasks', campaignWorkflowId, campaignWorkflow.workflow_id);
+    if (!workflow?.WorkflowTasks?.length) {
+      consoleLog('Worlflow:', 'Linked workflow does not have tasks', campaignWorkflowId);
       return 0;
     }
 
-    // trigger tasks
-    /**
-     * NOTE:
-     * - some tasks will auto group all enrolments into single action instead of multiple if isManual
-     */
-    const autoGroupActions = [
-      'send_email', 'send_sms',
-    ];
     const queueService = new QueueService();
-    // assuming provided tasks is root
-    const promises = [];
-    campaignWorkflow.Workflow.WorkflowTasks.forEach((task) => {
+    const promises = workflow.WorkflowTasks.map(async (task) => {
       const queueData = {
         campaign: {
-          id: campaignWorkflow.Campaign?.id,
-          name: campaignWorkflow.Campaign?.name,
+          id: campaign.id,
+          name: campaign.name,
         },
       };
-      if (autoGroupActions.includes(task.action) && enrolments.length > 1) {
-        // generate single action for all enrolments
-        queueData.enrolments = enrolments.map((d) => d.id);
-        promises.push(queueService.pushQueueTask(task.id, queueData));
+      if (enrolmentId) {
+        // case 1 - auto-trigger
+        // cache basic info for lazy load later
+        queueData.isAuto = true;
+        queueData.enrolment = {
+          id: enrolments[0].id,
+          user: {
+            id: enrolments[0].User?.id,
+            name: enrolments[0].User?.name,
+            contact: enrolments[0].User?.contact,
+            email: enrolments[0].User?.email,
+          },
+        };
       } else {
-        // generate action for each enrolment
-        enrolments.forEach((enrolment) => {
-          queueData.enrolment = {
-            id: enrolment.id,
-            user: {
-              id: enrolment.User?.id,
-              name: enrolment.User?.name,
-              email: enrolment.User?.email,
-              contact: enrolment.User?.contact,
-            },
-          };
-          promises.push(queueService.pushQueueTask(task.id, queueData));
-        });
+        // case 2 - manual-trigger
+        // no need cache as data too large
+        queueData.isAuto = false;
       }
+
+      // push to queue
+      await queueService.pushQueueTask(task.id, queueData);
     });
 
     try {
       await Promise.all(promises);
-      consoleLog('Worlflow:', 'Trigger campaign workflow end', campaignWorkflowId);
+      consoleLog('Worlflow:', 'Run campaign workflow - end', campaignWorkflowId);
       return promises.length;
     } catch (err) {
-      consoleLog('WorlflowErr: Trigger campaign workflow', campaignWorkflowId, err.message);
+      consoleLog('WorlflowErr:', 'Run campaign workflow', campaignWorkflowId, err.message);
       return 0;
     }
   }
 
   /**
-   * Trigger enrolment submission workflow
+   * Trigger campaign's workflow by enrolment
    *
-   * @param  {string}  campaignId
-   * @param  {array}  enrolmentIds
+   * @param  {Model}  enrolment
    * @return {int}
    */
-  async triggerEnrolmentWorkflow(campaignId, enrolmentIds = null) {
-    consoleLog('Worlflow:', 'Trigger by campaign', campaignId);
-    const campaign = await Campaign.findByPk(campaignId);
-    const workflows = await campaign.getCampaignWorkflows({
-      where: {
-        enable: true,
-      },
-    });
-
-    // no workflows
-    if (!workflows) {
-      consoleLog('Worlflow:', 'Campaign do not have workflows - end', campaignId);
-      return 0;
-    }
-
-    // find affected enrolments
-    const conds = {};
-    if (enrolmentIds?.length) {
-      conds.id = enrolmentIds;
-    } else {
-      conds.status = {
-        [Op.ne]: CampaignEnrolment.STATUSES.REJECT,
-      };
-    }
-    const enrolments = await campaign.getCampaignEnrolments({
-      where: conds,
+  async triggerWorkflowByEnrolment(enrolment) {
+    consoleLog('Worlflow:', 'Trigger by enrolment', enrolment.id);
+    const campaign = await enrolment.getCampaign({
       include: [
-        { model: User },
+        {
+          model: CampaignWorkflow,
+          where: { enable: true },
+        },
       ],
     });
-    // no enrolments
-    if (!enrolments?.length) {
-      consoleLog('Worlflow:', 'Campaign do not have enrolments - end', campaignId);
+    // validate - no workflows
+    if (!campaign.CampaignWorkflows.length) {
+      consoleLog('Worlflow:', 'Enrolment campaign does not have auto-trigger workflows - end', enrolment.id);
       return 0;
     }
 
-    // sync
-    const results = [];
-    // eslint-disable-next-line no-restricted-syntax
-    for (const workflow of workflows) {
-      // eslint-disable-next-line no-await-in-loop
-      const count = await this.triggerWorkflow(workflow.id, enrolments);
-      results.push(count);
-    }
-    // async
-    // const triggers = workflows.map(async (workflow) => {
-    //   const count = await this.triggerWorkflow(workflow.id, enrolments);
-    //   return count;
-    // });
-    // const results = await Promise.all(triggers);
-    const totalTasks = results.reduce((a, d) => (a + d), 0);
+    // trigger campaign workflows
+    const promises = campaign.CampaignWorkflows.map(async (campaignWorkflow) => {
+      const count = await this.triggerCampaignWorkflow(campaignWorkflow.id, enrolment.id);
+      return count;
+    });
+    const results = await Promise.all(promises);
+    const totalTasks = results.reduce((a, c) => (a + c), 0);
 
-    consoleLog('Worlflow:', 'Trigger by campaign end', campaignId);
+    consoleLog('Worlflow:', `Trigger by enrolment - end (${totalTasks} tasks)`, enrolment.id);
+
     return totalTasks;
-
-    // const enrolment = await CampaignEnrolment.findByPk(enrolmentId, {
-    //   include: [
-    //     { model: Campaign },
-    //     { model: User },
-    //   ],
-    // });
-
-    // let promises = [];
-    // if (enrolment?.Campaign?.enrolment_workflow_id) {
-    //   const rootTasks = await WorkflowTask.findAll({
-    //     where: {
-    //       workflow_id: enrolment.Campaign.enrolment_workflow_id,
-    //       parent_task_id: null,
-    //     },
-    //   });
-    //   if (rootTasks?.length) {
-    //     const queueService = new QueueService();
-    //     // cache minimum info only
-    //     const queueData = {
-    //       enrolments: [
-    //         {
-    //           id: enrolment.id,
-    //           user: {
-    //             id: enrolment.User?.id,
-    //             name: enrolment.User?.name,
-    //             email: enrolment.User?.email,
-    //             contact: enrolment.User?.contact,
-    //           },
-    //         },
-    //       ],
-    //       campaign: {
-    //         id: enrolment.Campaign.id,
-    //         name: enrolment.Campaign.name,
-    //       },
-    //     };
-    //     promises = rootTasks.map(async (task) => {
-    //       await queueService.pushQueueTask(task.id, queueData);
-    //     });
-    //     try {
-    //       await Promise.all(promises);
-    //     } catch (err) {
-    //       consoleLog('WorlflowErr: Trigger by enrolment', enrolmentId, err.message);
-    //       return 0;
-    //     }
-    //   }
-    // }
-
-    // consoleLog('Worlflow:', 'Trigger by enrolment end', enrolmentId);
-    // return promises.length;
   }
 }
 

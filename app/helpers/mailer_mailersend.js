@@ -4,6 +4,7 @@ const {
   Sender,
   Recipient,
 } = require('mailersend');
+const { consoleLog } = require('./logger');
 const { mailersend: mailersendConfig } = require('../../config/providers');
 
 const client = new MailerSend({
@@ -19,6 +20,7 @@ async function sendMail({
   useHtml = false,
   throwErr = false,
 }) {
+  consoleLog('Mailer:', 'Sending email to', to);
   const sentFrom = new Sender(
     from || mailersendConfig.fromEmail,
     fromName || mailersendConfig.fromName,
@@ -38,12 +40,14 @@ async function sendMail({
 
   try {
     const response = await client.email.send(emailParams);
-    return response.statusCode === 202;
+
+    consoleLog('Mailer:', `Sending email to (code ${response?.statusCode}) - end`, to);
+    return response?.statusCode === 202;
   } catch (err) {
-    console.log(err);
+    const errMsg = err.body?.message || 'Unknown response from MailersSend';
+    consoleLog('MailerErr:', 'Sending email to', to, errMsg);
     if (throwErr) {
-      const errMsg = err.body?.message;
-      throw new Error(errMsg || 'Unknown response from MailersSend');
+      throw new Error(errMsg);
     }
     return false;
   }
@@ -58,6 +62,7 @@ async function sendMailUsingTmpl({
   templateData,
   throwErr = false,
 }) {
+  consoleLog('Mailer:', 'Sending tmpl email to', to, templateId);
   const sentFrom = new Sender(
     from || mailersendConfig.fromEmail,
     fromName || mailersendConfig.fromName,
@@ -78,12 +83,14 @@ async function sendMailUsingTmpl({
 
   try {
     const response = await client.email.send(emailParams);
-    return response.statusCode === 202;
+
+    consoleLog('Mailer:', `Sending tmpl email to - done (status ${response?.statusCode})`, to, templateId);
+    return response?.statusCode === 202;
   } catch (err) {
-    console.log(err);
+    const errMsg = err.body?.message || 'Unknown response from MailersSend';
+    consoleLog('Mailer:Err', 'Sending tmpl email to', to, templateId, errMsg);
     if (throwErr) {
-      const errMsg = err.body?.message;
-      throw new Error(errMsg || 'Unknown response from MailersSend');
+      throw new Error(errMsg);
     }
     return false;
   }

@@ -2,6 +2,7 @@ const ApiController = require('./ApiController');
 const QueueService = require('../services/QueueService');
 const WorkflowService = require('../services/WorkflowService');
 const { pushQueue } = require('../helpers/queue');
+const { CampaignEnrolment } = require('../models');
 
 class CronController extends ApiController {
   /**
@@ -40,10 +41,11 @@ class CronController extends ApiController {
    */
   async testWorkflowTrigger(req, res) {
     // @test data
-    const campaignId = '82313a22-d850-42fb-8ac5-f6028edd09ed';
+    const enrolmentId = '36';
+    const enrolment = await CampaignEnrolment.findByPk(enrolmentId);
 
     const workflowService = new WorkflowService();
-    const queueTaskCount = await workflowService.triggerEnrolmentWorkflow(campaignId);
+    const queueTaskCount = await workflowService.triggerWorkflowByEnrolment(enrolment);
 
     return this.responseJson(req, res, {
       data: `${queueTaskCount} tasks scheduled.`,

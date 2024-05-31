@@ -2,7 +2,7 @@ const { Sequelize, Op } = require('sequelize');
 const ApiController = require('../ApiController');
 const allOptions = require('../../../config/options');
 const {
-  sequelize, CampaignWorkflow, CampaignEnrolment, WorkflowTask, Vendor, User,
+  sequelize, Campaign, CampaignWorkflow, CampaignEnrolment, WorkflowTask, Vendor, User,
 } = require('../../models');
 const WorkflowService = require('../../services/WorkflowService');
 const ConfigService = require('../../services/ConfigService');
@@ -20,12 +20,14 @@ class WorkflowController extends ApiController {
    * GET - all
    */
   async getAll(req, res) {
+    // inject vendor-only filter
+    req.query.vendor_id = req.user.vendor_id;
+
     try {
       const query = {
         where: this.workflowService.genWhereQuery(req),
         order: this.workflowService.genOrdering(req),
         include: [
-          // { model: WorkflowTask },
           { model: CampaignWorkflow },
           { model: Vendor },
         ],
@@ -52,7 +54,11 @@ class WorkflowController extends ApiController {
    */
   async getSingle(req, res) {
     try {
-      const record = await this.workflowService.findById(req.params.id, {
+      const record = await this.workflowService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
         include: [
           { model: Vendor },
           { model: WorkflowTask },
@@ -77,9 +83,9 @@ class WorkflowController extends ApiController {
       name: req.body.name,
       trigger: req.body.trigger,
       campaign_id: req.body.campaign_id,
-      vendor_id: req.body.vendor_id,
       created_by: req.user.id,
     };
+    formData.vendor_id = req.user.vendor_id;
 
     // DB update
     const t = await sequelize.transaction();
@@ -113,14 +119,17 @@ class WorkflowController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.workflowService.findById(req.params.id, {
-        include: [CampaignWorkflow],
+      const record = await this.workflowService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
       });
       const result = await this.workflowService.update(record, formData, { transaction: t });
 
       await t.commit();
 
-      // reload
+      // force refersh result
       await result.reload({
         include: [
           { model: Vendor },
@@ -145,7 +154,12 @@ class WorkflowController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.workflowService.findById(req.params.id);
+      const record = await this.workflowService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
+      });
       const deleted = await this.workflowService.delete(record, { transaction: t });
 
       await t.commit();
@@ -222,7 +236,12 @@ class WorkflowController extends ApiController {
     // DB update
     const t = await sequelize.transaction();
     try {
-      const record = await this.workflowService.findById(req.params.id);
+      const record = await this.workflowService.findOne({
+        where: {
+          id: req.params.id,
+          vendor_id: req.user.vendor_id,
+        },
+      });
       const result = await this.workflowService.update(record, formData, { transaction: t });
 
       await t.commit();
@@ -230,9 +249,9 @@ class WorkflowController extends ApiController {
       // reload
       await result.reload({
         include: [
-          { model: Vendor },
-          { model: WorkflowTask },
           { model: CampaignWorkflow },
+          { model: WorkflowTask },
+          { model: Vendor },
         ],
       });
 
@@ -250,7 +269,17 @@ class WorkflowController extends ApiController {
    */
   async triggerCampaignWorkflow(req, res) {
     try {
-      const campaignWorkflow = await CampaignWorkflow.findByPk(req.params.id);
+      const campaignWorkflow = await CampaignWorkflow.findOne({
+        where: {
+          id: req.params.id,
+        },
+        include: [
+          {
+            model: Campaign,
+            where: { vendor_id: req.user.vendor_id },
+          },
+        ],
+      });
       if (!campaignWorkflow) {
         throw new ModelNotFound('Data not found');
       }
@@ -279,7 +308,7 @@ class WorkflowController extends ApiController {
       });
       // no enrolments
       if (!enrolments?.length) {
-        throw new ValidationFailed('No available enrolments');
+        throw new ValidationFailed('Campaign does not have available enrolments');
       }
 
       // trigger

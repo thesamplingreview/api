@@ -1,12 +1,16 @@
 const { Op } = require('sequelize');
 const { addHours } = require('date-fns');
+const configApp = require('../../config/app');
 const { strMap } = require('../helpers/utils');
 const { consoleLog } = require('../helpers/logger');
 const { sendMail, sendMailUsingTmpl } = require('../helpers/mailer');
 const { sendSMS } = require('../helpers/sms');
+const { sendWhatsAppTmpl } = require('../helpers/whatsapp');
 const { pushQueue } = require('../helpers/queue');
 const BaseService = require('./BaseService');
-const { sequelize, QueueTask, WorkflowTask } = require('../models');
+const {
+  sequelize, User, QueueTask, WorkflowTask, CampaignEnrolment,
+} = require('../models');
 
 class QueueService extends BaseService {
   constructor() {
@@ -107,16 +111,16 @@ class QueueService extends BaseService {
    */
   async runQueueTask(queue) {
     if (!queue) {
-      consoleLog('TriggerQueueErr', 'Invalid queue');
+      consoleLog('RunQueueErr:', 'Invalid queue');
       return;
     }
     // prevent re-run of queue
     if (queue.status !== QueueTask.STATUSES.PENDING) {
-      consoleLog('TriggerQueueErr:', 'Already triggered -', queue.id);
+      consoleLog('RunQueueErr:', 'Queue already triggered - end', queue.id);
       return;
     }
 
-    consoleLog('TriggerQueue', 'Start running -', queue.id);
+    consoleLog('RunQueue:', 'Run queue ID', queue.id);
     const transaction = await sequelize.transaction();
     try {
       const { result, pos, modifier } = await this.runTask(
@@ -129,11 +133,11 @@ class QueueService extends BaseService {
       queue.result_obj = result;
       await queue.save();
       await transaction.commit();
-      consoleLog('TriggerQueue:', 'End running -', queue.id);
+      consoleLog('RunQueue:', 'Run queue ID - end', queue.id);
 
       const nextTaskId = await this.findNextTaskId(queue, pos);
       if (!nextTaskId) {
-        consoleLog('TriggerQueue', 'End of workflow tree -', queue.id);
+        consoleLog('RunQueue:', 'End of queue workflow tree', queue.id);
         return;
       }
 
@@ -150,17 +154,17 @@ class QueueService extends BaseService {
       await this.pushQueueTask(nextTaskId, queue.task_data, metadata);
     } catch (err) {
       await transaction.rollback();
-      consoleLog('TriggerQueue:', err.message);
+      consoleLog('RunQueueErr:', 'Error detected', err.message);
 
       // apply retry
       // @todo: need to apply delay on retry
       if (queue.retry_count < 1) {
-        consoleLog('TriggerQueue:', 'Retry task', queue.id);
         queue.retry_count += 1;
+        consoleLog('RunQueue:', 'Retrying queue ID', queue.id, queue.retry_count);
         await queue.save();
         await this.runQueueTask(queue);
       } else {
-        consoleLog('TriggerQueue:', 'All retry failed', queue.id);
+        consoleLog('RunQueueErr:', 'All queue retries failed - end', queue.id);
         queue.status = QueueTask.STATUSES.FAILED;
         queue.execute_at = new Date();
         queue.error_message = err.message;
@@ -170,7 +174,7 @@ class QueueService extends BaseService {
         // @tbc
         const nextTaskId = await this.findNextTaskId(queue, null);
         if (!nextTaskId) {
-          consoleLog('TriggerQueue', 'End of workflow tree -', queue.id);
+          consoleLog('RunQueue:', 'End of queue workflow tree', queue.id);
           return;
         }
         // continue queue next task
@@ -242,133 +246,18 @@ class QueueService extends BaseService {
     return nextTaskId;
   }
 
-  // DEPRECATED - using on demand quene tasks creation (next queue tasks will be created when completion of current queue task)
-  // async generateQueueTasks(record, input, options = {}) {
-  //   const tasks = await record.getWorkflowTasks();
-  //   const queueItems = [];
-
-  //   function getParentTask(parentId) {
-  //     if (parentId === null) return null;
-  //     const parentQueue = queueItems.find((item) => item.task_id === parentId);
-  //     return parentQueue || null;
-  //   }
-
-  //   function generateQueue(task, triggerTime = new Date()) {
-  //     const uid = `${(new Date()).getTime()}_${queueItems.length + 1}`;
-  //     let triggerAt = new Date(triggerTime.getTime());
-  //     const parentQueue = getParentTask(task.parent_task_id);
-  //     if (parentQueue) {
-  //       triggerAt.setTime(parentQueue.trigger_at.getTime());
-  //     }
-
-  //     // grand_parent
-  //     let grandQueueId = null;
-  //     if (task.pos) {
-  //       grandQueueId = parentQueue?.id || null;
-  //     } else {
-  //       grandQueueId = parentQueue?.grand_parent_queue_id || null;
-  //     }
-
-  //     // apply delay
-  //     if (task.action === 'delay_action') {
-  //       triggerAt = addHours(triggerAt, task.config?.duration || 0);
-  //     }
-
-  //     // construct queue item
-  //     const queue = {
-  //       id: uid,
-  //       task_action: task.action,
-  //       task_pos: task.pos,
-  //       task_config: task.config,
-  //       task_data: input,
-  //       workflow_id: task.workflow_id,
-  //       status: QueueTask.STATUSES.PENDING,
-  //       task_id: task.id,
-  //       task_parent_id: task.parent_task_id,
-  //       parent_queue_id: parentQueue?.id || null,
-  //       grand_parent_queue_id: grandQueueId,
-  //       trigger_at: triggerAt,
-  //     };
-  //     queueItems.push(queue);
-
-  //     // child tasks
-  //     const childs = tasks.filter((d) => d.parent_task_id === task.id);
-  //     childs.forEach((d) => generateQueue(d, triggerAt));
-  //   }
-
-  //   const rootTasks = tasks.filter((d) => d.parent_task_id === null);
-  //   rootTasks.forEach((d) => generateQueue(d));
-
-  //   // DB update
-  //   await this.model.bulkCreate(queueItems, options);
-
-  //   return queueItems;
-  // }
-  // using DB tracker
-  // async pushQueueTask2(queueId) {
-  //   const queueItem = await this.model.findByPk(queueId);
-  //   console.log('Push queue:', queueId, queueItem.task_action);
-
-  //   // sync driver
-  //   await this.runQueueTask2(queueId);
-  // }
-
-  // async runQueueTask2(queueId) {
-  //   const queueItem = await this.model.findByPk(queueId);
-  //   // if (queueItem.status === QueueTask.STATUSES.COMPLETED) {
-  //   //   console.log('Queue task already completed.');
-  //   //   return;
-  //   // }
-  //   // if (queueItem.status !== QueueTask.STATUSES.FAILED) {
-  //   //   console.log('Queue task already triggered.');
-  //   //   return;
-  //   // }
-
-  //   console.log('Trigger:', queueItem.task_action, queueItem.trigger_at);
-  //   const { result, pos } = await this.runTask(queueItem.task_action, queueItem.task_data, queueItem.task_config);
-  //   console.log(result, pos);
-
-  //   queueItem.execute_at = new Date();
-  //   queueItem.status = QueueTask.STATUSES.COMPLETED;
-  //   queueItem.result_obj = result;
-  //   await queueItem.save();
-
-  //   // prepare next queue item
-  //   const chainedItems = await this.model.findAll({
-  //     attributes: ['id', 'task_pos'],
-  //     where: {
-  //       parent_queue_id: queueItem.id,
-  //     },
-  //     raw: true,
-  //   });
-  //   if (!chainedItems?.length) {
-  //     console.log('Trigger completed');
-  //     return;
-  //   }
-  //   const items = chainedItems.reduce((acc, cur) => ({
-  //     ...acc,
-  //     [cur.task_pos || '']: cur.id,
-  //   }), {});
-  //   // console.log(chainedItems, items);
-
-  //   const nextQueueItemId = items[pos || ''] || null;
-  //   if (!nextQueueItemId) {
-  //     console.log('Something wrong... Trigger stopped');
-  //     return;
-  //   }
-  //   await this.pushQueueTask(nextQueueItemId);
-  // }
-
   async runTask(action, data, config) {
-    // available actions
-    // - send_user_email
-    // - send_user_sms
-    // - send_user_whatsapp
-    // - send_email
-    // - send_sms
-    // - send_whatsapp
-    // - call_api
-    // - delay_action
+    /**
+     * Available actions
+     * - send_user_email
+     * - send_user_sms
+     * - send_user_whatsapp
+     * - send_email
+     * - send_sms
+     * - send_whatsapp
+     * - call_api
+     * - delay_action (disabled for SQS flow)
+     */
 
     // delay
     if (action === 'delay_action') {
@@ -390,12 +279,13 @@ class QueueService extends BaseService {
 
       const message = strMap(config.message, data);
       const params = {
-        subject: `New Enrolment for ${data.campaign?.name}`,
+        subject: `New Enrolment Alert from ${configApp.name}`,
         to: config?.email,
         content: message,
         throwErr: true,
       };
       await sendMail(params);
+
       return {
         pos: null,
         result: null,
@@ -407,18 +297,26 @@ class QueueService extends BaseService {
       if (!config?.template) {
         throw new Error('Invalid send_user_email node config');
       }
-      const promises = data?.enrolments
-        .filter((enrolment) => enrolment?.user?.email)
+      if (!data?.campaign?.id) {
+        throw new Error('Invalid send_user_email data');
+      }
+
+      const subject = strMap(config.subject || 'Thank you for interested', data);
+      const enrolments = await this.getAffectedEnrolments(data);
+      const promises = enrolments
+        .filter((enrolment) => enrolment.user.email?.trim())
         .map((enrolment) => {
           const params = {
-            subject: `Campaign Enrolment: ${data.campaign?.name}`,
+            subject,
             templateId: config.template,
             templateData: enrolment,
             to: enrolment.user.email,
           };
           return sendMailUsingTmpl(params);
         });
-      await promises.all();
+      // swallow errors
+      // await Promise.allSettled(promises);
+      await this.batchedPromises(promises, 10, 1000);
 
       return {
         pos: null,
@@ -441,6 +339,7 @@ class QueueService extends BaseService {
         throwErr: true,
       };
       await sendSMS(params);
+
       return {
         pos: null,
         result: null,
@@ -450,18 +349,27 @@ class QueueService extends BaseService {
     if (action === 'send_user_sms') {
       // invalid config check
       if (!config?.template) {
-        throw new Error('Invalid send_user_email node config');
+        throw new Error('Invalid send_user_sms node config');
       }
-      if (!data?.user?.contact) {
-        throw new Error('Invalid user.contact');
+      if (!data?.campaign?.id) {
+        throw new Error('Invalid send_user_sms data');
       }
-      // @tbc
-      // const params = {
-      //   to: data?.user?.contact,
-      //   message: config?.message,
-      //   throwErr: true,
-      // };
-      // await sendSMS(params);
+
+      const enrolments = await this.getAffectedEnrolments(data);
+      const promises = enrolments
+        .filter((enrolment) => enrolment.user.contact?.trim())
+        .map((enrolment) => {
+          const params = {
+            to: enrolment.user.contact,
+            message: 'SMS blast message for enrolment',
+            throwErr: true,
+          };
+          return sendSMS(params);
+        });
+      // swallow errors
+      // await Promise.allSettled(promises);
+      await this.batchedPromises(promises, 10, 1000);
+
       return {
         pos: null,
         result: null,
@@ -472,15 +380,17 @@ class QueueService extends BaseService {
     // Whatsapp
     if (action === 'send_whatsapp') {
       // invalid config check
-      if (!config?.number || !config?.message) {
+      if (!config?.number || !config?.template) {
         throw new Error('Invalid send_whatsapp node config');
       }
-      // const params = {
-      //   to: config?.number,
-      //   message: config?.message,
-      //   throwErr: true,
-      // };
-      // await sendSMS(params);
+      const params = {
+        to: config.number,
+        templateName: config.template,
+        // input: {},
+        // inputOrder: [],
+        throwErr: true,
+      };
+      await sendWhatsAppTmpl(params);
       return {
         pos: null,
         result: null,
@@ -492,16 +402,27 @@ class QueueService extends BaseService {
       if (!config?.template) {
         throw new Error('Invalid send_user_whatsapp node config');
       }
-      if (!data?.user?.contact) {
-        throw new Error('Invalid user.contact');
+      if (!data?.campaign?.id) {
+        throw new Error('Invalid send_user_whatsapp data');
       }
-      // @tbc
-      // const params = {
-      //   to: data?.user?.contact,
-      //   message: config?.message,
-      //   throwErr: true,
-      // };
-      // await sendSMS(params);
+
+      const enrolments = await this.getAffectedEnrolments(data);
+      const promises = enrolments
+        .filter((enrolment) => enrolment.user.contact?.trim())
+        .map((enrolment) => {
+          const params = {
+            to: enrolment.user.contact,
+            templateName: config.template,
+            // input: {},
+            // inputOrder: [],
+            throwErr: true,
+          };
+          return sendWhatsAppTmpl(params);
+        });
+      // swallow errors
+      // await Promise.allSettled(promises);
+      await this.batchedPromises(promises, 10, 1000);
+
       return {
         pos: null,
         result: null,
@@ -529,6 +450,7 @@ class QueueService extends BaseService {
       if (config?.auth_type === 'api_key') {
         headers[config?.key] = config?.value;
       }
+
       try {
         const response = await fetch(config.endpoint, {
           method: config?.method || 'GET',
@@ -552,11 +474,71 @@ class QueueService extends BaseService {
       }
     }
 
+    // fallback
     return {
       pos: null,
       result: null,
       modifier: null,
     };
+  }
+
+  /**
+   * Retrieve affected enrolments for node (DB)
+   *
+   * @param  {object}  taskData - node task_data
+   * @return {array}
+   */
+  async getAffectedEnrolments(taskData) {
+    // have enrolment - return as single
+    if (taskData?.enrolment) {
+      return [taskData.enrolment];
+    }
+    // invalid taskData huh?
+    if (!taskData?.campaign?.id) {
+      return [];
+    }
+
+    const enrolments = await CampaignEnrolment.findAll({
+      where: {
+        campaign_id: taskData.campaign.id,
+        status: {
+          [Op.ne]: CampaignEnrolment.STATUSES.REJECT,
+        },
+      },
+      include: [
+        { model: User },
+      ],
+    });
+
+    return enrolments.map((enrolment) => ({
+      id: enrolment.id,
+      user: {
+        id: enrolment.User?.id,
+        name: enrolment.User?.name,
+        email: enrolment.User?.email,
+        contact: enrolment.User?.contact,
+      },
+    }));
+  }
+
+  /**
+   * Batch trigger promises
+   */
+  async batchedPromises(promises, batchSize = 10, delay = 300) {
+    // helpers
+    const sleep = (ms) => new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+
+    /* eslint-disable no-restricted-syntax, no-await-in-loop */
+    for (let i = 0; i < promises.length; i += batchSize) {
+      if (i > 0) {
+        await sleep(delay);
+      }
+      const batch = promises.slice(i, i + batchSize);
+      await Promise.allSettled(batch);
+    }
+    /* eslint-enable no-restricted-syntax, no-await-in-loop */
   }
 }
 

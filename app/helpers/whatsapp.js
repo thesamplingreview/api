@@ -50,12 +50,13 @@ async function sendWhatsAppTmpl({
   language = 'en',
   throwErr = false,
 }) {
+  consoleLog('WhatsApp:', 'Send tmpl message to', to);
   try {
     const paramsOrder = inputOrder?.length ? inputOrder : Object.keys(input);
     const params = paramsOrder.map((key) => ({
       type: 'text',
       text: input[key] || '',
-    }));
+    })) || [];
     const data = {
       messaging_product: 'whatsapp',
       to,
@@ -83,17 +84,17 @@ async function sendWhatsAppTmpl({
       body: JSON.stringify(data),
     });
     const result = await response.json();
-    // console.log(result);
     if (result.error) {
       throw new Error(result.error.error_data?.details || result.error.message || 'Unknown WA error');
     }
+
+    consoleLog('WhatsApp:', 'Send tmpl message to - end', to);
     return true;
   } catch (err) {
+    consoleLog('WhatsAppErr:', 'Send tmpl message to', to, err.message);
     if (throwErr) {
       throw err;
     }
-    // debug log
-    consoleLog('Failed to send WhatsApp message...', err);
     return false;
   }
 }
@@ -105,6 +106,7 @@ async function sendWhatsAppCode({
   language = 'en',
   throwErr = false,
 }) {
+  consoleLog('WhatsApp:', 'Send OTP message to', to);
   try {
     const data = {
       messaging_product: 'whatsapp',
@@ -147,13 +149,14 @@ async function sendWhatsAppCode({
     if (result.error) {
       throw new Error(result.error.error_data?.details || result.error.message || 'Unknown WA error');
     }
+
+    consoleLog('WhatsApp:', 'Send OTP message to - end', to);
     return true;
   } catch (err) {
+    consoleLog('WhatsAppErr:', 'Send OTP message to', to, err.message);
     if (throwErr) {
       throw err;
     }
-    // debug log
-    consoleLog('Failed to send WhatsApp message...', err);
     return false;
   }
 }
