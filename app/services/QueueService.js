@@ -9,7 +9,7 @@ const { sendWhatsAppTmpl } = require('../helpers/whatsapp');
 const { pushQueue } = require('../helpers/queue');
 const BaseService = require('./BaseService');
 const {
-  sequelize, User, QueueTask, WorkflowTask, CampaignEnrolment,
+  sequelize, User, QueueTask, WorkflowTask, CampaignEnrolment, CampaignReview,
 } = require('../models');
 
 class QueueService extends BaseService {
@@ -277,9 +277,13 @@ class QueueService extends BaseService {
         throw new Error('Invalid send_email node config');
       }
 
+      let subject = `New Enrolment Alert from ${configApp.name}`;
+      if (data?.trigger === 'review') {
+        subject = `New Review Alert from ${configApp.name}`;
+      }
       const message = strMap(config.message, data);
       const params = {
-        subject: `New Enrolment Alert from ${configApp.name}`,
+        subject,
         to: config?.email,
         content: message,
         throwErr: true,
@@ -302,15 +306,14 @@ class QueueService extends BaseService {
       }
 
       const subject = strMap(config.subject || 'Thank you for interested', data);
-      const enrolments = await this.getAffectedEnrolments(data);
-      const promises = enrolments
-        .filter((enrolment) => enrolment.user.email?.trim())
-        .map((enrolment) => {
+      const users = await this.getAffectedUsers(data);
+      const promises = users.filter((user) => user.email?.trim())
+        .map((user) => {
           const params = {
             subject,
+            to: user.email,
             templateId: config.template,
-            templateData: enrolment,
-            to: enrolment.user.email,
+            templateData: user,
           };
           return sendMailUsingTmpl(params);
         });
@@ -355,13 +358,12 @@ class QueueService extends BaseService {
         throw new Error('Invalid send_user_sms data');
       }
 
-      const enrolments = await this.getAffectedEnrolments(data);
-      const promises = enrolments
-        .filter((enrolment) => enrolment.user.contact?.trim())
-        .map((enrolment) => {
+      const users = await this.getAffectedUsers(data);
+      const promises = users.filter((user) => user.contact?.trim())
+        .map((user) => {
           const params = {
-            to: enrolment.user.contact,
-            message: 'SMS blast message for enrolment',
+            to: user.contact,
+            message: 'SMS blast message (WIP)',
             throwErr: true,
           };
           return sendSMS(params);
@@ -406,12 +408,11 @@ class QueueService extends BaseService {
         throw new Error('Invalid send_user_whatsapp data');
       }
 
-      const enrolments = await this.getAffectedEnrolments(data);
-      const promises = enrolments
-        .filter((enrolment) => enrolment.user.contact?.trim())
-        .map((enrolment) => {
+      const users = await this.getAffectedUsers(data);
+      const promises = users.filter((user) => user.contact?.trim())
+        .map((user) => {
           const params = {
-            to: enrolment.user.contact,
+            to: user.contact,
             templateName: config.template,
             // input: {},
             // inputOrder: [],
@@ -488,37 +489,56 @@ class QueueService extends BaseService {
    * @param  {object}  taskData - node task_data
    * @return {array}
    */
-  async getAffectedEnrolments(taskData) {
-    // have enrolment - return as single
-    if (taskData?.enrolment) {
-      return [taskData.enrolment];
+  async getAffectedUsers(taskData) {
+    // have user - return as single
+    if (taskData?.user) {
+      return [taskData.user];
     }
     // invalid taskData huh?
     if (!taskData?.campaign?.id) {
       return [];
     }
 
-    const enrolments = await CampaignEnrolment.findAll({
-      where: {
-        campaign_id: taskData.campaign.id,
-        status: {
-          [Op.ne]: CampaignEnrolment.STATUSES.REJECT,
+    // trigger by enrolment
+    if (taskData.trigger === 'enrolment' && !taskData.isAuto) {
+      const enrolments = await CampaignEnrolment.findAll({
+        where: {
+          campaign_id: taskData.campaign.id,
+          status: {
+            [Op.ne]: CampaignEnrolment.STATUSES.REJECT,
+          },
         },
-      },
-      include: [
-        { model: User },
-      ],
-    });
-
-    return enrolments.map((enrolment) => ({
-      id: enrolment.id,
-      user: {
+        include: [
+          { model: User },
+        ],
+      });
+      return enrolments.map((enrolment) => ({
         id: enrolment.User?.id,
         name: enrolment.User?.name,
         email: enrolment.User?.email,
         contact: enrolment.User?.contact,
-      },
-    }));
+      }));
+    }
+
+    // trigger by review
+    if (taskData.trigger === 'review' && !taskData.isAuto) {
+      const reviews = await CampaignReview.findAll({
+        where: {
+          campaign_id: taskData.campaign.id,
+        },
+        include: [
+          { model: User },
+        ],
+      });
+      return reviews.map((review) => ({
+        id: review.User?.id,
+        name: review.User?.name,
+        email: review.User?.email,
+        contact: review.User?.contact,
+      }));
+    }
+
+    return [];
   }
 
   /**

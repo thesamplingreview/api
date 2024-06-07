@@ -1,7 +1,8 @@
 const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
+const allOptions = require('../../../config/options');
 const {
-  sequelize, Campaign, Product, Form, Vendor, User,
+  sequelize, Campaign, CampaignWorkflow, Product, Form, Vendor, User,
 } = require('../../models');
 const CampaignService = require('../../services/CampaignService');
 const CampaignResource = require('../../resources/CampaignResource');
@@ -253,6 +254,10 @@ class CampaignController extends ApiController {
         name: val.charAt(0).toUpperCase() + val.slice(1),
       })),
       states,
+      workflow_triggers: Object.values(CampaignWorkflow.TRIGGERS).map((val) => ({
+        id: val,
+        name: allOptions.workflowTriggers?.[val] || val,
+      })),
     };
 
     return this.responseJson(req, res, {

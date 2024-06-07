@@ -104,8 +104,7 @@ class WorkflowController extends ApiController {
     const formData = {
       name: req.body.name,
       enable: req.body.enable,
-      // *only allow to change name
-      // trigger: req.body.trigger,
+      trigger: req.body.trigger,
       // campaign_id: req.body.campaign_id,
       // vendor_id: req.body.vendor_id,
     };
@@ -188,6 +187,10 @@ class WorkflowController extends ApiController {
       mailTmpls: convertTextareaToOptions(wf_send_user_mail_tmpls),
       waTmpls: convertTextareaToOptions(wf_send_user_whatsapp_tmpls),
       phone_prefixes: allOptions.phonePrefixes,
+      workflow_triggers: Object.values(CampaignWorkflow.TRIGGERS).map((val) => ({
+        id: val,
+        name: allOptions.workflowTriggers?.[val] || val,
+      })),
     };
 
     return this.responseJson(req, res, {

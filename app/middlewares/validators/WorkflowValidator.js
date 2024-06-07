@@ -101,8 +101,8 @@ exports.createReq = [
 exports.updateReq = [
   nameValidator().optional(),
   enableValidator().optional(),
+  triggerValidator().optional(),
   // vendorValidator().optional(),
-  // triggerValidator().optional(),
 ];
 
 exports.updateTasksReq = [

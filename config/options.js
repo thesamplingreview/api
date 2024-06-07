@@ -33,4 +33,9 @@ module.exports = {
     { id: 'Terengganu', name: 'Terengganu' },
     { id: 'Wilayah Persekutuan', name: 'Wilayah Persekutuan' },
   ],
+  // key <> name mapping
+  workflowTriggers: {
+    enrolment: 'New Enrolment',
+    review: 'New Review',
+  },
 };

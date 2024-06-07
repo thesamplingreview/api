@@ -6,7 +6,8 @@ module.exports = (sequelize, DataTypes) => {
      * Static variables
      */
     static TRIGGERS = {
-      ENROLMENT: 'enrolment',
+      NEW_ENROLMENT: 'enrolment',
+      NEW_REVIEW: 'review',
     };
 
     static associate(models) {

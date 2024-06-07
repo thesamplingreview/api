@@ -2,7 +2,7 @@ const ApiController = require('./ApiController');
 const QueueService = require('../services/QueueService');
 const WorkflowService = require('../services/WorkflowService');
 const { pushQueue } = require('../helpers/queue');
-const { CampaignEnrolment } = require('../models');
+const { CampaignEnrolment, CampaignReview } = require('../models');
 
 class CronController extends ApiController {
   /**
@@ -40,12 +40,19 @@ class CronController extends ApiController {
    * TEST - testing init trigger of queue task from enrolment
    */
   async testWorkflowTrigger(req, res) {
-    // @test data
-    const enrolmentId = '36';
-    const enrolment = await CampaignEnrolment.findByPk(enrolmentId);
-
     const workflowService = new WorkflowService();
-    const queueTaskCount = await workflowService.triggerWorkflowByEnrolment(enrolment);
+
+    // @test data
+    let queueTaskCount = 0;
+    if (req.query.type === 'enrolment') {
+      const enrolmentId = '36';
+      const enrolment = await CampaignEnrolment.findByPk(enrolmentId);
+      queueTaskCount = await workflowService.triggerWorkflowByEnrolment(enrolment);
+    } else if (req.query.type === 'review') {
+      const reviewId = '4';
+      const review = await CampaignReview.findByPk(reviewId);
+      queueTaskCount = await workflowService.triggerWorkflowByReview(review);
+    }
 
     return this.responseJson(req, res, {
       data: `${queueTaskCount} tasks scheduled.`,

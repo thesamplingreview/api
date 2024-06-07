@@ -4,7 +4,7 @@ const { consoleLog } = require('../helpers/logger');
 const BaseService = require('./BaseService');
 const QueueService = require('./QueueService');
 const {
-  Workflow, WorkflowTask, Campaign, CampaignWorkflow, CampaignEnrolment, User,
+  Workflow, WorkflowTask, Campaign, CampaignWorkflow, CampaignEnrolment, CampaignReview, User,
 } = require('../models');
 
 class WorkflowService extends BaseService {
@@ -64,6 +64,7 @@ class WorkflowService extends BaseService {
 
     if (record.CampaignWorkflow) {
       const linkedFormData = {
+        trigger: getInput(input.trigger, record.CampaignWorkflow.trigger),
         enable: getInput(input.enable, record.CampaignWorkflow.enable),
       };
       await record.CampaignWorkflow.update(linkedFormData, options);
@@ -126,10 +127,10 @@ class WorkflowService extends BaseService {
    * Trigger campaign workflow
    *
    * @param  {string}  campaignWorkflowId
-   * @param  {string}  enrolmentId
+   * @param  {string}  singleId
    * @return {int}
    */
-  async triggerCampaignWorkflow(campaignWorkflowId, enrolmentId = '') {
+  async triggerCampaignWorkflow(campaignWorkflowId, singleId = '') {
     consoleLog('Worlflow:', 'Run campaign workflow', campaignWorkflowId);
     const campaignWorkflow = await CampaignWorkflow.findByPk(campaignWorkflowId, {
       include: [
@@ -143,34 +144,96 @@ class WorkflowService extends BaseService {
       return 0;
     }
 
-    // validate - enrolment(s)
-    let enrolments = [];
-    if (enrolmentId) {
-      // case 1 - trigger for single enrolment only
-      const enrolment = await CampaignEnrolment.findByPk(enrolmentId, {
-        include: [
-          { model: User },
-        ],
-      });
-      if (enrolment) {
-        enrolments.push(enrolment);
+    const queueData = {
+      campaign: {
+        id: campaign.id,
+        name: campaign.name,
+      },
+    };
+
+    if (campaignWorkflow.trigger === CampaignWorkflow.TRIGGERS.NEW_ENROLMENT) {
+      if (singleId) {
+        // case 1 - trigger for single enrolment only
+        const enrolment = await CampaignEnrolment.findByPk(singleId, {
+          include: [
+            { model: User },
+          ],
+        });
+        if (!enrolment) {
+          consoleLog('Worlflow:', 'Invalid enrolment ID', campaignWorkflowId, singleId);
+          return 0;
+        }
+        // inject queueData
+        queueData.isAuto = true;
+        queueData.trigger = 'enrolment';
+        queueData.user = {
+          id: enrolment.User?.id,
+          name: enrolment.User?.name,
+          contact: enrolment.User?.contact,
+          email: enrolment.User?.email,
+        };
+        queueData.enrolment = {
+          id: enrolment.id,
+        };
+      } else {
+        // case 2 - trigger for all campaign enrolments (manual)
+        const enrolments = await CampaignEnrolment.findAll({
+          where: {
+            campaign_id: campaignWorkflow.Campaign.id,
+            status: {
+              [Op.ne]: CampaignEnrolment.STATUSES.REJECT,
+            },
+          },
+        });
+        if (!enrolments.length) {
+          consoleLog('Worlflow:', 'Linked campaign does not have available enrolments', campaignWorkflowId);
+          return 0;
+        }
+        // inject queueData
+        queueData.isAuto = false;
+        queueData.trigger = 'enrolment';
+      }
+    } else if (campaignWorkflow.trigger === CampaignWorkflow.TRIGGERS.NEW_REVIEW) {
+      if (singleId) {
+        // case 1 - trigger for single review only
+        const review = await CampaignReview.findByPk(singleId, {
+          include: [
+            { model: User },
+          ],
+        });
+        if (!review) {
+          consoleLog('Worlflow:', 'Invalid review ID', campaignWorkflowId, singleId);
+          return 0;
+        }
+        // inject queueData
+        queueData.isAuto = true;
+        queueData.trigger = 'review';
+        queueData.user = {
+          id: review.User?.id,
+          name: review.User?.name,
+          contact: review.User?.contact,
+          email: review.User?.email,
+        };
+        queueData.review = {
+          id: review.id,
+        };
+      } else {
+        // case 2 - trigger for all campaign reviews (manual)
+        const reviews = await CampaignReview.findAll({
+          where: {
+            campaign_id: campaignWorkflow.Campaign.id,
+          },
+        });
+        if (!reviews.length) {
+          consoleLog('Worlflow:', 'Linked campaign does not have available reviews', campaignWorkflowId);
+          return 0;
+        }
+        // inject queueData
+        queueData.isAuto = false;
+        queueData.trigger = 'review';
       }
     } else {
-      // case 2 - trigger for all campaign enrolments
-      enrolments = await CampaignEnrolment.findAll({
-        where: {
-          campaign_id: campaignWorkflow.Campaign.id,
-          status: {
-            [Op.ne]: CampaignEnrolment.STATUSES.REJECT,
-          },
-        },
-        include: [
-          { model: User },
-        ],
-      });
-    }
-    if (!enrolments.length) {
-      consoleLog('Worlflow:', 'Linked campaign does not have available enrolments', campaignWorkflowId);
+      consoleLog('Worlflow:', 'Unknown trigger - end', campaignWorkflowId, campaignWorkflow.trigger);
       return 0;
     }
 
@@ -188,37 +251,11 @@ class WorkflowService extends BaseService {
       return 0;
     }
 
+    // generate queue
     const queueService = new QueueService();
-    const promises = workflow.WorkflowTasks.map(async (task) => {
-      const queueData = {
-        campaign: {
-          id: campaign.id,
-          name: campaign.name,
-        },
-      };
-      if (enrolmentId) {
-        // case 1 - auto-trigger
-        // cache basic info for lazy load later
-        queueData.isAuto = true;
-        queueData.enrolment = {
-          id: enrolments[0].id,
-          user: {
-            id: enrolments[0].User?.id,
-            name: enrolments[0].User?.name,
-            contact: enrolments[0].User?.contact,
-            email: enrolments[0].User?.email,
-          },
-        };
-      } else {
-        // case 2 - manual-trigger
-        // no need cache as data too large
-        queueData.isAuto = false;
-      }
-
-      // push to queue
-      await queueService.pushQueueTask(task.id, queueData);
+    const promises = workflow.WorkflowTasks.map((task) => {
+      return queueService.pushQueueTask(task.id, queueData);
     });
-
     try {
       await Promise.all(promises);
       consoleLog('Worlflow:', 'Run campaign workflow - end', campaignWorkflowId);
@@ -241,13 +278,17 @@ class WorkflowService extends BaseService {
       include: [
         {
           model: CampaignWorkflow,
-          where: { enable: true },
+          where: {
+            trigger: CampaignWorkflow.TRIGGERS.NEW_ENROLMENT,
+            enable: true,
+          },
         },
       ],
     });
+
     // validate - no workflows
     if (!campaign.CampaignWorkflows.length) {
-      consoleLog('Worlflow:', 'Enrolment campaign does not have auto-trigger workflows - end', enrolment.id);
+      consoleLog('Worlflow:', 'Enrolment\'s campaign does not have auto-trigger workflows - end', enrolment.id);
       return 0;
     }
 
@@ -260,6 +301,45 @@ class WorkflowService extends BaseService {
     const totalTasks = results.reduce((a, c) => (a + c), 0);
 
     consoleLog('Worlflow:', `Trigger by enrolment - end (${totalTasks} tasks)`, enrolment.id);
+
+    return totalTasks;
+  }
+
+  /**
+   * Trigger campaign's workflow by review
+   *
+   * @param  {Model}  review
+   * @return {int}
+   */
+  async triggerWorkflowByReview(review) {
+    consoleLog('Worlflow:', 'Trigger by review', review.id);
+    const campaign = await review.getCampaign({
+      include: [
+        {
+          model: CampaignWorkflow,
+          where: {
+            trigger: CampaignWorkflow.TRIGGERS.NEW_REVIEW,
+            enable: true,
+          },
+        },
+      ],
+    });
+
+    // validate - no workflows
+    if (!campaign.CampaignWorkflows.length) {
+      consoleLog('Worlflow:', 'Review\'s campaign does not have auto-trigger workflows - end', review.id);
+      return 0;
+    }
+
+    // trigger campaign workflows
+    const promises = campaign.CampaignWorkflows.map(async (campaignWorkflow) => {
+      const count = await this.triggerCampaignWorkflow(campaignWorkflow.id, review.id);
+      return count;
+    });
+    const results = await Promise.all(promises);
+    const totalTasks = results.reduce((a, c) => (a + c), 0);
+
+    consoleLog('Worlflow:', `Trigger by review - end (${totalTasks} tasks)`, review.id);
 
     return totalTasks;
   }

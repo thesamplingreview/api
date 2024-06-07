@@ -106,7 +106,7 @@ class CampaignController extends ApiController {
     };
 
     const enrolmentService = new EnrolmentService();
-    const workflowService = new WorkflowService();
+
     // eslint-disable-next-line prefer-destructuring
     const campaign = req.campaign;
 
@@ -152,8 +152,9 @@ class CampaignController extends ApiController {
 
       await t.commit();
 
-      // trigger submission workflow
-      await workflowService.triggerEnrolmentWorkflow(campaign.id, [result.id]);
+      // trigger enrolment workflow
+      const workflowService = new WorkflowService();
+      await workflowService.triggerWorkflowByEnrolment(result);
 
       // Deprecated - replace with workflow tasks
       // email notifications
@@ -214,8 +215,6 @@ class CampaignController extends ApiController {
       review: req.body.review,
     };
 
-    const reviewService = new ReviewService();
-
     const t = await sequelize.transaction();
     try {
       // DB validation - if user dont have enrolment record
@@ -241,9 +240,15 @@ class CampaignController extends ApiController {
       }
 
       // DB update
+      const reviewService = new ReviewService();
       const result = await reviewService.create(formData, { transaction: t });
 
       await t.commit();
+
+      // trigger review workflow (off)
+      // const workflowService = new WorkflowService();
+      // await workflowService.triggerWorkflowByReview(result);
+
       return this.responseJson(req, res, {
         data: new CampaignReviewResource(result),
       });
