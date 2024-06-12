@@ -65,6 +65,15 @@ class ApiController {
   }
 
   /**
+   * Success CSV export
+   */
+  responseCsv(req, res, output) {
+    res.setHeader('Content-Disposition', 'attachment; filename=data.csv');
+    res.setHeader('Content-Type', 'text/csv');
+    res.send(output);
+  }
+
+  /**
    * Error response
    */
   responseError(req, res, err, data = {}, code = 500) {

@@ -3043,6 +3043,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"csv-stringify@npm:^6.5.0":
+  version: 6.5.0
+  resolution: "csv-stringify@npm:6.5.0"
+  checksum: c4009bc691b30314ff17cb2918d2f43dd42de5a1d3cd7889fd523f131d0e37d2a3c3c2601de93e8b71e2d8f3f52a9e4fb2a5f2ede9991e2895c1daa268694d78
+  languageName: node
+  linkType: hard
+
 "d@npm:1, d@npm:^1.0.1":
   version: 1.0.1
   resolution: "d@npm:1.0.1"
@@ -5906,6 +5913,7 @@ __metadata:
     aws-sdk: ^2.1493.0
     bcryptjs: ^2.4.3
     cors: ^2.8.5
+    csv-stringify: ^6.5.0
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.0
     dotenv: ^16.3.1
