@@ -81,6 +81,7 @@ router.put('/campaigns/:id/workflow', WorkflowValidator.updateTasksReq, Campaign
 // enrolment module
 router.get('/enrolments', EnrolmentController.getAll);
 router.get('/enrolments/all/options', EnrolmentController.options);
+router.get('/enrolments/export', EnrolmentController.export);
 router.get('/enrolments/:id', EnrolmentController.getSingle);
 router.put('/enrolments/:id', EnrolmentValidator.settingUpdateReq, EnrolmentController.update);
 router.delete('/enrolments/:id', EnrolmentController.remove);
@@ -88,6 +89,7 @@ router.delete('/enrolments/:id', EnrolmentController.remove);
 // review module
 router.get('/reviews', ReviewController.getAll);
 router.get('/reviews/all/options', ReviewController.options);
+router.get('/reviews/export', ReviewController.export);
 router.get('/reviews/:id', ReviewController.getSingle);
 // router.put('/reviews/:id', ReviewController.settingUpdateReq, EnrolmentController.update);
 router.delete('/reviews/:id', ReviewController.remove);

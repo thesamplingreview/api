@@ -3,7 +3,9 @@ const {
   sequelize, CampaignEnrolment, Campaign, Form, FormField, User, Product,
 } = require('../../models');
 const EnrolmentService = require('../../services/EnrolmentService');
+const CampaignService = require('../../services/CampaignService');
 const CampaignEnrolmentResource = require('../../resources/CampaignEnrolmentResource');
+const EnrolmentCsv = require('../../exporters/EnrolmentCsv');
 
 class EnrolmentController extends ApiController {
   constructor() {
@@ -122,6 +124,35 @@ class EnrolmentController extends ApiController {
     return this.responseJson(req, res, {
       data: options,
     });
+  }
+
+  /**
+   * GET - export (by campaign-basis only)
+   */
+  async export(req, res) {
+    try {
+      const campaignService = new CampaignService();
+      const record = await campaignService.findById(req.query.campaign_id, {
+        include: [
+          { model: Form },
+        ],
+      });
+      let fields = [];
+      if (record.Form) {
+        fields = await record.Form.getFormFields({
+          raw: true,
+        });
+      }
+
+      const enrolmentCsv = new EnrolmentCsv({
+        filter: { campaign_id: record.id },
+        formFields: fields,
+      });
+      const csv = await enrolmentCsv.toCsv();
+      return this.responseCsv(req, res, csv);
+    } catch (err) {
+      return this.responseError(req, res, err);
+    }
   }
 }
 
