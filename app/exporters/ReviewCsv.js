@@ -51,6 +51,7 @@ class ReviewCsv extends BaseCsv {
         {
           model: Campaign,
           attributes: ['name', 'slug'],
+          required: true,
         },
         {
           model: User,

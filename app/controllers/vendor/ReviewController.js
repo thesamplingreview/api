@@ -4,6 +4,7 @@ const {
 } = require('../../models');
 const ReviewService = require('../../services/ReviewService');
 const CampaignReviewResource = require('../../resources/CampaignReviewResource');
+const ReviewCsv = require('../../exporters/ReviewCsv');
 
 class ReviewController extends ApiController {
   constructor() {
@@ -135,6 +136,25 @@ class ReviewController extends ApiController {
     return this.responseJson(req, res, {
       data: options,
     });
+  }
+
+  /**
+   * GET - export
+   */
+  async export(req, res) {
+    // inject vendor-only filter
+    req.query.vendor_id = req.user.vendor_id;
+
+    try {
+      const reviewCsv = new ReviewCsv({
+        filter: this.reviewService.genWhereQuery(req),
+      });
+      const csv = await reviewCsv.toCsv();
+
+      return this.responseCsv(req, res, csv);
+    } catch (err) {
+      return this.responseError(req, res, err);
+    }
   }
 }
 
