@@ -7,12 +7,47 @@ class EnrolmentCsv extends BaseCsv {
     super();
 
     this.filter = filter;
-    this.appendColumns = formFields.map((field) => {
-      return {
-        key: `submissions.${field.id}`,
-        header: field.name,
-      };
+    // append columns
+    const appendColumns = [];
+    formFields.forEach((field) => {
+      // ignore type
+      if (field.type === 'static') {
+        return;
+      }
+      // special extraction for address type
+      if (field.type === 'address') {
+        appendColumns.push({
+          key: `submissions.${field.id}.name`,
+          header: `${field.name} (Name)`,
+        });
+        appendColumns.push({
+          key: `submissions.${field.id}.email`,
+          header: `${field.name} (Email)`,
+        });
+        appendColumns.push({
+          key: `submissions.${field.id}.state`,
+          header: `${field.name} (State)`,
+        });
+        appendColumns.push({
+          key: `submissions.${field.id}.postal`,
+          header: `${field.name} (Postal)`,
+        });
+        appendColumns.push({
+          key: `submissions.${field.id}.address`,
+          header: `${field.name} (Address)`,
+        });
+        appendColumns.push({
+          key: `submissions.${field.id}.contact`,
+          header: `${field.name} (Contact)`,
+        });
+      } else {
+        appendColumns.push({
+          key: `submissions.${field.id}`,
+          header: field.name,
+        });
+      }
     });
+    this.appendColumns = appendColumns;
   }
 
   columns() {
@@ -59,6 +94,8 @@ class EnrolmentCsv extends BaseCsv {
       raw: true,
     };
     const results = await enrolmentService.findAll(query);
+    // products mappings
+    // @todo - not straight forwards as each enrolment might have different form
     return results;
   }
 }
