@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       });
+      this.hasMany(models.CampaignReviewUpload, {
+        foreignKey: 'review_id',
+        targetKey: 'id',
+      });
     }
   }
 

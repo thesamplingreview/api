@@ -15,6 +15,17 @@ class CampaignReviewResource {
       const UserResource = require('./UserResource');
       relations.creator = this.data.User ? new UserResource(this.data.User) : null;
     }
+    if (this.data.CampaignReviewUploads !== undefined) {
+      relations.uploads = this.data.CampaignReviewUploads.map((d) => ({
+        id: d.id,
+        type: d.type,
+        asset_id: d.asset_id,
+        url: d.url,
+        name: d.Asset?.filename || null,
+        size: d.Asset?.filesize || null,
+        mimetype: d.Asset?.mimetype || null,
+      }));
+    }
 
     return {
       id: this.data.id,

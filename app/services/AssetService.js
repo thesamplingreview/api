@@ -1,6 +1,11 @@
+const { v4: uuidv4 } = require('uuid');
+const { format } = require('date-fns');
 const BaseService = require('./BaseService');
 const { Asset } = require('../models');
-const { s3Upload, s3Remove, getImageDimension } = require('../helpers/upload');
+const {
+  s3Upload, s3PublicUrl, s3Remove, generateS3PresignedUrl, getImageDimension,
+} = require('../helpers/upload');
+const appConfig = require('../../config/app');
 
 class AssetService extends BaseService {
   constructor() {
@@ -8,51 +13,97 @@ class AssetService extends BaseService {
   }
 
   /**
-   * Verify token
+   * Upload asset
    *
-   * @param  {string}  type
-   * @param  {string}  type
-   * @param  {string}  type
+   * @param  {object}  input
+   * @param  {object}  options
    * @return {boolean}
    */
   async create(input, options = {}) {
-    // eslint-disable-next-line prefer-destructuring
-    const file = input.file;
+    const {
+      file, caption, tags, vendor_id, created_by,
+    } = input;
     if (!file?.filepath) {
       throw new Error('Invalid file object.');
     }
 
-    // NOTE: 'local' disk only for local testing
-    let url = file.filepath;
-    let disk = 'local';
+    // image meta
     const dimensions = await getImageDimension(file.filepath);
-
-    // upload to s3
-    const useS3 = false;
-    if (useS3) {
-      url = await s3Upload(file, 'assets');
-      disk = 's3';
+    let fileUrl;
+    if (appConfig.uploadDisk === 's3') {
+      // s3
+      const dir = 'assets';
+      fileUrl = await s3Upload(file, dir);
     } else {
-      url = `https://picsum.photos/800?v=${(new Date()).valueOf()}`;
+      // local
+      fileUrl = file.filepath;
     }
 
     const formData = {
-      url,
-      disk,
+      url: fileUrl,
+      disk: appConfig.uploadDisk,
       filename: file.newFilename,
       ori_filename: file.originalFilename,
-      caption: input.caption || null,
       mimetype: file.mimetype,
       filesize: file.size,
       width: dimensions?.width || 0,
       height: dimensions?.height || 0,
-      tags: input.tags || null,
-      vendor_id: input.vendor_id || null,
-      created_by: input.created_by || null,
+      caption: caption || null,
+      tags: tags || null,
+      vendor_id: vendor_id || null,
+      created_by: created_by || null,
     };
     const result = await this.model.create(formData, options);
 
     return result;
+  }
+
+  /**
+   * DELETE - remove
+   */
+  async delete(record, options) {
+    const result = await record.destroy(options);
+
+    // attempt to remove s3 also
+    await s3Remove(result.url);
+
+    return result;
+  }
+
+  /**
+   * Generate s3 presigned url
+   *
+   * @param  {object}  input - {filename, created_by}
+   * @param  {object}  options
+   * @return {boolean}
+   */
+  async createS3PresignedAsset(input, options = {}) {
+    const {
+      filename, filesize, mimetype, created_by,
+    } = input;
+
+    const dir = `userupload/${format(new Date(), 'yyyy-MM-dd')}`;
+    const filenameSegs = filename.split('.');
+    const newFilename = `${uuidv4()}.${filenameSegs[filenameSegs.length - 1]}`;
+    const presignedUrl = await generateS3PresignedUrl(newFilename, dir);
+    const fileUrl = s3PublicUrl(`${dir}/${newFilename}`);
+
+    const formData = {
+      url: fileUrl,
+      disk: 's3',
+      filename: newFilename,
+      ori_filename: filename,
+      tags: 'presigned',
+      mimetype: mimetype || null,
+      filesize: filesize || null,
+      created_by: created_by || null,
+    };
+    const result = await this.model.create(formData, options);
+
+    return {
+      asset: result,
+      presigned_url: presignedUrl,
+    };
   }
 }
 

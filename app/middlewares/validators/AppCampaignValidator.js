@@ -43,7 +43,7 @@ exports.createEnrolmentReq = [
     }),
 ];
 
-exports.createReviewReq = [
+exports.postReviewReq = [
   slugValidator(),
   body('rating')
     .notEmpty().bail()
@@ -51,6 +51,15 @@ exports.createReviewReq = [
     .toInt(),
   body('review')
     .optional(),
+  body('uploads')
+    .isArray({ min: 1 }).bail()
+    .withMessage(validatorMessage('validation.required', 'Uploads')),
+  body('uploads.*.url')
+    .notEmpty().bail()
+    .withMessage(validatorMessage('validation.required', 'upload.url')),
+  body('uploads.*.asset_id')
+    .notEmpty().bail()
+    .withMessage(validatorMessage('validation.required', 'upload.asset_id')),
 ];
 
 /* eslint-enable newline-per-chained-call */

@@ -26,6 +26,21 @@ router.post(
   utilsController.uploadAsset.bind(utilsController),
 );
 
+router.delete(
+  '/asset/:id',
+  tokenInfoMiddleware(),
+  userCheckMiddleware(),
+  utilsController.deleteAsset.bind(utilsController),
+);
+
+router.post(
+  '/upload-s3-presigned-url',
+  tokenInfoMiddleware(),
+  userCheckMiddleware(),
+  UtilsValidator.s3PresignedUrlReq,
+  utilsController.s3PresignedUrl.bind(utilsController),
+);
+
 router.post(
   '/test-email',
   appKeyCheckMiddleware(),

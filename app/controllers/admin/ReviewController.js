@@ -1,6 +1,6 @@
 const ApiController = require('../ApiController');
 const {
-  sequelize, Campaign, User, Product,
+  sequelize, Campaign, CampaignReviewUpload, Asset, User, Product,
 } = require('../../models');
 const ReviewService = require('../../services/ReviewService');
 const CampaignReviewResource = require('../../resources/CampaignReviewResource');
@@ -24,6 +24,7 @@ class ReviewController extends ApiController {
         include: [
           { model: Campaign },
           { model: User },
+          { model: CampaignReviewUpload, include: [Asset] },
         ],
       };
       const { page, perPage } = this.getPaginate(req);

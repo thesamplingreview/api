@@ -204,15 +204,16 @@ class CampaignController extends ApiController {
   }
 
   /**
-   * Create review
+   * Post review (create / update)
    */
-  async createReview(req, res) {
+  async postReview(req, res) {
     // validated
     const formData = {
       created_by: req.user.id,
       campaign_id: req.campaign.id,
       rating: req.body.rating,
       review: req.body.review,
+      uploads: req.body.uploads,
     };
 
     const t = await sequelize.transaction();
@@ -228,20 +229,20 @@ class CampaignController extends ApiController {
         throw new ValidationFailed('User do not have any enrolment on this campaign.');
       }
 
-      // DB validation - if user have review record
-      const hasReview = await CampaignReview.findOne({
+      const reviewService = new ReviewService();
+      const record = await CampaignReview.findOne({
         where: {
           campaign_id: formData.campaign_id,
           created_by: formData.created_by,
         },
       });
-      if (hasReview) {
-        throw new ValidationFailed('User already review this campaign.');
-      }
 
-      // DB update
-      const reviewService = new ReviewService();
-      const result = await reviewService.create(formData, { transaction: t });
+      let result;
+      if (record) { // update
+        result = await reviewService.update(record, formData, { transaction: t });
+      } else { // create
+        result = await reviewService.create(formData, { transaction: t });
+      }
 
       await t.commit();
 

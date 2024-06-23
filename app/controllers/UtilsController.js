@@ -1,5 +1,6 @@
 const ApiController = require('./ApiController');
 const { sequelize } = require('../models');
+const { ValidationFailed } = require('../errors');
 const AssetService = require('../services/AssetService');
 const AssetResource = require('../resources/AssetResource');
 const { sendMail, sendMailUsingTmpl } = require('../helpers/mailer');
@@ -61,6 +62,67 @@ class UtilsController extends ApiController {
     }
   }
 
+  /**
+   * POST - get s3 presigned url
+   */
+  async s3PresignedUrl(req, res) {
+    const formData = {
+      filename: req.body.filename,
+      filesize: req.body.filesize,
+      mimetype: req.body.mimetype,
+      created_by: req.user.id,
+    };
+
+    const assetService = new AssetService();
+
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const result = await assetService.createS3PresignedAsset(formData, { transaction: t });
+
+      await t.commit();
+      return this.responseJson(req, res, {
+        data: {
+          ...result,
+          asset: new AssetResource(result.asset),
+        },
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * DELETE - delete asset
+   */
+  async deleteAsset(req, res, next) {
+    const assetService = new AssetService();
+    const record = await assetService.findById(req.params.id);
+
+    // validation - owner
+    if (record.created_by !== req.user.id) {
+      return next(new ValidationFailed('You do not have permission to delete this.'));
+    }
+
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const deleted = await assetService.delete(record, { transaction: t });
+
+      await t.commit();
+      return this.responseJson(req, res, {
+        data: new AssetResource(deleted),
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * Test script
+   */
   async sendTestEmail(req, res) {
     const formdata = {
       to: req.body.to,

@@ -13,6 +13,9 @@ module.exports = {
   // timezone
   timezone: getEnv(process.env.APP_TIMEZONE, '+08:00'),
 
+  // file upload disk
+  uploadDisk: getEnv(process.env.UPLOAD_DISK, 'local'),
+
   // urls
   webUrl: getEnv(process.env.WEB_URL, ''),
 

@@ -1,5 +1,7 @@
 const BaseCsv = require('./BaseCsv');
-const { Campaign, User } = require('../models');
+const {
+  Campaign, CampaignReviewUpload, User,
+} = require('../models');
 const ReviewService = require('../services/ReviewService');
 
 class ReviewCsv extends BaseCsv {
@@ -36,6 +38,10 @@ class ReviewCsv extends BaseCsv {
         header: 'Review',
       },
       {
+        key: 'CampaignReviewUploads.url',
+        header: 'Upload',
+      },
+      {
         key: 'created_at',
         header: 'Date',
       },
@@ -52,6 +58,11 @@ class ReviewCsv extends BaseCsv {
           model: Campaign,
           attributes: ['name', 'slug'],
           required: true,
+        },
+        {
+          // @NOTE: using raw will causing multiple rows if having multiple uploads
+          model: CampaignReviewUpload,
+          attributes: ['url'],
         },
         {
           model: User,
