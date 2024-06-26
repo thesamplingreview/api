@@ -22,7 +22,7 @@ async function pushQueue({
     // debug log
     consoleLog('Push to SQS queue');
     const response = await client.send(new SendMessageCommand({
-      QueueUrl: 'https://sqs.ap-southeast-1.amazonaws.com/029060303898/MyTestQueue',
+      QueueUrl: awsConfig.sqsUrl,
       MessageBody: JSON.stringify(data),
       DelaySeconds: delay,
     }));

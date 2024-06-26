@@ -7,6 +7,7 @@ module.exports = {
     secretKey: getEnv(process.env.AWS_SECRET_ACCESS_KEY),
     region: getEnv(process.env.AWS_DEFAULT_REGION),
     bucket: getEnv(process.env.AWS_BUCKET),
+    sqsUrl: getEnv(process.env.AWS_SQS_URL),
   },
 
   // sendgrid mailer
