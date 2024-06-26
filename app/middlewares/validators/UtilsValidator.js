@@ -58,4 +58,15 @@ exports.uploadAssetReq = [
   body('tags').optional(),
 ];
 
+exports.s3PresignedUrlReq = [
+  body('filename')
+    .notEmpty().bail()
+    .withMessage(validatorMessage('validation.required', 'filename')),
+  body('filesize')
+    .toInt()
+    .optional(),
+  body('mimetype')
+    .optional(),
+];
+
 /* eslint-enable newline-per-chained-call */

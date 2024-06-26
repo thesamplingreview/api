@@ -22,6 +22,7 @@ class ProductResource {
       image_url: this.data.image_url,
       brand: this.data.brand,
       status: this.data.status,
+      vendor_id: this.data.vendor_id,
       pos: this.data.pos,
       created_at: this.data.created_at,
       updated_at: this.data.updated_at,

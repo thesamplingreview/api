@@ -1,10 +1,11 @@
+const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
 const allOptions = require('../../../config/options');
 const {
   sequelize,
   User,
   UserRole,
-  Vendor,
+  Campaign,
 } = require('../../models');
 const CustomerService = require('../../services/CustomerService');
 const UserResource = require('../../resources/UserResource');
@@ -24,7 +25,9 @@ class UserController extends ApiController {
       const query = {
         where: this.customerService.genWhereQuery(req),
         order: this.customerService.genOrdering(req),
-        include: [Vendor],
+        include: [
+          { model: Campaign, required: true },
+        ],
       };
       const { page, perPage } = this.getPaginate(req);
       const results = await this.customerService.paginate(query, page, perPage);
@@ -45,7 +48,14 @@ class UserController extends ApiController {
   async getSingle(req, res) {
     try {
       const record = await this.customerService.findById(req.params.id, {
-        include: [UserRole, Vendor],
+        include: [
+          { model: UserRole },
+        ],
+        attributes: {
+          include: [
+            [Sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`user_id` = `User`.`id`)'), 'enrolmentsCount'],
+          ],
+        },
       });
 
       return this.responseJson(req, res, {
@@ -66,7 +76,6 @@ class UserController extends ApiController {
       password: req.body.password,
       contact: req.body.contact,
       name: req.body.name,
-      vendor_id: req.body.vendor_id,
       status: req.body.status,
     };
 
@@ -96,7 +105,6 @@ class UserController extends ApiController {
       name: req.body.name,
       status: req.body.status,
       role_id: req.body.role_id,
-      vendor_id: req.body.vendor_id,
     };
 
     // DB update
@@ -142,13 +150,9 @@ class UserController extends ApiController {
     const roles = await UserRole.scope('users').findAll({
       attributes: ['id', 'name'],
     });
-    const vendors = await Vendor.findAll({
-      attributes: ['id', 'name'],
-    });
 
     const options = {
       roles,
-      vendors,
       statuses: Object.values(User.STATUSES).map((val) => ({
         id: val,
         name: val.charAt(0).toUpperCase() + val.slice(1),

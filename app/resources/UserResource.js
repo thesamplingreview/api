@@ -12,11 +12,12 @@ class UserResource {
         id: this.data.UserRole.id,
         name: this.data.UserRole.name,
         code: this.data.UserRole.code,
+        group: this.data.UserRole.group,
       } : null;
     }
     if (this.data.Vendor !== undefined) {
       const VendorResource = require('./VendorResource');
-      relations.vendors = this.data.Vendor ? new VendorResource(this.data.Vendor) : null;
+      relations.vendor = this.data.Vendor ? new VendorResource(this.data.Vendor) : null;
     }
     if (this.data.CampaignEnrolment !== undefined) {
       relations.campaign_enrolment = {
@@ -26,6 +27,11 @@ class UserResource {
         created_at: this.data.CampaignEnrolment?.created_at || null,
         updated_at: this.data.CampaignEnrolment?.updated_at || null,
       };
+    }
+
+    const counts = {};
+    if (this.data.enrolmentsCount !== undefined) {
+      counts.enrolments_count = this.data.enrolmentsCount;
     }
 
     return {
@@ -43,6 +49,7 @@ class UserResource {
       contact_verified_at: this.data.contact_verified_at || null,
       created_at: this.data.created_at || null,
       updated_at: this.data.updated_at || null,
+      ...counts,
       ...relations,
     };
   }

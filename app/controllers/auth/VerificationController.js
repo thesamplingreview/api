@@ -11,9 +11,9 @@ class VerificationController extends ApiController {
   }
 
   /**
-   * POST - create phone otp
+   * POST - request otp SMS
    */
-  async createOtp(req, res) {
+  async requestSMSOtp(req, res) {
     const formData = {
       contact: req.body.contact,
     };
@@ -22,6 +22,30 @@ class VerificationController extends ApiController {
     const t = await sequelize.transaction();
     try {
       const result = await this.verificationService.sendOtp(formData);
+      await t.commit();
+
+      return this.responseJson(req, res, {
+        message: 'ok',
+        data: debug ? result : null,
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * POST - request otp using WhatsApp
+   */
+  async requestWAOtp(req, res) {
+    const formData = {
+      contact: req.body.contact,
+    };
+
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const result = await this.verificationService.sendOtpWa(formData);
       await t.commit();
 
       return this.responseJson(req, res, {

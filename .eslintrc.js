@@ -28,6 +28,7 @@ module.exports = {
     'no-param-reassign': 'off',
     'no-underscore-dangle': 'off',
     'camelcase': 'off',
+    'brace-style': 'off',
     'import/newline-after-import': 'off',
     'arrow-body-style': 'off',
     'class-methods-use-this': 'off',

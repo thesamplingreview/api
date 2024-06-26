@@ -1,6 +1,6 @@
 const ApiController = require('../ApiController');
 const {
-  Campaign, Vendor, CampaignEnrolment, CampaignReview,
+  Campaign, Vendor, CampaignEnrolment, CampaignReview, CampaignReviewUpload, Asset,
 } = require('../../models');
 const CampaignService = require('../../services/CampaignService');
 const CampaignResource = require('../../resources/CampaignResource');
@@ -19,7 +19,9 @@ class MyController extends ApiController {
         },
         order: campaignService.genOrdering(req),
         include: [
-          { model: Vendor },
+          {
+            model: Vendor,
+          },
           {
             model: CampaignEnrolment,
             where: { user_id: req.user.id },
@@ -28,6 +30,12 @@ class MyController extends ApiController {
             model: CampaignReview,
             where: { created_by: req.user.id },
             required: false,
+            include: [
+              {
+                model: CampaignReviewUpload,
+                include: [Asset],
+              },
+            ],
           },
         ],
       };

@@ -3,7 +3,9 @@ const ApiController = require('../ApiController');
 const { genValidatorItem } = require('../../helpers/validator');
 // const { verifyOTP } = require('../../helpers/sms');
 const { ValidationFailed } = require('../../errors');
-const { sequelize, VerificationToken } = require('../../models');
+const {
+  sequelize, VerificationToken, Vendor, UserRole,
+} = require('../../models');
 const UserService = require('../../services/UserService');
 const VerificationService = require('../../services/VerificationService');
 const UserResource = require('../../resources/UserResource');
@@ -20,10 +22,20 @@ class MyController extends ApiController {
    */
   async my(req, res) {
     try {
-      const user = await this.userService.findById(req.user.id);
+      const user = await this.userService.findById(req.user.id, {
+        include: [
+          { model: Vendor },
+          { model: UserRole },
+        ],
+      });
+      const data = new UserResource(user).toJSON();
+      if (req.query.scopes === '1') {
+        const permissionsConfig = require('../../../config/permissions');
+        data.permissions = permissionsConfig[user.UserRole.group] || [];
+      }
 
       return this.responseJson(req, res, {
-        data: new UserResource(user),
+        data,
       });
     } catch (err) {
       return this.responseError(req, res, err);
@@ -128,6 +140,26 @@ class MyController extends ApiController {
       });
     } catch (err) {
       await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * GET - permissions
+   */
+  async permissions(req, res) {
+    try {
+      const permissionsConfig = require('../../../config/permissions');
+      const user = await this.userService.findById(req.user.id, {
+        include: [
+          { model: UserRole },
+        ],
+      });
+
+      return this.responseJson(req, res, {
+        data: permissionsConfig[user.UserRole.group] || [],
+      });
+    } catch (err) {
       return this.responseError(req, res, err);
     }
   }

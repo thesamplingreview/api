@@ -53,6 +53,10 @@ class CampaignService extends BaseService {
         };
       }
     }
+    // filter - vendor_id
+    if (req.query.vendor_id?.trim()) {
+      whereQuery.vendor_id = req.query.vendor_id;
+    }
 
     return whereQuery;
   }
@@ -94,6 +98,7 @@ class CampaignService extends BaseService {
       review_cta: input.review_cta || null,
       start_date: toDate(input.start_date, null),
       end_date: toDate(input.end_date, null),
+      quota: input.quota || null,
       vendor_id: input.vendor_id || null,
       form_id: input.form_id || null,
       theme: input.theme || Campaign.THEMES.LIGHT,
@@ -137,6 +142,7 @@ class CampaignService extends BaseService {
       review_cta: getInput(input.review_cta, record.review_cta),
       start_date: input.start_date !== undefined ? toDate(input.start_date, null) : record.start_date,
       end_date: input.end_date !== undefined ? toDate(input.end_date, null) : record.end_date,
+      quota: getInput(input.quota, record.quota),
       vendor_id: getInput(input.vendor_id, record.vendor_id),
       form_id: getInput(input.form_id, record.form_id),
       theme: getInput(input.theme, record.theme),

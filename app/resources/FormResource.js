@@ -35,6 +35,7 @@ class FormResource {
       name: this.data.name,
       description: this.data.description || null,
       cover_url: this.data.cover_url || null,
+      vendor_id: this.data.vendor_id || null,
       created_at: this.data.created_at || null,
       updated_at: this.data.updated_at || null,
       ...counts,

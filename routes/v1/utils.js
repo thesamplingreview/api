@@ -4,6 +4,7 @@ const userCheckMiddleware = require('../../app/middlewares/userCheck');
 const appKeyCheckMiddleware = require('../../app/middlewares/appKeyCheck');
 const { UtilsValidator } = require('../../app/middlewares/validators');
 const UtilsController = require('../../app/controllers/UtilsController');
+const CronController = require('../../app/controllers/CronController');
 
 const router = express.Router();
 
@@ -25,6 +26,21 @@ router.post(
   utilsController.uploadAsset.bind(utilsController),
 );
 
+router.delete(
+  '/asset/:id',
+  tokenInfoMiddleware(),
+  userCheckMiddleware(),
+  utilsController.deleteAsset.bind(utilsController),
+);
+
+router.post(
+  '/upload-s3-presigned-url',
+  tokenInfoMiddleware(),
+  userCheckMiddleware(),
+  UtilsValidator.s3PresignedUrlReq,
+  utilsController.s3PresignedUrl.bind(utilsController),
+);
+
 router.post(
   '/test-email',
   appKeyCheckMiddleware(),
@@ -35,6 +51,29 @@ router.post(
   '/test-sms',
   appKeyCheckMiddleware(),
   utilsController.sendTestSMS.bind(utilsController),
+);
+
+router.post(
+  '/test-whatsapp',
+  appKeyCheckMiddleware(),
+  utilsController.sendTestWhatsapp.bind(utilsController),
+);
+
+// cron module
+const cronController = new CronController();
+
+router.get(
+  '/run-cron-queue',
+  appKeyCheckMiddleware(),
+  cronController.triggerQueueTask.bind(cronController),
+);
+router.get(
+  '/test-trigger',
+  cronController.testWorkflowTrigger.bind(cronController),
+);
+router.get(
+  '/test-push-queue',
+  cronController.testPushQueue.bind(cronController),
 );
 
 module.exports = router;

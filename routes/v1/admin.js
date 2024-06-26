@@ -12,6 +12,7 @@ const {
   ProductController,
   ConfigController,
   ReportController,
+  WorkflowController,
 } = require('../../app/controllers/admin');
 const {
   UserValidator,
@@ -22,6 +23,7 @@ const {
   EnrolmentValidator,
   ProductValidator,
   ConfigValidator,
+  WorkflowValidator,
 } = require('../../app/middlewares/validators');
 
 const router = express.Router();
@@ -73,6 +75,8 @@ router.post('/campaigns', CampaignValidator.createReq, CampaignController.create
 router.put('/campaigns/:id', CampaignValidator.updateReq, CampaignController.update);
 router.delete('/campaigns/:id', CampaignController.remove);
 router.put('/campaigns/:id/products', CampaignValidator.productsReq, CampaignController.updateProducts);
+router.get('/campaigns/:id/workflow', CampaignController.getWorkflow);
+router.put('/campaigns/:id/workflow', WorkflowValidator.updateTasksReq, CampaignController.updateWorkflow);
 
 // enrolment module
 router.get('/enrolments', EnrolmentController.getAll);
@@ -105,5 +109,15 @@ router.put('/configs', ConfigValidator.saveReq, ConfigController.save);
 // report module
 router.get('/report/signup', ReportController.countSignup);
 router.get('/report/enrolments', ReportController.countEnrolments);
+
+// workflow module
+router.get('/workflows', WorkflowController.getAll);
+router.get('/workflows/all/options', WorkflowController.options);
+router.get('/workflows/:id', WorkflowController.getSingle);
+router.post('/workflows', WorkflowValidator.createReq, WorkflowController.create);
+router.put('/workflows/:id', WorkflowValidator.updateReq, WorkflowController.update);
+router.put('/workflows/:id/tasks', WorkflowValidator.updateTasksReq, WorkflowController.updateTasks);
+router.delete('/workflows/:id', WorkflowController.remove);
+router.put('/campaign-workflow/:id/trigger', WorkflowController.triggerCampaignWorkflow);
 
 module.exports = router;

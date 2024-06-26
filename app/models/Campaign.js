@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'campaign_id',
         targetKey: 'id',
       });
+      this.hasMany(models.CampaignWorkflow, {
+        foreignKey: 'campaign_id',
+        targetKey: 'id',
+      });
       this.belongsToMany(models.Product, {
         through: models.CampaignProduct,
       });
@@ -112,6 +116,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     end_date: {
       type: DataTypes.DATE,
+    },
+    quota: {
+      type: DataTypes.INTEGER,
     },
     vendor_id: {
       type: DataTypes.UUID,

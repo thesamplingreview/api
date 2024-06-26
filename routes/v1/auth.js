@@ -29,8 +29,14 @@ router.post('/login/google', AuthValidator.loginWithGoogleReq, AuthController.lo
 router.post(
   '/verify/contact/otp',
   tokenInfoMiddleware(),
-  AuthValidator.createOtpReq,
-  VerificationController.createOtp,
+  AuthValidator.requestSMSOtpReq,
+  VerificationController.requestSMSOtp,
+);
+router.post(
+  '/verify/contact/otp-wa',
+  tokenInfoMiddleware(),
+  AuthValidator.requestWAOtpReq,
+  VerificationController.requestWAOtp,
 );
 
 // my module
@@ -47,6 +53,11 @@ router.put(
   tokenInfoMiddleware(),
   MyValidator.changeContactReq,
   MyController.changeContact,
+);
+router.get(
+  '/my/permissions',
+  tokenInfoMiddleware(),
+  MyController.permissions,
 );
 
 // password reset

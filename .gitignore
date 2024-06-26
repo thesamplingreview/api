@@ -5,3 +5,7 @@ node_modules
 .pnp.*
 
 .env
+.env.local
+.env.dev
+.env.production
+*.txt

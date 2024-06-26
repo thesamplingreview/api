@@ -4,6 +4,7 @@ const config = require('../../config/app');
 const { VerificationToken } = require('../models');
 const { consoleLog } = require('../helpers/logger');
 const { sendSMS } = require('../helpers/sms');
+const { sendWhatsAppCode } = require('../helpers/whatsapp');
 
 class VerificationService extends BaseService {
   constructor() {
@@ -48,25 +49,22 @@ class VerificationService extends BaseService {
   }
 
   /**
-   * Send out OTP
+   * Create OTP token
    *
    * @param  {object}  input
    * @return {object}
    */
-  async sendOtp(input) {
+  async createOtpToken({ contact }) {
     const code = config.env === 'production' ? this.randomToken() : '888888';
     const expiry = Math.floor(Date.now() / 1000) + (60 * 60 * 2);
 
-    // debug log
-    consoleLog(`Preparing send OTP to ${input.contact}...`);
-
     let token = await this.model.findOne({
-      where: { token_value: input.contact },
+      where: { token_value: contact },
     });
     if (!token) {
       token = new VerificationToken({
-        token_value: input.contact,
         type: VerificationToken.TYPES.PHONE,
+        token_value: contact,
       });
     }
     token.token = code;
@@ -74,15 +72,63 @@ class VerificationService extends BaseService {
     token.expired_at = new Date(expiry * 1000);
     const result = await token.save();
 
+    return result;
+  }
+
+  /**
+   * Send out OTP
+   *
+   * @param  {object}  input
+   * @return {object}
+   */
+  async sendOtp(input) {
+    const token = await this.createOtpToken({
+      contact: input.contact,
+    });
+
+    // debug log
+    consoleLog(`Preparing send OTP to ${input.contact}...`);
+
     // send OTP through SMS (production only)
     if (config.env === 'production') {
       await sendSMS({
         to: input.contact,
-        message: `Your [SamplingReview] verification code is: ${code}`,
+        message: `Your [SamplingReview] verification code is: ${token.token}`,
       });
     }
 
-    return result;
+    consoleLog(`Finish send OTP to ${input.contact}...`);
+
+    return token;
+  }
+
+  /**
+   * Send out OTP using WhatsApp authentication
+   *
+   * @param  {object}  input
+   * @return {object}
+   */
+  async sendOtpWa(input) {
+    const token = await this.createOtpToken({
+      contact: input.contact,
+    });
+
+    // debug log
+    consoleLog(`Preparing send WA OTP to ${input.contact}...`);
+
+    // send OTP through SMS (production only)
+    if (config.env === 'production') {
+      await sendWhatsAppCode({
+        to: input.contact,
+        templateName: 'test_code',
+        code: token.token,
+        throwErr: true,
+      });
+    }
+
+    consoleLog(`Finish send WA OTP to ${input.contact}...`);
+
+    return token;
   }
 }
 

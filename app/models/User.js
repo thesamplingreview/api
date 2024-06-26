@@ -61,6 +61,15 @@ module.exports = (sequelize, DataTypes) => {
           },
         ],
       });
+
+      this.addScope('vendors', {
+        include: [
+          {
+            model: models.UserRole,
+            where: { group: models.UserRole.GROUPS.VENDOR },
+          },
+        ],
+      });
     }
   }
 
@@ -122,7 +131,7 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'User',
     timestamps: true,
-    paranoid: true,
+    // paranoid: true,
     underscored: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at',

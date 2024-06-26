@@ -6,7 +6,7 @@ const { User } = require('../models');
 
 class CustomerService extends BaseService {
   constructor() {
-    super(User.scope('users'));
+    super(User);
   }
 
   genWhereQuery(req) {
@@ -53,7 +53,7 @@ class CustomerService extends BaseService {
       google_id: input.google_id || null,
       facebook_id: input.facebook_id || null,
       status: input.status || User.STATUSES.ACTIVE,
-      vendor_id: input.vendor_id || null,
+      // vendor_id: input.vendor_id || null,
       role_id: User.DEFAULT_ROLE_ID,
     };
     const result = await this.model.create(formData, options);

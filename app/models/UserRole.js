@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     static GROUPS = {
       USER: 'user',
       ADMIN: 'admin',
+      VENDOR: 'vendor',
     };
 
     static associate(models) {
@@ -21,6 +22,9 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.addScope('admins', {
         where: { group: UserRole.GROUPS.ADMIN },
+      });
+      this.addScope('vendors', {
+        where: { group: UserRole.GROUPS.VENDOR },
       });
     }
   }

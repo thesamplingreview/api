@@ -40,8 +40,17 @@ class CampaignResource {
     if (this.data.enrolmentsCount !== undefined) {
       counts.enrolments_count = this.data.enrolmentsCount;
     }
+    if (this.data.enrolmentsAcceptedCount !== undefined) {
+      counts.enrolments_accepted_count = this.data.enrolmentsAcceptedCount;
+    }
     if (this.data.reviewsCount !== undefined) {
       counts.reviews_count = this.data.reviewsCount;
+    }
+    if (this.data.productsCount !== undefined) {
+      counts.products_count = this.data.productsCount;
+    }
+    if (this.data.workflowsCount !== undefined) {
+      counts.workflows_count = this.data.workflowsCount;
     }
 
     return {
@@ -65,6 +74,7 @@ class CampaignResource {
       background_url: this.data.background_url,
       start_date: this.data.start_date,
       end_date: this.data.end_date,
+      quota: this.data.quota,
       status: this.data.status,
       state: this.generateStateAttr(this.data),
       highlight: this.data.highlight,

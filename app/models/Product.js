@@ -44,6 +44,9 @@ module.exports = (sequelize, DataTypes) => {
     status: {
       type: DataTypes.STRING,
     },
+    vendor_id: {
+      type: DataTypes.UUID,
+    },
     pos: {
       type: DataTypes.INTEGER,
       defaultValue: 0,

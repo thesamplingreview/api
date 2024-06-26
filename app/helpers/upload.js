@@ -4,6 +4,7 @@ const formidable = require('formidable');
 const imageSize = require('image-size');
 // const { Upload } = require('@aws-sdk/lib-storage');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { aws: awsConfig } = require('../../config/providers');
 const { S3UploadError, BadRequest } = require('../errors');
 
@@ -181,30 +182,6 @@ async function s3Upload(file, dir = '', options = {}) {
     throw new S3UploadError(err.message);
   }
 }
-// async function s3Upload2(file, dir = '', options = {}) {
-//   try {
-//     const parallelUploads3 = new Upload({
-//       client: s3Client,
-//       params: {
-//         ACL: 'public-read',
-//         Bucket: awsConfig.bucket,
-//         Key: `${dir}/${file.newFilename}`,
-//         Body: fs.readFileSync(file.filepath),
-//         ContentType: file.mimetype,
-//       },
-//       // leavePartsOnError: false,
-//     });
-
-//     const result = await parallelUploads3.done();
-
-//     // rm tmp file
-//     fs.unlinkSync(file.filepath);
-//     return result;
-//   } catch (e) {
-//     fs.unlinkSync(file.filepath);
-//     throw new S3UploadError(e.message);
-//   }
-// }
 
 async function getImageDimension(filePath) {
   try {
@@ -215,6 +192,21 @@ async function getImageDimension(filePath) {
   }
 }
 
+async function generateS3PresignedUrl(filename, dir = '') {
+  // upload path
+  const s3Key = `${dir}/${filename}`;
+  const command = new PutObjectCommand({
+    ACL: 'public-read',
+    Key: s3Key,
+    Bucket: awsConfig.bucket,
+    ContentType: 'application/octet-stream',
+  });
+  const expiresIn = 60 * 60; // 5 mins
+
+  const url = await getSignedUrl(s3Client, command, { expiresIn });
+  return url;
+}
+
 module.exports = {
   parseFormData,
   validatorFileCheck,
@@ -223,4 +215,5 @@ module.exports = {
   s3Upload,
   s3Remove,
   getImageDimension,
+  generateS3PresignedUrl,
 };

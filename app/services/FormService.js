@@ -1,6 +1,5 @@
 const { Op } = require('sequelize');
 const { getInput } = require('../helpers/utils');
-// const { s3Upload, s3Remove } = require('../helpers/upload');
 const BaseService = require('./BaseService');
 const { Form, FormField, FormFieldOption } = require('../models');
 
@@ -17,6 +16,10 @@ class FormService extends BaseService {
         [Op.like]: `%${req.query.name}%`,
       };
     }
+    // filter - vendor_id
+    if (req.query.vendor_id?.trim()) {
+      whereQuery.vendor_id = req.query.vendor_id;
+    }
 
     return whereQuery;
   }
@@ -32,6 +35,7 @@ class FormService extends BaseService {
     const formData = {
       name: input.name,
       description: input.description || null,
+      vendor_id: input.vendor_id || null,
     };
     // deprecated
     // if (input.cover?.filepath) {
@@ -50,6 +54,7 @@ class FormService extends BaseService {
     const formData = {
       name: getInput(input.name, record.name),
       description: getInput(input.description, record.profile),
+      vendor_id: getInput(input.vendor_id, record.vendor_id),
     };
     // deprecated
     // if (input.cover !== undefined && input.cover?.filepath) {

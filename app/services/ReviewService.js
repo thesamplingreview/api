@@ -1,7 +1,7 @@
 const { Op } = require('sequelize');
 const { toDate } = require('../helpers/utils');
 const BaseService = require('./BaseService');
-const { CampaignReview } = require('../models');
+const { CampaignReview, CampaignReviewUpload } = require('../models');
 
 class ReviewService extends BaseService {
   constructor() {
@@ -41,6 +41,10 @@ class ReviewService extends BaseService {
         };
       }
     }
+    // filter - vendor_id (need campaign relations)
+    if (req.query.vendor_id) {
+      whereQuery['$Campaign.vendor_id$'] = req.user.vendor_id;
+    }
 
     return whereQuery;
   }
@@ -60,8 +64,65 @@ class ReviewService extends BaseService {
     };
 
     const result = await this.model.create(formData, options);
+    if (Array.isArray(input.uploads)) {
+      await this.syncUploads(result, input.uploads, options);
+    }
 
     return result;
+  }
+
+  async update(record, input, options = {}) {
+    const formData = {
+      rating: input.rating,
+      review: input.review,
+    };
+
+    const result = await record.update(formData, options);
+    if (Array.isArray(input.uploads)) {
+      await this.syncUploads(result, input.uploads, options);
+    }
+
+    return result;
+  }
+
+  /**
+   * Sync review <> uploads dataset
+   * - this method will auto-cleanup old records if the record was not included inside `uploads`
+   *
+   * @param  {model}  record
+   * @param  {array}  uploads
+   * @param  {object}  options - sequelize options
+   * @return {model[]}
+   */
+  async syncUploads(record, uploads, options) {
+    const oldUploads = await record.getCampaignReviewUploads();
+
+    const promises = uploads.map(async (data) => {
+      let upload = oldUploads.find((d) => d.asset_id === data.asset_id && d.review_id === record.id);
+      if (!upload) {
+        upload = new CampaignReviewUpload();
+        upload.review_id = record.id;
+      }
+      upload.asset_id = data.asset_id;
+      upload.url = data.url;
+      upload.type = 'asset';
+
+      upload = await upload.save(options);
+      return upload;
+    });
+    const results = await Promise.all(promises);
+
+    // clean up orpaned records
+    const newIds = results.map((d) => d.id);
+    await CampaignReviewUpload.destroy({
+      ...options,
+      where: {
+        id: { [Op.notIn]: newIds },
+        review_id: record.id,
+      },
+    });
+
+    return results;
   }
 }
 

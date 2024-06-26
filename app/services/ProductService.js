@@ -22,6 +22,10 @@ class ProductService extends BaseService {
     if (req.query.status) {
       whereQuery.status = req.query.status;
     }
+    // filter - vendor_id
+    if (req.query.vendor_id) {
+      whereQuery.vendor_id = req.query.vendor_id;
+    }
     // filter - brand
     if (req.query.brand?.trim()) {
       whereQuery.brand = {
@@ -61,6 +65,7 @@ class ProductService extends BaseService {
       description: input.description || null,
       brand: input.brand || null,
       status: input.status || Product.STATUSES.ACTIVE,
+      vendor_id: input.vendor_id || null,
       pos: input.pos || await this.count(),
     };
     if (input.image?.filepath) {
@@ -81,6 +86,7 @@ class ProductService extends BaseService {
       description: getInput(input.description, record.description),
       brand: getInput(input.brand, record.brand),
       status: getInput(input.status, record.status),
+      vendor_id: getInput(input.vendor_id, record.vendor_id),
       pos: getInput(input.pos, record.pos),
     };
     if (input.image !== undefined && input.image?.filepath) {

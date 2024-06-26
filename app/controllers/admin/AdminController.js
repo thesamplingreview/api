@@ -4,6 +4,7 @@ const {
   sequelize,
   User,
   UserRole,
+  Vendor,
 } = require('../../models');
 const AdminService = require('../../services/AdminService');
 const UserResource = require('../../resources/UserResource');
@@ -24,7 +25,7 @@ class UserController extends ApiController {
       const query = {
         where: this.adminService.genWhereQuery(req),
         order: this.adminService.genOrdering(req),
-        include: [UserRole],
+        include: [UserRole, Vendor],
       };
       const { page, perPage } = this.getPaginate(req);
       const results = await this.adminService.paginate(query, page, perPage);
@@ -142,9 +143,12 @@ class UserController extends ApiController {
    * GET - options
    */
   async options(req, res) {
-    const roles = await UserRole.scope('admins').findAll({
+    const roles = await UserRole.findAll({
       attributes: ['id', 'name'],
-      where: { id: { [Op.ne]: 9 } },
+      where: {
+        id: { [Op.ne]: 9 },
+        group: { [Op.ne]: UserRole.GROUPS.USER },
+      },
     });
 
     const options = {

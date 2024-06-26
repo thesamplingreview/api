@@ -1,12 +1,13 @@
-const { AuthError } = require('../errors');
+const { ForbiddenError } = require('../errors');
 const AuthService = require('../services/AuthService');
 const UserService = require('../services/UserService');
+const { UserRole } = require('../models');
 
 const userCheck = (role = '') => {
   return async (req, res, next) => {
     const userId = req.user.id;
     if (!userId) {
-      next(new AuthError());
+      next(new ForbiddenError());
     }
 
     try {
@@ -22,6 +23,8 @@ const userCheck = (role = '') => {
             email: user.email,
             role_id: user.role_id,
             role_code: user.UserRole.code,
+            role_group: user.UserRole.group,
+            vendor_id: user.vendor_id,
           };
         }
       } else {
@@ -38,6 +41,10 @@ const userCheck = (role = '') => {
       if (!userObj) {
         throw new Error('Invalid user / role');
       }
+      // reject if user role is vendor but don't have vendor_id
+      if (userObj.role_group === UserRole.GROUPS.VENDOR && !userObj.vendor_id) {
+        throw new Error('Invalid user role configuration');
+      }
 
       // update global variable
       req.user = userObj;
@@ -46,7 +53,7 @@ const userCheck = (role = '') => {
       next();
     } catch (err) {
       // throw authError
-      next(new AuthError(err.message));
+      next(new ForbiddenError(err.message));
     }
   };
 };

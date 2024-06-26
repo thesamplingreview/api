@@ -7,6 +7,7 @@ module.exports = {
     secretKey: getEnv(process.env.AWS_SECRET_ACCESS_KEY),
     region: getEnv(process.env.AWS_DEFAULT_REGION),
     bucket: getEnv(process.env.AWS_BUCKET),
+    sqsUrl: getEnv(process.env.AWS_SQS_URL),
   },
 
   // sendgrid mailer
@@ -28,5 +29,11 @@ module.exports = {
     sid: getEnv(process.env.TWILIO_ACCOUNT_SID),
     verifySid: getEnv(process.env.TWILIO_VERIFY_SID),
     token: getEnv(process.env.TWILIO_TOKEN),
+  },
+
+  // whatsapp
+  whatsapp: {
+    numberId: getEnv(process.env.WHATSAPP_NUMBER_ID),
+    token: getEnv(process.env.WHATSAPP_TOKEN),
   },
 };

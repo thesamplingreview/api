@@ -4,9 +4,7 @@ const {
 const { startOfDay, endOfDay } = require('date-fns');
 const { toDate } = require('../../helpers/utils');
 const ApiController = require('../ApiController');
-const {
-  User, UserRole, CampaignEnrolment,
-} = require('../../models');
+const { User, CampaignEnrolment } = require('../../models');
 
 class ReportController extends ApiController {
   /**
@@ -23,13 +21,6 @@ class ReportController extends ApiController {
 
     const result = await User.findAll({
       where: whereQuery,
-      include: [
-        {
-          model: UserRole,
-          attributes: [],
-          where: { group: UserRole.GROUPS.USER },
-        },
-      ],
       attributes: [
         [fn('DATE', literal('created_at')), 'day'],
         [fn('COUNT', col('User.id')), 'count'],

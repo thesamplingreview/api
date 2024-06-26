@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const ApiController = require('../ApiController');
 const { ValidationFailed } = require('../../errors');
 const {
@@ -6,11 +7,12 @@ const {
 const CampaignService = require('../../services/CampaignService');
 const EnrolmentService = require('../../services/EnrolmentService');
 const ReviewService = require('../../services/ReviewService');
-const ConfigService = require('../../services/ConfigService');
+const WorkflowService = require('../../services/WorkflowService');
+// const ConfigService = require('../../services/ConfigService');
 const CampaignResource = require('../../resources/CampaignResource');
 const CampaignEnrolmentResource = require('../../resources/CampaignEnrolmentResource');
 const CampaignReviewResource = require('../../resources/CampaignReviewResource');
-const { sendMailUsingTmpl } = require('../../helpers/mailer');
+// const { sendMailUsingTmpl } = require('../../helpers/mailer');
 
 class CampaignController extends ApiController {
   constructor() {
@@ -75,6 +77,12 @@ class CampaignController extends ApiController {
             where: { user_id: req.user.id },
           } : undefined,
         ].filter((d) => d),
+        attributes: {
+          include: [
+            // [sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id`)'), 'enrolmentsCount'],
+            [sequelize.literal('(SELECT COUNT(*) FROM `campaign_enrolments` AS `CampaignEnrolments` WHERE `CampaignEnrolments`.`campaign_id` = `Campaign`.`id` AND (`CampaignEnrolments`.`status` <> "reject" OR `CampaignEnrolments`.`status` IS NULL))'), 'enrolmentsAcceptedCount'],
+          ],
+        },
       });
 
       return this.responseJson(req, res, {
@@ -99,8 +107,32 @@ class CampaignController extends ApiController {
 
     const enrolmentService = new EnrolmentService();
 
+    // eslint-disable-next-line prefer-destructuring
+    const campaign = req.campaign;
+
     const t = await sequelize.transaction();
     try {
+      // DB validation - enrolment quota
+      if (campaign.quota) {
+        const count = await enrolmentService.count({
+          where: {
+            campaign_id: formData.campaign_id,
+            status: {
+              [Op.or]: [
+                { [Op.ne]: CampaignEnrolment.STATUSES.REJECT },
+                { [Op.is]: null },
+              ],
+            },
+          },
+        });
+        if (count >= campaign.quota) {
+          throw new ValidationFailed('quota limit hit', [{
+            field: 'quota',
+            msg: 'This campaign already reached maximum of enrolments.',
+          }]);
+        }
+      }
+
       // DB validation - if user have enrolment record
       const enrolment = await CampaignEnrolment.findOne({
         where: {
@@ -109,50 +141,58 @@ class CampaignController extends ApiController {
         },
       });
       if (enrolment) {
-        throw new ValidationFailed('User already enroled.');
+        throw new ValidationFailed('invalid_enrolment', [{
+          field: 'user_id',
+          msg: 'User already enrolled previously.',
+        }]);
       }
 
       // DB update
       const result = await enrolmentService.create(formData, { transaction: t });
 
-      t.commit();
+      await t.commit();
 
+      // trigger enrolment workflow
+      const workflowService = new WorkflowService();
+      await workflowService.triggerWorkflowByEnrolment(result);
+
+      // Deprecated - replace with workflow tasks
       // email notifications
-      const configService = new ConfigService();
-      const {
-        sendgrid_template_id_campaign_enrolled_user: tmplUser,
-        sendgrid_template_id_campaign_enrolled_admin: tmplAdmin,
-        admin_emails,
-      } = await configService.getKeys([
-        'sendgrid_template_id_campaign_enrolled_user',
-        'sendgrid_template_id_campaign_enrolled_admin',
-        'admin_emails',
-      ]);
-      const tmplData = {
-        enrolment_id: result.id,
-        campaign_name: req.campaign.name,
-        user_name: req.user.name,
-        user_email: req.user.email,
-      };
-      if (tmplUser) {
-        const formdata = {
-          to: req.user.email,
-          subject: 'Thank You for Interested in Sampling Programs',
-          templateId: tmplUser,
-          templateData: tmplData,
-        };
-        await sendMailUsingTmpl(formdata);
-      }
-      const adminEmails = admin_emails?.split('\n').map((d) => d.trim());
-      if (tmplAdmin && adminEmails?.length) {
-        const formdata = {
-          to: adminEmails,
-          subject: 'New Enrolment',
-          templateId: tmplAdmin,
-          templateData: tmplData,
-        };
-        await sendMailUsingTmpl(formdata);
-      }
+      // const configService = new ConfigService();
+      // const {
+      //   sendgrid_template_id_campaign_enrolled_user: tmplUser,
+      //   sendgrid_template_id_campaign_enrolled_admin: tmplAdmin,
+      //   admin_emails,
+      // } = await configService.getKeys([
+      //   'sendgrid_template_id_campaign_enrolled_user',
+      //   'sendgrid_template_id_campaign_enrolled_admin',
+      //   'admin_emails',
+      // ]);
+      // const tmplData = {
+      //   enrolment_id: result.id,
+      //   campaign_name: req.campaign.name,
+      //   user_name: req.user.name,
+      //   user_email: req.user.email,
+      // };
+      // if (tmplUser) {
+      //   const formdata = {
+      //     to: req.user.email,
+      //     subject: 'Thank You for Interested in Sampling Programs',
+      //     templateId: tmplUser,
+      //     templateData: tmplData,
+      //   };
+      //   await sendMailUsingTmpl(formdata);
+      // }
+      // const adminEmails = admin_emails?.split('\n').map((d) => d.trim());
+      // if (tmplAdmin && adminEmails?.length) {
+      //   const formdata = {
+      //     to: adminEmails,
+      //     subject: 'New Enrolment',
+      //     templateId: tmplAdmin,
+      //     templateData: tmplData,
+      //   };
+      //   await sendMailUsingTmpl(formdata);
+      // }
 
       return this.responseJson(req, res, {
         data: new CampaignEnrolmentResource(result),
@@ -164,18 +204,17 @@ class CampaignController extends ApiController {
   }
 
   /**
-   * Create review
+   * Post review (create / update)
    */
-  async createReview(req, res) {
+  async postReview(req, res) {
     // validated
     const formData = {
       created_by: req.user.id,
       campaign_id: req.campaign.id,
       rating: req.body.rating,
       review: req.body.review,
+      uploads: req.body.uploads,
     };
-
-    const reviewService = new ReviewService();
 
     const t = await sequelize.transaction();
     try {
@@ -190,21 +229,27 @@ class CampaignController extends ApiController {
         throw new ValidationFailed('User do not have any enrolment on this campaign.');
       }
 
-      // DB validation - if user have review record
-      const hasReview = await CampaignReview.findOne({
+      const reviewService = new ReviewService();
+      const record = await CampaignReview.findOne({
         where: {
           campaign_id: formData.campaign_id,
           created_by: formData.created_by,
         },
       });
-      if (hasReview) {
-        throw new ValidationFailed('User already review this campaign.');
+
+      let result;
+      if (record) { // update
+        result = await reviewService.update(record, formData, { transaction: t });
+      } else { // create
+        result = await reviewService.create(formData, { transaction: t });
       }
 
-      // DB update
-      const result = await reviewService.create(formData, { transaction: t });
+      await t.commit();
 
-      t.commit();
+      // trigger review workflow (off)
+      // const workflowService = new WorkflowService();
+      // await workflowService.triggerWorkflowByReview(result);
+
       return this.responseJson(req, res, {
         data: new CampaignReviewResource(result),
       });

@@ -113,7 +113,7 @@ class ApiController {
         });
     }
 
-    console.log(err);
+    // console.log(err);
     return res
       .status(err.code || code)
       .json({

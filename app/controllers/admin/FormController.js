@@ -117,11 +117,19 @@ class FormController extends ApiController {
         //   { model: FormField },
         // ],
       });
-      const updated = await this.formService.update(record, formData, { transaction: t });
+      const result = await this.formService.update(record, formData, { transaction: t });
 
       await t.commit();
+
+      // force reload
+      await result.reload({
+        include: [
+          { model: FormField },
+        ],
+      });
+
       return this.responseJson(req, res, {
-        data: new FormResource(updated),
+        data: new FormResource(result),
       });
     } catch (err) {
       await t.rollback();

@@ -4,6 +4,13 @@ const { twilio: twilioConfig } = require('../../config/providers');
 const client = twilio(twilioConfig.sid, twilioConfig.token);
 
 /**
+ * Send only SMS (not supported)
+ */
+async function sendSMS() {
+  return false;
+}
+
+/**
  * OTP service was relying on Twilio service
  */
 async function sendOTP({ to }) {
@@ -38,6 +45,7 @@ async function verifyOTP({ to, code }) {
 
 module.exports = {
   client,
+  sendSMS,
   sendOTP,
   verifyOTP,
 };

@@ -18,7 +18,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.445.0",
     "@aws-sdk/client-sns": "^3.504.0",
+    "@aws-sdk/client-sqs": "^3.583.0",
     "@aws-sdk/lib-storage": "^3.449.0",
+    "@aws-sdk/s3-request-presigner": "^3.600.0",
     "@sendgrid/mail": "^8.1.0",
     "aws-sdk": "^2.1493.0",
     "bcryptjs": "^2.4.3",
