@@ -87,7 +87,7 @@ class VendorController extends ApiController {
         where: { group: UserRole.GROUPS.VENDOR },
         raw: true,
       });
-      const adminService = new AdminService();
+      const adminService = new AdminService('vendors');
       await adminService.create({
         name: formData.admin_name,
         email: formData.admin_email,

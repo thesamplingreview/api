@@ -14,7 +14,7 @@ class UserController extends ApiController {
   constructor() {
     super();
 
-    this.adminService = new AdminService();
+    this.adminService = new AdminService('admins');
   }
 
   /**

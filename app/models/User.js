@@ -57,7 +57,12 @@ module.exports = (sequelize, DataTypes) => {
         include: [
           {
             model: models.UserRole,
-            where: { group: models.UserRole.GROUPS.ADMIN },
+            where: {
+              group: [
+                models.UserRole.GROUPS.ADMIN,
+                models.UserRole.GROUPS.VENDOR,
+              ],
+            },
           },
         ],
       });
@@ -66,7 +71,9 @@ module.exports = (sequelize, DataTypes) => {
         include: [
           {
             model: models.UserRole,
-            where: { group: models.UserRole.GROUPS.VENDOR },
+            where: {
+              group: models.UserRole.GROUPS.VENDOR,
+            },
           },
         ],
       });
