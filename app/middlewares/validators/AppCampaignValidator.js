@@ -50,14 +50,18 @@ exports.postReviewReq = [
     .withMessage(validatorMessage('validation.required', 'Rating'))
     .toInt(),
   body('review')
-    .optional(),
+    .notEmpty().bail()
+    .withMessage(validatorMessage('validation.required', 'Review')),
   body('uploads')
-    .isArray({ min: 1 }).bail()
+    .optional()
+    .isArray({ min: 0 }).bail()
     .withMessage(validatorMessage('validation.required', 'Uploads')),
   body('uploads.*.url')
+    .optional()
     .notEmpty().bail()
     .withMessage(validatorMessage('validation.required', 'upload.url')),
   body('uploads.*.asset_id')
+    .optional()
     .notEmpty().bail()
     .withMessage(validatorMessage('validation.required', 'upload.asset_id')),
 ];
