@@ -16,7 +16,7 @@ const emailValidator = () => body('email')
       throw new Error('Not found');
     }
   }).bail()
-  .withMessage(validatorMessage('validation.exist', 'Email'));
+  .withMessage(validatorMessage('validation.not_exist', 'Email'));
 
 const tokenValidator = () => body('token')
   .notEmpty().bail()

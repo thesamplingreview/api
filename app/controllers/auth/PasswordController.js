@@ -29,9 +29,9 @@ class PasswordController extends ApiController {
       // send email
       const configService = new ConfigService();
       const {
-        sendgrid_template_id_reset_password: tmpl,
+        mailersend_tmpl_reset_password: tmpl,
       } = await configService.getKeys([
-        'sendgrid_template_id_reset_password',
+        'mailersend_tmpl_reset_password',
       ]);
       if (tmpl) {
         const formdata = {

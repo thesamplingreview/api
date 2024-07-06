@@ -95,7 +95,7 @@ exports.createReq = [
   nameValidator(),
   campaignValidator(),
   triggerValidator(),
-  vendorValidator().optional(),
+  vendorValidator().optional({ values: 'falsy' }),
 ];
 
 exports.updateReq = [
