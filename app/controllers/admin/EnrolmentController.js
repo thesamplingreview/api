@@ -23,8 +23,8 @@ class EnrolmentController extends ApiController {
         where: this.enrolmentService.genWhereQuery(req),
         order: this.enrolmentService.genOrdering(req),
         include: [
-          { model: Campaign },
-          { model: User },
+          { model: Campaign, required: true },
+          { model: User, required: true },
           { model: Form, include: [FormField] },
         ],
       };

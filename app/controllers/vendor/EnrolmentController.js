@@ -27,7 +27,7 @@ class EnrolmentController extends ApiController {
         order: this.enrolmentService.genOrdering(req),
         include: [
           { model: Campaign, required: true },
-          { model: User },
+          { model: User, required: true },
           { model: Form, include: [FormField] },
         ],
         countInclude: [

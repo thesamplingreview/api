@@ -19,6 +19,18 @@ class ReviewService extends BaseService {
     if (req.query.created_by) {
       whereQuery.created_by = req.query.created_by;
     }
+    // filter - user_name
+    if (req.query.user_name) {
+      whereQuery['$User.name$'] = {
+        [Op.like]: `%${req.query.user_name}%`,
+      };
+    }
+    // filter - user_email
+    if (req.query.user_email) {
+      whereQuery['$User.email$'] = {
+        [Op.like]: `%${req.query.user_email}%`,
+      };
+    }
     // filter - rating
     if (req.query.rating) {
       whereQuery.rating = req.query.rating;

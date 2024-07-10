@@ -26,7 +26,7 @@ class ReviewController extends ApiController {
         order: this.reviewService.genOrdering(req),
         include: [
           { model: Campaign, required: true },
-          { model: User },
+          { model: User, required: true },
         ],
         countInclude: [
           { model: Campaign, required: true },

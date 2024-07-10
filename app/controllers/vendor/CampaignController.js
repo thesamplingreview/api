@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 const ApiController = require('../ApiController');
 const allOptions = require('../../../config/options');
 const {
-  sequelize, Campaign, CampaignWorkflow, Product, Form, Vendor, User,
+  sequelize, Campaign, CampaignEnrolment, CampaignWorkflow, Product, Form, Vendor, User,
 } = require('../../models');
 const CampaignService = require('../../services/CampaignService');
 const CampaignResource = require('../../resources/CampaignResource');
@@ -242,6 +242,10 @@ class CampaignController extends ApiController {
       forms,
       products,
       statuses: Object.values(Campaign.STATUSES).map((val) => ({
+        id: val,
+        name: val.charAt(0).toUpperCase() + val.slice(1),
+      })),
+      enrolment_statuses: Object.values(CampaignEnrolment.STATUSES).map((val) => ({
         id: val,
         name: val.charAt(0).toUpperCase() + val.slice(1),
       })),

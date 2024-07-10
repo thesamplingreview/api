@@ -23,7 +23,7 @@ class ReviewController extends ApiController {
         order: this.reviewService.genOrdering(req),
         include: [
           { model: Campaign },
-          { model: User },
+          { model: User, required: true },
           { model: CampaignReviewUpload, include: [Asset] },
         ],
       };

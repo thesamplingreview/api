@@ -19,6 +19,18 @@ class EnrolmentService extends BaseService {
     if (req.query.user_id) {
       whereQuery.user_id = req.query.user_id;
     }
+    // filter - user_name
+    if (req.query.user_name) {
+      whereQuery['$User.name$'] = {
+        [Op.like]: `%${req.query.user_name}%`,
+      };
+    }
+    // filter - user_email
+    if (req.query.user_email) {
+      whereQuery['$User.email$'] = {
+        [Op.like]: `%${req.query.user_email}%`,
+      };
+    }
     // filter - form_id
     if (req.query.form_id) {
       whereQuery.form_id = req.query.form_id;
