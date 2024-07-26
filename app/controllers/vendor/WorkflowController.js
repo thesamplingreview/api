@@ -185,7 +185,7 @@ class WorkflowController extends ApiController {
     ]);
 
     const convertTextareaToOptions = (input) => {
-      return input.trim()
+      return (input || '').trim()
         .split('\n')
         .filter((line) => line.trim())
         .map((line) => {
@@ -198,8 +198,8 @@ class WorkflowController extends ApiController {
     };
 
     const options = {
-      mailTmpls: convertTextareaToOptions(wf_send_user_mail_tmpls),
-      waTmpls: convertTextareaToOptions(wf_send_user_whatsapp_tmpls),
+      mailTmpls: convertTextareaToOptions(wf_send_user_mail_tmpls || ''),
+      waTmpls: convertTextareaToOptions(wf_send_user_whatsapp_tmpls || ''),
       phone_prefixes: allOptions.phonePrefixes,
       workflow_triggers: Object.values(CampaignWorkflow.TRIGGERS).map((val) => ({
         id: val,
