@@ -56,6 +56,7 @@ class AdminService extends BaseService {
       contact: getInput(input.contact, record.contact),
       status: getInput(input.status, record.status),
       role_id: getInput(input.role_id, record.role_id),
+      vendor_id: getInput(input.vendor_id, record.vendor_id),
     };
     if (input.password) {
       formData.password = bcrypt.hashSync(input.password, 12);

@@ -68,6 +68,7 @@ class UserController extends ApiController {
       contact: req.body.contact,
       role_id: req.body.role_id,
       status: req.body.status,
+      vendor_id: req.role.group === UserRole.GROUPS.VENDOR ? req.body.vendor_id : null,
     };
 
     // DB update
@@ -96,6 +97,7 @@ class UserController extends ApiController {
       name: req.body.name,
       status: req.body.status,
       role_id: req.body.role_id,
+      vendor_id: req.role.group === UserRole.GROUPS.VENDOR ? req.body.vendor_id : null,
     };
 
     // DB update
@@ -144,7 +146,7 @@ class UserController extends ApiController {
    */
   async options(req, res) {
     const roles = await UserRole.findAll({
-      attributes: ['id', 'name'],
+      attributes: ['id', 'name', 'group'],
       where: {
         id: { [Op.ne]: 9 },
         group: { [Op.ne]: UserRole.GROUPS.USER },

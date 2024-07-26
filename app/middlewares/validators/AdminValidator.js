@@ -1,6 +1,6 @@
 const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
-const { User, UserRole } = require('../../models');
+const { User, UserRole, Vendor } = require('../../models');
 
 const statuses = Object.values(User.STATUSES);
 
@@ -59,18 +59,40 @@ const roleValidator = (scope) => body('role_id')
   .notEmpty().bail()
   .withMessage(validatorMessage('validation.required', 'Role'))
   .custom(async (val, { req }) => {
-    const roles = await UserRole.scope(scope).findAll({
-      attributes: ['id'],
-    });
-    const roleIds = roles.map((d) => d.id);
-    if (!roleIds.includes(val)) {
-      throw new Error(req.__('validation.in', {
-        field: 'Role',
-        values: roleIds.toString(),
-      }));
+    let role = [];
+    if (scope) {
+      role = await UserRole.scope(scope).findByPk(val);
+    } else {
+      role = await UserRole.findByPk(val);
     }
-    return true;
-  }).bail();
+    if (!role) {
+      return Promise.reject();
+    }
+    req.role = role;
+    return Promise.resolve();
+  }).bail()
+  .withMessage(validatorMessage('validation.not_exist', 'Role'));
+
+const vendorValidator = () => body('vendor_id')
+  .custom(async (val, { req }) => {
+    // rely on role_id
+    if (!req.role) {
+      return Promise.reject();
+    }
+
+    // apply checking if role is 'vendor' group
+    if (req.role.group === UserRole.GROUPS.VENDOR) {
+      const vendor = await Vendor.findByPk(val);
+      if (!vendor) {
+        return Promise.reject();
+      }
+      req.vendor = vendor;
+      return Promise.resolve();
+    }
+    // proceed
+    return Promise.resolve();
+  }).bail()
+  .withMessage(validatorMessage('validation.required', 'Vendor'));
 
 // request validators
 exports.createReq = [
@@ -79,7 +101,8 @@ exports.createReq = [
   passwordValidator(),
   contactValidator().optional(),
   statusValidator().optional(),
-  roleValidator('admins'),
+  roleValidator(),
+  vendorValidator().optional(),
 ];
 
 exports.updateReq = [
@@ -87,7 +110,8 @@ exports.updateReq = [
   passwordValidator().optional(),
   contactValidator().optional(),
   statusValidator().optional(),
-  roleValidator('admins').optional(),
+  roleValidator().optional(),
+  vendorValidator().optional(),
 ];
 
 exports.vendorCreateReq = [
