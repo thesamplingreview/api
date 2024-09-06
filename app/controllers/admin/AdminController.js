@@ -129,7 +129,10 @@ class UserController extends ApiController {
     const t = await sequelize.transaction();
     try {
       const record = await this.adminService.findById(req.params.id);
-      const deleted = await this.adminService.delete(record, { transaction: t });
+      const deleted = await this.adminService.delete(record, {
+        force: true,
+        transaction: t,
+      });
 
       await t.commit();
       return this.responseJson(req, res, {
