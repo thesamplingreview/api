@@ -89,6 +89,15 @@ exports.signupWithGoogleReq = [
     .withMessage(validatorMessage('validation.required', 'Token')),
 ];
 
+exports.continueWithGoogleReq = [
+  body('email')
+    .notEmpty()
+    .withMessage(validatorMessage('validation.required', 'Email')),
+  body('token')
+    .notEmpty()
+    .withMessage(validatorMessage('validation.required', 'Token')),
+];
+
 exports.tokenRefreshReq = [
   body('refresh_token')
     .trim()

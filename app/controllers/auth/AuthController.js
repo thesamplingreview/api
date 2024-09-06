@@ -161,7 +161,7 @@ class AuthController extends ApiController {
   }
 
   /**
-   * POST - login using Google
+   * POST - login using Google (deprecated)
    */
   async loginWithGoogle(req, res) {
     // validated
@@ -192,7 +192,7 @@ class AuthController extends ApiController {
   }
 
   /**
-   * POST - signup with Google
+   * POST - signup with Google (deprecated)
    */
   async signupWithGoogle(req, res) {
     // validated
@@ -220,6 +220,40 @@ class AuthController extends ApiController {
       await t.commit();
       return this.responseJson(req, res, {
         data: new UserResource(result),
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
+   * POST - continue with Google
+   */
+  async continueWithGoogle(req, res) {
+    // validated
+    const formData = {
+      email: req.body.email,
+      token: req.body.token,
+    };
+
+    const t = await sequelize.transaction();
+    try {
+      const authService = new AuthService();
+
+      // login user
+      const { user, tokens } = await authService.loginWithGoogle(formData);
+
+      user.last_login = new Date();
+      await user.save({ transaction: t });
+
+      await t.commit();
+
+      return this.responseJson(req, res, {
+        data: {
+          jwt: tokens,
+          user: new UserResource(user),
+        },
       });
     } catch (err) {
       await t.rollback();

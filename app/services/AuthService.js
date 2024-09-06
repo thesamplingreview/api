@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const { ValidationFailed } = require('../errors');
 const JWTService = require('./JWTService');
+const CustomerService = require('./CustomerService');
 const { User, UserRole } = require('../models');
 
 class AuthService {
@@ -44,34 +45,44 @@ class AuthService {
    * Login using Google and return JWT tokens
    *
    * @param  {object}  input
+   * @param  {object}  options (transaction, etc)
    * @return {object}
    */
-  async loginWithGoogle(input) {
-    const formData = {
-      email: input.email || '',
-      token: input.token || '',
-    };
-
-    // validation
-    const user = await User.findOne({
-      where: {
-        email: formData.email,
-      },
-    });
-    if (!user) {
-      throw new ValidationFailed('Invalid email');
+  async loginWithGoogle(input, options = {}) {
+    // cross-check with provider
+    const googleProfile = await this.fetchGoogleAccessTokenInfo(input.token);
+    // re-verify input email is same as googleProfile
+    if (input.email !== googleProfile.email) {
+      throw new ValidationFailed('Mismatch Google email.');
     }
 
-    // cross-check with provider
-    const result = await this.fetchGoogleAccessTokenInfo(formData.token);
-    if (user.google_id !== result.sub) {
+    let isCreated = false;
+    let user = await User.findOne({
+      where: {
+        email: input.email,
+      },
+    });
+    // create user if model not found
+    if (!user) {
+      const customerService = new CustomerService();
+      const newFormData = {
+        email: googleProfile.email,
+        name: googleProfile.name,
+        google_id: googleProfile.sub,
+      };
+      user = await customerService.create(newFormData, options);
+      isCreated = true;
+    }
+
+    // re-verify if user is same as googleProfile
+    if (user.google_id !== googleProfile.sub) {
       throw new ValidationFailed('Mismatch Google profile.');
     }
 
     // generate auth token
     const tokens = await this.jwtService.generateAuthToken(user);
 
-    return { user, tokens };
+    return { user, tokens, isCreated };
   }
 
   /**
