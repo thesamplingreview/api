@@ -26,7 +26,7 @@ class UserController extends ApiController {
         where: this.customerService.genWhereQuery(req),
         order: this.customerService.genOrdering(req),
         include: [
-          { model: Campaign, required: true },
+          { model: Campaign },
         ],
       };
       const { page, perPage } = this.getPaginate(req);

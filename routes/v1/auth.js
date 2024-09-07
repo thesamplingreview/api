@@ -24,6 +24,7 @@ router.post('/invalidate', tokenInfoMiddleware(), AuthController.invalidate);
 // auth - social module
 router.post('/signup/google', AuthValidator.signupWithGoogleReq, AuthController.signupWithGoogle);
 router.post('/login/google', AuthValidator.loginWithGoogleReq, AuthController.loginWithGoogle);
+router.post('/google', AuthValidator.continueWithGoogleReq, AuthController.continueWithGoogle);
 
 // verification
 router.post(

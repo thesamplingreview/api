@@ -2,7 +2,7 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcryptjs');
 const { getInput } = require('../helpers/utils');
 const BaseService = require('./BaseService');
-const { User } = require('../models');
+const { User, AuthToken } = require('../models');
 
 class CustomerService extends BaseService {
   constructor() {
@@ -72,6 +72,23 @@ class CustomerService extends BaseService {
       formData.password = bcrypt.hashSync(input.password, 12);
     }
     const result = await record.update(formData, options);
+
+    return result;
+  }
+
+  async delete(record, options) {
+    // have to destroy authToken records (DB relation not created)
+    await AuthToken.destroy({
+      where: {
+        user_id: record.id,
+      },
+      ...options,
+    });
+
+    const result = await record.destroy({
+      force: true,
+      ...options,
+    });
 
     return result;
   }
