@@ -63,3 +63,12 @@ exports.changeContactReq = [
   contactValidator(),
   codeValidator(),
 ];
+
+/**
+ * Change request #20241224
+ * - disable OTP verification flow
+ * - but require phone number
+ */
+exports.saveContactReq = [
+  contactValidator(),
+];

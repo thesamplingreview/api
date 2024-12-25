@@ -145,6 +145,34 @@ class MyController extends ApiController {
   }
 
   /**
+   * PUT - save contact
+   *
+   * Change request #20241224
+   * - temp disable OTP verification flow
+   * - but require phone number
+   * - the phone number wont be validated for now onwards
+   */
+  async saveContact(req, res) {
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const user = await this.userService.findById(req.user.id);
+
+      // update contact
+      user.contact = req.body.contact;
+      await user.save({ transaction: t });
+
+      await t.commit();
+      return this.responseJson(req, res, {
+        data: new UserResource(user),
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
+
+  /**
    * GET - permissions
    */
   async permissions(req, res) {

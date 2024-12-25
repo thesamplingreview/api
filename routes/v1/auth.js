@@ -49,11 +49,23 @@ router.put(
   PasswordValidator.changePasswordReq,
   MyController.changePassword,
 );
+/**
+ * Change request #20241224
+ * - temp disable OTP verification flow
+ * - but require phone number
+ * - so creating new validator & controller for that, to enable back OTP, reopen the following route
+ */
+// router.put(
+//   '/my/contact',
+//   tokenInfoMiddleware(),
+//   MyValidator.changeContactReq,
+//   MyController.changeContact,
+// );
 router.put(
   '/my/contact',
   tokenInfoMiddleware(),
-  MyValidator.changeContactReq,
-  MyController.changeContact,
+  MyValidator.saveContactReq,
+  MyController.saveContact,
 );
 router.get(
   '/my/permissions',
