@@ -287,7 +287,7 @@ class WorkflowService extends BaseService {
     });
 
     // validate - no workflows
-    if (!campaign.CampaignWorkflows?.length) {
+    if (!campaign?.CampaignWorkflows?.length) {
       consoleLog('Worlflow:', 'Enrolment\'s campaign does not have auto-trigger workflows - end', enrolment.id);
       return 0;
     }
