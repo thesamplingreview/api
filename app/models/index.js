@@ -10,6 +10,7 @@ const sequelize = new Sequelize(
   db.password,
   {
     host: db.host,
+    port: db.port,
     dialect: 'mysql',
     timezone: appConfig.timezone,
     // logging: appConfig.env === 'local' ? console.log : false,

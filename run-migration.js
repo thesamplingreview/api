@@ -67,7 +67,8 @@ async function getTableNames(connection, database) {
      ORDER BY table_name`,
     [database]
   );
-  return tables.map(t => t.table_name);
+  // MySQL returns column names in uppercase from information_schema
+  return tables.map(t => t.TABLE_NAME || t.table_name || (typeof t === 'string' ? t : Object.values(t)[0]));
 }
 
 async function migrateTable(sourceConn, targetConn, tableName) {
@@ -86,11 +87,6 @@ async function migrateTable(sourceConn, targetConn, tableName) {
     
     console.log(`    📊 ${tableName}: ${rowCount} rows to migrate`);
     
-    // Get column names - use escaped table name
-    const [columns] = await sourceConn.execute(`SHOW COLUMNS FROM ${escapedTable}`);
-    const columnNames = columns.map(c => c.Field);
-    const columnList = columnNames.map(c => `\`${c}\``).join(', ');
-    
     // Clear existing data in target - use escaped table name
     await targetConn.execute(`TRUNCATE TABLE ${escapedTable}`);
     
@@ -98,6 +94,8 @@ async function migrateTable(sourceConn, targetConn, tableName) {
     const BATCH_SIZE = 500;
     let offset = 0;
     let totalInserted = 0;
+    let columnNames = null;
+    let columnList = null;
     
     while (offset < rowCount) {
       const [rows] = await sourceConn.execute(
@@ -106,6 +104,12 @@ async function migrateTable(sourceConn, targetConn, tableName) {
       );
       
       if (rows.length === 0) break;
+      
+      // Get column names from first row to ensure exact match with SELECT * results
+      if (!columnNames && rows.length > 0) {
+        columnNames = Object.keys(rows[0]);
+        columnList = columnNames.map(c => `\`${c}\``).join(', ');
+      }
       
       // Build INSERT statement with values
       const placeholders = rows.map(() => `(${columnNames.map(() => '?').join(', ')})`).join(', ');
@@ -128,8 +132,17 @@ async function migrateTable(sourceConn, targetConn, tableName) {
       }
     }
     
-    console.log(`    ✅ ${tableName}: ${totalInserted} rows migrated`);
-    return { table: tableName, rows: totalInserted };
+    // Verify insertion
+    const [verifyCount] = await targetConn.execute(`SELECT COUNT(*) as count FROM ${escapedTable}`);
+    const insertedCount = verifyCount[0].count;
+    
+    if (insertedCount === rowCount) {
+      console.log(`    ✅ ${tableName}: ${insertedCount} rows migrated successfully`);
+    } else {
+      console.log(`    ⚠️  ${tableName}: Expected ${rowCount}, got ${insertedCount} rows`);
+    }
+    
+    return { table: tableName, rows: insertedCount, expected: rowCount };
   } catch (error) {
     console.error(`    ❌ Error migrating ${tableName}:`, error.message);
     throw error;
@@ -151,17 +164,19 @@ async function importData() {
   
   try {
     // Connect to both databases
+    console.log('  🔌 Connecting to databases...');
     sourceConn = await mysql.createConnection(SOURCE_CONFIG);
     targetConn = await mysql.createConnection(TARGET_CONFIG);
+    console.log('  ✅ Connected to both databases');
     
     // Disable foreign key checks on target
     await targetConn.execute('SET FOREIGN_KEY_CHECKS = 0');
     await targetConn.execute('SET SESSION sql_mode = "NO_AUTO_VALUE_ON_ZERO"');
-    console.log('  Foreign key checks disabled');
+    console.log('  🔓 Foreign key checks disabled');
     
     // Get all tables
     const tables = await getTableNames(sourceConn, SOURCE_CONFIG.database);
-    console.log(`\n  Found ${tables.length} tables to migrate`);
+    console.log(`\n  📋 Found ${tables.length} tables to migrate`);
     
     // Migrate each table
     const results = [];
@@ -170,23 +185,36 @@ async function importData() {
         const result = await migrateTable(sourceConn, targetConn, table);
         results.push(result);
       } catch (error) {
-        console.error(`    ❌ Failed to migrate ${table}:`, error.message);
+        console.error(`\n    ❌ FAILED to migrate ${table}:`, error.message);
+        console.error(`    Stack:`, error.stack);
         results.push({ table, rows: 0, error: error.message });
+        // Continue with other tables
       }
     }
     
     // Re-enable foreign key checks
     await targetConn.execute('SET FOREIGN_KEY_CHECKS = 1');
-    console.log('\n  Foreign key checks re-enabled');
+    console.log('\n  🔒 Foreign key checks re-enabled');
     
     // Summary
     const totalRows = results.reduce((sum, r) => sum + (r.rows || 0), 0);
-    const successful = results.filter(r => !r.error).length;
-    console.log(`\n✅ Data migration completed:`);
-    console.log(`   ${successful}/${tables.length} tables migrated successfully`);
-    console.log(`   ${totalRows} total rows migrated`);
+    const totalExpected = results.reduce((sum, r) => sum + (r.expected || 0), 0);
+    const successful = results.filter(r => !r.error && r.rows > 0).length;
+    const failed = results.filter(r => r.error).length;
     
-    return true;
+    console.log(`\n✅ Data migration summary:`);
+    console.log(`   ${successful}/${tables.length} tables migrated successfully`);
+    if (failed > 0) console.log(`   ${failed} tables failed`);
+    console.log(`   ${totalRows}/${totalExpected} total rows migrated`);
+    
+    if (failed > 0) {
+      console.log(`\n   Failed tables:`);
+      results.filter(r => r.error).forEach(r => {
+        console.log(`     - ${r.table}: ${r.error}`);
+      });
+    }
+    
+    return failed === 0;
   } catch (error) {
     console.error('❌ Failed to migrate data:', error.message);
     console.error(error.stack);
@@ -299,21 +327,13 @@ async function main() {
     process.exit(1);
   }
 
-  // Run migrations
-  const migrationsOk = await runMigrations();
-  if (!migrationsOk) {
-    console.error('\n⚠️  Migrations had issues, but continuing...');
-  }
-
-  // Export data (placeholder)
-  const exportOk = await exportData();
-  if (!exportOk) {
-    process.exit(1);
-  }
-
+  // Skip migrations - tables should already exist
+  console.log('\n⏭️  Skipping migrations (assuming tables already exist)');
+  
   // Import data (actually does the migration)
   const importOk = await importData();
   if (!importOk) {
+    console.error('\n❌ Data migration failed. Check errors above.');
     process.exit(1);
   }
 

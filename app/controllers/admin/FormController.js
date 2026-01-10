@@ -26,7 +26,7 @@ class FormController extends ApiController {
         ],
         attributes: {
           include: [
-            [Sequelize.literal('(SELECT COUNT(*) FROM `form_fields` AS `Fields` WHERE `Fields`.`form_id` = `Form`.`id`)'), 'fieldsCount'],
+            [Sequelize.literal('(SELECT COUNT(*) FROM `form_fields` WHERE `form_fields`.`form_id` = `Form`.`id`)'), 'fieldsCount'],
           ],
         },
         distinct: true,
