@@ -51,6 +51,7 @@ class MyController extends ApiController {
       name: req.body.name,
       // password: req.body.password,
       contact: req.body.contact,
+      delivery_address: req.body.delivery_address,
     };
 
     // DB update

@@ -125,6 +125,10 @@ module.exports = (sequelize, DataTypes) => {
     contact_verified_at: {
       type: DataTypes.DATE,
     },
+    delivery_address: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
     created_at: {
       type: DataTypes.DATE,
     },

@@ -16,6 +16,9 @@ class UserService extends BaseService {
     if (input.password) {
       formData.password = bcrypt.hashSync(input.password, 12);
     }
+    if (input.delivery_address !== undefined) {
+      formData.delivery_address = input.delivery_address;
+    }
     const result = await record.update(formData, options);
 
     return result;
