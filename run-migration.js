@@ -3,14 +3,13 @@
 /**
  * Full Data Migration Script: AWS RDS → Dokploy MySQL
  * Run this from API container: node run-migration.js
+ * Uses pure Node.js/mysql2 - no CLI tools required
  */
 
 const mysql = require('mysql2/promise');
 const { promisify } = require('util');
 const { exec } = require('child_process');
 const execAsync = promisify(exec);
-const fs = require('fs');
-const path = require('path');
 
 // Source database (AWS RDS)
 const SOURCE_CONFIG = {
@@ -31,8 +30,6 @@ const TARGET_CONFIG = {
   password: process.env.DB_PASSWORD || '9fc97ac06e9daa88c8695e0a71580f6c',
   connectTimeout: 60000,
 };
-
-const DUMP_FILE = '/tmp/aws_dump.sql';
 
 async function testConnection(config, name) {
   try {
@@ -63,71 +60,144 @@ async function runMigrations() {
   }
 }
 
-async function exportData() {
-  console.log('\n📦 Step 1: Exporting data from AWS RDS...');
-  console.log('  This may take several minutes depending on data size...');
-  
-  const command = `mysqldump -h "${SOURCE_CONFIG.host}" -P ${SOURCE_CONFIG.port} -u "${SOURCE_CONFIG.user}" -p"${SOURCE_CONFIG.password}" ` +
-    `--single-transaction --routines --triggers --events --no-create-db --skip-add-drop-table --skip-lock-tables ` +
-    `"${SOURCE_CONFIG.database}" > "${DUMP_FILE}"`;
+async function getTableNames(connection, database) {
+  const [tables] = await connection.execute(
+    `SELECT table_name FROM information_schema.tables 
+     WHERE table_schema = ? AND table_type = 'BASE TABLE' 
+     ORDER BY table_name`,
+    [database]
+  );
+  return tables.map(t => t.table_name);
+}
 
-  try {
-    await execAsync(command);
-    const stats = fs.statSync(DUMP_FILE);
-    const sizeMB = (stats.size / (1024 * 1024)).toFixed(2);
-    console.log(`✅ Data exported successfully (${sizeMB} MB)`);
-    return true;
-  } catch (error) {
-    console.error('❌ Failed to export data:', error.message);
-    if (error.stderr) console.error(error.stderr);
-    return false;
+async function migrateTable(sourceConn, targetConn, tableName) {
+  console.log(`  Migrating table: ${tableName}...`);
+  
+  // Get row count first
+  const [countResult] = await sourceConn.execute(`SELECT COUNT(*) as count FROM ??`, [tableName]);
+  const rowCount = countResult[0].count;
+  
+  if (rowCount === 0) {
+    console.log(`    ⏭️  ${tableName}: 0 rows (skipped)`);
+    return { table: tableName, rows: 0 };
   }
+  
+  console.log(`    📊 ${tableName}: ${rowCount} rows to migrate`);
+  
+  // Get column names
+  const [columns] = await sourceConn.execute(`SHOW COLUMNS FROM ??`, [tableName]);
+  const columnNames = columns.map(c => c.Field);
+  const columnList = columnNames.map(c => `\`${c}\``).join(', ');
+  
+  // Clear existing data in target
+  await targetConn.execute(`TRUNCATE TABLE ??`, [tableName]);
+  
+  // Fetch and insert data in batches
+  const BATCH_SIZE = 500;
+  let offset = 0;
+  let totalInserted = 0;
+  
+  while (offset < rowCount) {
+    const [rows] = await sourceConn.execute(
+      `SELECT * FROM ?? LIMIT ? OFFSET ?`,
+      [tableName, BATCH_SIZE, offset]
+    );
+    
+    if (rows.length === 0) break;
+    
+    // Build INSERT statement with values
+    const placeholders = rows.map(() => `(${columnNames.map(() => '?').join(', ')})`).join(', ');
+    const values = [];
+    rows.forEach(row => {
+      columnNames.forEach(col => {
+        const value = row[col];
+        values.push(value !== null && value !== undefined ? value : null);
+      });
+    });
+    
+    const insertSql = `INSERT INTO ?? (${columnList}) VALUES ${placeholders}`;
+    await targetConn.execute(insertSql, [tableName, ...values]);
+    
+    totalInserted += rows.length;
+    offset += BATCH_SIZE;
+    
+    if (offset % 5000 === 0 || offset >= rowCount) {
+      process.stdout.write(`    Progress: ${totalInserted}/${rowCount} rows\r`);
+    }
+  }
+  
+  console.log(`    ✅ ${tableName}: ${totalInserted} rows migrated`);
+  return { table: tableName, rows: totalInserted };
+}
+
+async function exportData() {
+  // Placeholder - we migrate directly now
+  console.log('\n📦 Step 1: Preparing data migration...');
+  console.log('  Using direct database-to-database transfer (pure Node.js)');
+  return true;
 }
 
 async function importData() {
-  console.log('\n📥 Step 2: Importing data to Dokploy MySQL...');
+  console.log('\n📥 Step 2: Migrating data from AWS RDS to Dokploy MySQL...');
   console.log('  This may take several minutes depending on data size...');
   
-  // Disable foreign key checks
+  let sourceConn, targetConn;
+  
   try {
-    const conn = await mysql.createConnection(TARGET_CONFIG);
-    await conn.execute('SET FOREIGN_KEY_CHECKS = 0');
-    await conn.end();
-  } catch (error) {
-    console.warn('⚠️  Could not disable foreign key checks:', error.message);
-  }
-
-  const command = `mysql -h "${TARGET_CONFIG.host}" -P ${TARGET_CONFIG.port} -u "${TARGET_CONFIG.user}" -p"${TARGET_CONFIG.password}" ` +
-    `"${TARGET_CONFIG.database}" < "${DUMP_FILE}"`;
-
-  try {
-    await execAsync(command);
-    console.log('✅ Data imported successfully');
+    // Connect to both databases
+    sourceConn = await mysql.createConnection(SOURCE_CONFIG);
+    targetConn = await mysql.createConnection(TARGET_CONFIG);
+    
+    // Disable foreign key checks on target
+    await targetConn.execute('SET FOREIGN_KEY_CHECKS = 0');
+    await targetConn.execute('SET SESSION sql_mode = "NO_AUTO_VALUE_ON_ZERO"');
+    console.log('  Foreign key checks disabled');
+    
+    // Get all tables
+    const tables = await getTableNames(sourceConn, SOURCE_CONFIG.database);
+    console.log(`\n  Found ${tables.length} tables to migrate`);
+    
+    // Migrate each table
+    const results = [];
+    for (const table of tables) {
+      try {
+        const result = await migrateTable(sourceConn, targetConn, table);
+        results.push(result);
+      } catch (error) {
+        console.error(`    ❌ Failed to migrate ${table}:`, error.message);
+        results.push({ table, rows: 0, error: error.message });
+      }
+    }
     
     // Re-enable foreign key checks
-    try {
-      const conn = await mysql.createConnection(TARGET_CONFIG);
-      await conn.execute('SET FOREIGN_KEY_CHECKS = 1');
-      await conn.end();
-    } catch (error) {
-      console.warn('⚠️  Could not re-enable foreign key checks:', error.message);
-    }
+    await targetConn.execute('SET FOREIGN_KEY_CHECKS = 1');
+    console.log('\n  Foreign key checks re-enabled');
+    
+    // Summary
+    const totalRows = results.reduce((sum, r) => sum + (r.rows || 0), 0);
+    const successful = results.filter(r => !r.error).length;
+    console.log(`\n✅ Data migration completed:`);
+    console.log(`   ${successful}/${tables.length} tables migrated successfully`);
+    console.log(`   ${totalRows} total rows migrated`);
     
     return true;
   } catch (error) {
-    console.error('❌ Failed to import data:', error.message);
-    if (error.stderr) console.error(error.stderr);
+    console.error('❌ Failed to migrate data:', error.message);
+    console.error(error.stack);
     
     // Try to re-enable foreign key checks even on error
-    try {
-      const conn = await mysql.createConnection(TARGET_CONFIG);
-      await conn.execute('SET FOREIGN_KEY_CHECKS = 1');
-      await conn.end();
-    } catch (e) {
-      // Ignore
+    if (targetConn) {
+      try {
+        await targetConn.execute('SET FOREIGN_KEY_CHECKS = 1');
+      } catch (e) {
+        // Ignore
+      }
     }
     
     return false;
+  } finally {
+    if (sourceConn) await sourceConn.end();
+    if (targetConn) await targetConn.end();
   }
 }
 
@@ -163,7 +233,7 @@ async function verifyMigration() {
         const match = sourceCount === targetCount ? '✅' : '⚠️';
         console.log(`    ${match} ${table}: ${sourceCount} → ${targetCount}`);
       } catch (error) {
-        console.log(`    ⚠️  ${table}: Error checking count`);
+        console.log(`    ⚠️  ${table}: Error checking count (${error.message})`);
       }
     }
 
@@ -189,14 +259,8 @@ async function verifyMigration() {
 
 async function cleanup() {
   console.log('\n🧹 Step 4: Cleaning up...');
-  try {
-    if (fs.existsSync(DUMP_FILE)) {
-      fs.unlinkSync(DUMP_FILE);
-      console.log('✅ Temporary files removed');
-    }
-  } catch (error) {
-    console.error('⚠️  Cleanup warning:', error.message);
-  }
+  // No temporary files to clean up with pure Node.js approach
+  console.log('✅ Cleanup completed (no temporary files)');
 }
 
 async function main() {
@@ -234,13 +298,13 @@ async function main() {
     console.error('\n⚠️  Migrations had issues, but continuing...');
   }
 
-  // Export data
+  // Export data (placeholder)
   const exportOk = await exportData();
   if (!exportOk) {
     process.exit(1);
   }
 
-  // Import data
+  // Import data (actually does the migration)
   const importOk = await importData();
   if (!importOk) {
     process.exit(1);
