@@ -10,6 +10,23 @@ class FormResource {
     if (this.data.FormFields !== undefined) {
       relations.fields = this.data.FormFields.map((d) => {
         const field = d instanceof FormField ? d.get({ plain: true }) : d;
+        
+        // Fix invalid config strings (e.g., '[object Object]')
+        if (field.config && typeof field.config === 'string') {
+          try {
+            // Try to parse if it looks like JSON
+            if (field.config.trim().startsWith('{') || field.config.trim().startsWith('[')) {
+              field.config = JSON.parse(field.config);
+            } else {
+              // If it's '[object Object]' or similar invalid string, set to null
+              field.config = null;
+            }
+          } catch (e) {
+            // If parsing fails, set to null
+            field.config = null;
+          }
+        }
+        
         if (field.FormFieldOptions !== undefined) {
           field.options = field.FormFieldOptions.sort((a, b) => a.pos - b.pos);
           delete field.FormFieldOptions;
