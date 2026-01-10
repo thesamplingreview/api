@@ -73,61 +73,67 @@ async function getTableNames(connection, database) {
 async function migrateTable(sourceConn, targetConn, tableName) {
   console.log(`  Migrating table: ${tableName}...`);
   
-  // Get row count first
-  const [countResult] = await sourceConn.execute(`SELECT COUNT(*) as count FROM ??`, [tableName]);
-  const rowCount = countResult[0].count;
-  
-  if (rowCount === 0) {
-    console.log(`    ⏭️  ${tableName}: 0 rows (skipped)`);
-    return { table: tableName, rows: 0 };
-  }
-  
-  console.log(`    📊 ${tableName}: ${rowCount} rows to migrate`);
-  
-  // Get column names
-  const [columns] = await sourceConn.execute(`SHOW COLUMNS FROM ??`, [tableName]);
-  const columnNames = columns.map(c => c.Field);
-  const columnList = columnNames.map(c => `\`${c}\``).join(', ');
-  
-  // Clear existing data in target
-  await targetConn.execute(`TRUNCATE TABLE ??`, [tableName]);
-  
-  // Fetch and insert data in batches
-  const BATCH_SIZE = 500;
-  let offset = 0;
-  let totalInserted = 0;
-  
-  while (offset < rowCount) {
-    const [rows] = await sourceConn.execute(
-      `SELECT * FROM ?? LIMIT ? OFFSET ?`,
-      [tableName, BATCH_SIZE, offset]
-    );
+  try {
+    // Get row count first - use escaped table name
+    const escapedTable = `\`${tableName}\``;
+    const [countResult] = await sourceConn.execute(`SELECT COUNT(*) as count FROM ${escapedTable}`);
+    const rowCount = countResult[0].count;
     
-    if (rows.length === 0) break;
-    
-    // Build INSERT statement with values
-    const placeholders = rows.map(() => `(${columnNames.map(() => '?').join(', ')})`).join(', ');
-    const values = [];
-    rows.forEach(row => {
-      columnNames.forEach(col => {
-        const value = row[col];
-        values.push(value !== null && value !== undefined ? value : null);
-      });
-    });
-    
-    const insertSql = `INSERT INTO ?? (${columnList}) VALUES ${placeholders}`;
-    await targetConn.execute(insertSql, [tableName, ...values]);
-    
-    totalInserted += rows.length;
-    offset += BATCH_SIZE;
-    
-    if (offset % 5000 === 0 || offset >= rowCount) {
-      process.stdout.write(`    Progress: ${totalInserted}/${rowCount} rows\r`);
+    if (rowCount === 0) {
+      console.log(`    ⏭️  ${tableName}: 0 rows (skipped)`);
+      return { table: tableName, rows: 0 };
     }
+    
+    console.log(`    📊 ${tableName}: ${rowCount} rows to migrate`);
+    
+    // Get column names - use escaped table name
+    const [columns] = await sourceConn.execute(`SHOW COLUMNS FROM ${escapedTable}`);
+    const columnNames = columns.map(c => c.Field);
+    const columnList = columnNames.map(c => `\`${c}\``).join(', ');
+    
+    // Clear existing data in target - use escaped table name
+    await targetConn.execute(`TRUNCATE TABLE ${escapedTable}`);
+    
+    // Fetch and insert data in batches
+    const BATCH_SIZE = 500;
+    let offset = 0;
+    let totalInserted = 0;
+    
+    while (offset < rowCount) {
+      const [rows] = await sourceConn.execute(
+        `SELECT * FROM ${escapedTable} LIMIT ? OFFSET ?`,
+        [BATCH_SIZE, offset]
+      );
+      
+      if (rows.length === 0) break;
+      
+      // Build INSERT statement with values
+      const placeholders = rows.map(() => `(${columnNames.map(() => '?').join(', ')})`).join(', ');
+      const values = [];
+      rows.forEach(row => {
+        columnNames.forEach(col => {
+          const value = row[col];
+          values.push(value !== null && value !== undefined ? value : null);
+        });
+      });
+      
+      const insertSql = `INSERT INTO ${escapedTable} (${columnList}) VALUES ${placeholders}`;
+      await targetConn.execute(insertSql, values);
+      
+      totalInserted += rows.length;
+      offset += BATCH_SIZE;
+      
+      if (offset % 5000 === 0 || offset >= rowCount) {
+        process.stdout.write(`    Progress: ${totalInserted}/${rowCount} rows\r`);
+      }
+    }
+    
+    console.log(`    ✅ ${tableName}: ${totalInserted} rows migrated`);
+    return { table: tableName, rows: totalInserted };
+  } catch (error) {
+    console.error(`    ❌ Error migrating ${tableName}:`, error.message);
+    throw error;
   }
-  
-  console.log(`    ✅ ${tableName}: ${totalInserted} rows migrated`);
-  return { table: tableName, rows: totalInserted };
 }
 
 async function exportData() {
@@ -226,8 +232,9 @@ async function verifyMigration() {
     console.log('\n  Data row counts:');
     for (const table of keyTables) {
       try {
-        const [sourceRows] = await sourceConn.execute(`SELECT COUNT(*) as count FROM ??`, [table]);
-        const [targetRows] = await targetConn.execute(`SELECT COUNT(*) as count FROM ??`, [table]);
+        const escapedTable = `\`${table}\``;
+        const [sourceRows] = await sourceConn.execute(`SELECT COUNT(*) as count FROM ${escapedTable}`);
+        const [targetRows] = await targetConn.execute(`SELECT COUNT(*) as count FROM ${escapedTable}`);
         const sourceCount = sourceRows[0].count;
         const targetCount = targetRows[0].count;
         const match = sourceCount === targetCount ? '✅' : '⚠️';
