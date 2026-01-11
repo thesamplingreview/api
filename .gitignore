@@ -13,3 +13,6 @@ node_modules
 # Database backups
 backups/
 ../backups/
+
+# Future/experimental scripts
+future/
