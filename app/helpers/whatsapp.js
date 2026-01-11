@@ -106,15 +106,35 @@ async function sendWhatsAppCode({
   language = 'en',
   throwErr = false,
 }) {
-  consoleLog('WhatsApp:', 'Send OTP message to', to);
   try {
-    // Use Evolution API instead of Facebook WhatsApp Business API
-    // Format phone number (remove + if present, Evolution API expects numbers without +)
-    const phoneNumber = to.replace(/^\+/, '');
-    const message = `Your [SamplingReview] verification code is: ${code}`;
+    // Validate Evolution API configuration
+    if (!evolutionConfig.apiUrl) {
+      throw new Error('Evolution API URL is not configured. Please set EVOLUTION_API_URL environment variable.');
+    }
+    if (!evolutionConfig.apiKey) {
+      throw new Error('Evolution API Key is not configured. Please set EVOLUTION_API_KEY environment variable.');
+    }
+    if (!evolutionConfig.instance) {
+      throw new Error('Evolution API Instance is not configured. Please set EVOLUTION_INSTANCE environment variable.');
+    }
+
+    // Format phone number: remove +, handle duplicate country codes
+    // Example: +6060175168607 -> 60175168607 (remove duplicate 60)
+    let phoneNumber = to.replace(/^\+/, '');
+    
+    // Remove duplicate country code if present (e.g., 6060... -> 60...)
+    // Common country codes: 60 (Malaysia), 62 (Indonesia), 65 (Singapore), etc.
+    // Check if number starts with duplicate country code pattern (e.g., 6060, 6262, 6565)
+    const duplicatePattern = /^(\d{2})\1/;
+    if (duplicatePattern.test(phoneNumber)) {
+      phoneNumber = phoneNumber.replace(/^(\d{2})/, '');
+    }
     
     const endpoint = `${evolutionConfig.apiUrl}/message/sendText/${evolutionConfig.instance}`;
-    const response = await fetch(endpoint, {
+    
+    // Send first message: instruction
+    const firstMessage = 'Your [SamplingReview] verification code is:';
+    const firstResponse = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,23 +142,46 @@ async function sendWhatsAppCode({
       },
       body: JSON.stringify({
         number: phoneNumber,
-        text: message,
+        text: firstMessage,
         delay: 200,
         linkPreview: false,
       }),
     });
 
-    const result = await response.json();
-
-    if (!response.ok) {
-      const errorMsg = result?.message || result?.error || 'Unknown error from Evolution API';
-      throw new Error(`Evolution API error: ${errorMsg} (Status: ${response.status})`);
+    const firstResult = await firstResponse.json();
+    if (!firstResponse.ok) {
+      const errorMsg = firstResult?.message || firstResult?.error || 'Unknown error from Evolution API';
+      throw new Error(`Evolution API error: ${errorMsg} (Status: ${firstResponse.status})`);
     }
 
-    consoleLog('WhatsApp:', 'Send OTP message to - end', to);
+    // Wait a bit before sending the code
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Send second message: just the code (easier to copy)
+    const secondResponse = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': evolutionConfig.apiKey,
+      },
+      body: JSON.stringify({
+        number: phoneNumber,
+        text: code,
+        delay: 200,
+        linkPreview: false,
+      }),
+    });
+
+    const secondResult = await secondResponse.json();
+    if (!secondResponse.ok) {
+      const errorMsg = secondResult?.message || secondResult?.error || 'Unknown error from Evolution API';
+      throw new Error(`Evolution API error: ${errorMsg} (Status: ${secondResponse.status})`);
+    }
+
+    consoleLog('WhatsApp OTP sent');
     return true;
   } catch (err) {
-    consoleLog('WhatsAppErr:', 'Send OTP message to', to, err.message);
+    consoleLog('WhatsAppErr:', 'Failed to send OTP:', err.message);
     if (throwErr) {
       throw err;
     }

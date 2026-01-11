@@ -119,18 +119,23 @@ class VerificationService extends BaseService {
       contact: input.contact,
     });
 
-    // debug log
-    consoleLog(`Preparing send WA OTP to ${input.contact}...`);
+    // Format contact number before sending (remove duplicate country codes)
+    let formattedContact = input.contact;
+    // Remove + if present
+    formattedContact = formattedContact.replace(/^\+/, '');
+    // Remove duplicate country code if present (e.g., 6060... -> 60...)
+    const duplicatePattern = /^(\d{2})\1/;
+    if (duplicatePattern.test(formattedContact)) {
+      formattedContact = formattedContact.replace(/^(\d{2})/, '');
+    }
 
     // send OTP through Evolution API (always send, not just production)
     await sendWhatsAppCode({
-      to: input.contact,
+      to: formattedContact,
       templateName: 'test_code',
       code: token.token,
       throwErr: true,
     });
-
-    consoleLog(`Finish send WA OTP to ${input.contact}...`);
 
     return token;
   }
