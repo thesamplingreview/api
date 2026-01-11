@@ -57,6 +57,30 @@ class VerificationController extends ApiController {
       return this.responseError(req, res, err);
     }
   }
+
+  /**
+   * POST - request otp using Email
+   */
+  async requestEmailOtp(req, res) {
+    const formData = {
+      email: req.body.email,
+    };
+
+    // DB update
+    const t = await sequelize.transaction();
+    try {
+      const result = await this.verificationService.sendOtpEmail(formData);
+      await t.commit();
+
+      return this.responseJson(req, res, {
+        message: 'ok',
+        data: debug ? result : null,
+      });
+    } catch (err) {
+      await t.rollback();
+      return this.responseError(req, res, err);
+    }
+  }
 }
 
 module.exports = VerificationController;

@@ -112,3 +112,11 @@ exports.requestSMSOtpReq = [
 exports.requestWAOtpReq = [
   contactValidator(),
 ];
+
+exports.requestEmailOtpReq = [
+  body('email')
+    .notEmpty().bail()
+    .withMessage(validatorMessage('validation.required', 'Email'))
+    .isEmail().bail()
+    .withMessage(validatorMessage('validation.invalid_email', 'Email')),
+];

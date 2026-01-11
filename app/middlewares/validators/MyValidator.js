@@ -65,10 +65,9 @@ exports.changeContactReq = [
 ];
 
 /**
- * Change request #20241224
- * - disable OTP verification flow
- * - but require phone number
+ * Save contact with OTP verification (using Evolution API)
  */
 exports.saveContactReq = [
   contactValidator(),
+  codeValidator(),
 ];

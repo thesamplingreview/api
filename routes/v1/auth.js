@@ -39,6 +39,12 @@ router.post(
   AuthValidator.requestWAOtpReq,
   VerificationController.requestWAOtp,
 );
+router.post(
+  '/verify/email/otp',
+  tokenInfoMiddleware(),
+  AuthValidator.requestEmailOtpReq,
+  VerificationController.requestEmailOtp,
+);
 
 // my module
 router.get('/my', tokenInfoMiddleware(), MyController.my);

@@ -31,9 +31,16 @@ module.exports = {
     token: getEnv(process.env.TWILIO_TOKEN),
   },
 
-  // whatsapp
+  // whatsapp (Facebook/Meta WhatsApp Business API - commented out, using Evolution API)
   whatsapp: {
     numberId: getEnv(process.env.WHATSAPP_NUMBER_ID),
     token: getEnv(process.env.WHATSAPP_TOKEN),
+  },
+
+  // evolution api (WhatsApp via Evolution API)
+  evolution: {
+    apiUrl: getEnv(process.env.EVOLUTION_API_URL, 'https://evo-o2oengage.chattalyst.com'),
+    apiKey: getEnv(process.env.EVOLUTION_API_KEY),
+    instance: getEnv(process.env.EVOLUTION_INSTANCE, 'chattalyst'),
   },
 };

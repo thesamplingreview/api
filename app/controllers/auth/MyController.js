@@ -146,12 +146,7 @@ class MyController extends ApiController {
   }
 
   /**
-   * PUT - save contact
-   *
-   * Change request #20241224
-   * - temp disable OTP verification flow
-   * - but require phone number
-   * - the phone number wont be validated for now onwards
+   * PUT - save contact with OTP verification (using Evolution API)
    */
   async saveContact(req, res) {
     // DB update
@@ -159,8 +154,22 @@ class MyController extends ApiController {
     try {
       const user = await this.userService.findById(req.user.id);
 
+      // Verify OTP using Evolution API
+      const verificationService = new VerificationService();
+      const token = await verificationService.verifyToken(
+        VerificationToken.TYPES.PHONE,
+        req.body.contact,
+        req.body.code,
+      );
+      if (!token) {
+        throw new ValidationFailed(undefined, [
+          genValidatorItem('Code not matched.', 'code'),
+        ]);
+      }
+
       // update contact
       user.contact = req.body.contact;
+      user.contact_verified_at = new Date();
       await user.save({ transaction: t });
 
       await t.commit();

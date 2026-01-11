@@ -1,5 +1,5 @@
 const { consoleLog } = require('./logger');
-const { whatsapp: whatsappConfig } = require('../../config/providers');
+const { whatsapp: whatsappConfig, evolution: evolutionConfig } = require('../../config/providers');
 
 /**
  * Due to WhatsApp policy, bussiness unable to initiate an business using 'text'
@@ -108,46 +108,31 @@ async function sendWhatsAppCode({
 }) {
   consoleLog('WhatsApp:', 'Send OTP message to', to);
   try {
-    const data = {
-      messaging_product: 'whatsapp',
-      to,
-      type: 'template',
-      template: {
-        name: templateName,
-        language: {
-          code: language,
-        },
-        components: [
-          {
-            type: 'body',
-            parameters: [
-              { type: 'text', text: code },
-            ],
-          },
-          {
-            type: 'button',
-            sub_type: 'url',
-            index: '0',
-            parameters: [
-              { type: 'text', text: code },
-            ],
-          },
-        ],
-      },
-    };
-    const endpoint = `https://graph.facebook.com/v19.0/${whatsappConfig.numberId}/messages`;
+    // Use Evolution API instead of Facebook WhatsApp Business API
+    // Format phone number (remove + if present, Evolution API expects numbers without +)
+    const phoneNumber = to.replace(/^\+/, '');
+    const message = `Your [SamplingReview] verification code is: ${code}`;
+    
+    const endpoint = `${evolutionConfig.apiUrl}/message/sendText/${evolutionConfig.instance}`;
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${whatsappConfig.token}`,
         'Content-Type': 'application/json',
+        'apikey': evolutionConfig.apiKey,
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({
+        number: phoneNumber,
+        text: message,
+        delay: 200,
+        linkPreview: false,
+      }),
     });
+
     const result = await response.json();
-    // console.log(result);
-    if (result.error) {
-      throw new Error(result.error.error_data?.details || result.error.message || 'Unknown WA error');
+
+    if (!response.ok) {
+      const errorMsg = result?.message || result?.error || 'Unknown error from Evolution API';
+      throw new Error(`Evolution API error: ${errorMsg} (Status: ${response.status})`);
     }
 
     consoleLog('WhatsApp:', 'Send OTP message to - end', to);
