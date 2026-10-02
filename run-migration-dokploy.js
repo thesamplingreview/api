@@ -24,7 +24,7 @@ const DB_CONFIG = {
   port: parseInt(process.env.DB_PORT) || parseInt(process.env.DOKPLOY_DB_PORT) || 3306,
   database: process.env.DB_DATABASE || process.env.DOKPLOY_DB_DATABASE || 'samplingreview',
   user: process.env.DB_USERNAME || process.env.DOKPLOY_DB_USERNAME || 'samplingreview_user',
-  password: process.env.DB_PASSWORD || process.env.DOKPLOY_DB_PASSWORD || '9fc97ac06e9daa88c8695e0a71580f6c',
+  password: process.env.DB_PASSWORD || process.env.DOKPLOY_DB_PASSWORD,
   connectTimeout: 60000,
   multipleStatements: true,
 };

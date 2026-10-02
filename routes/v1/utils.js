@@ -69,10 +69,12 @@ router.get(
 );
 router.get(
   '/test-trigger',
+  appKeyCheckMiddleware(),
   cronController.testWorkflowTrigger.bind(cronController),
 );
 router.get(
   '/test-push-queue',
+  appKeyCheckMiddleware(),
   cronController.testPushQueue.bind(cronController),
 );
 

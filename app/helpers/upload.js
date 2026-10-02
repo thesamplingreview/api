@@ -17,7 +17,12 @@ const s3Client = new S3Client({
     secretAccessKey: awsConfig.secretKey,
   },
   region: awsConfig.region,
+  ...(awsConfig.endpoint && {
+    endpoint: awsConfig.endpoint,
+    forcePathStyle: Boolean(awsConfig.forcePathStyle),
+  }),
 });
+const s3PublicBaseUrl = awsConfig.publicUrl ? awsConfig.publicUrl.replace(/\/+$/, '') : '';
 
 /**
  * formidable@v3 seem having some bug on form.parse on the date of writing. Hence fallback to @v2 package.
@@ -121,7 +126,24 @@ function validatorFileCheck({ field, maxFileSize, mimeTypes }) {
  * Get s3 URL
  */
 function s3PublicUrl(key) {
+  if (s3PublicBaseUrl) {
+    return `${s3PublicBaseUrl}/${key}`;
+  }
   return `https://${awsConfig.bucket}.s3.${awsConfig.region}.amazonaws.com/${key}`;
+}
+
+/**
+ * Get s3 object key from public URL (custom public url or AWS virtual-hosted url)
+ */
+function s3KeyFromUrl(s3Url) {
+  if (s3PublicBaseUrl && s3Url?.startsWith(`${s3PublicBaseUrl}/`)) {
+    return decodeURIComponent(s3Url.substring(s3PublicBaseUrl.length + 1));
+  }
+  const s3UrlRegex = /^https:\/\/([\w.-]+)\.s3\.([\w.-]+)\.amazonaws\.com\/(.+)$/;
+  if (s3UrlRegex.test(s3Url)) {
+    return decodeURIComponent(new URL(s3Url).pathname.substring(1));
+  }
+  return null;
 }
 
 /**
@@ -129,14 +151,12 @@ function s3PublicUrl(key) {
  */
 async function s3Remove(s3Url) {
   // verify if provided path is s3 path
-  const s3UrlRegex = /^https:\/\/([\w.-]+)\.s3\.([\w.-]+)\.amazonaws\.com\/(.+)$/;
-  if (!s3UrlRegex.test(s3Url)) {
+  const s3Key = s3KeyFromUrl(s3Url);
+  if (!s3Key) {
     return false;
   }
 
   try {
-    const url = new URL(s3Url);
-    const s3Key = url.pathname.substring(1);
     const deleteCommand = new DeleteObjectCommand({
       Bucket: awsConfig.bucket,
       Key: s3Key,

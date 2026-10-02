@@ -9,6 +9,7 @@ const {
 const UserService = require('../../services/UserService');
 const VerificationService = require('../../services/VerificationService');
 const UserResource = require('../../resources/UserResource');
+const appConfig = require('../../../config/app');
 
 class MyController extends ApiController {
   constructor() {
@@ -154,22 +155,27 @@ class MyController extends ApiController {
     try {
       const user = await this.userService.findById(req.user.id);
 
-      // Verify OTP using Evolution API
-      const verificationService = new VerificationService();
-      const token = await verificationService.verifyToken(
-        VerificationToken.TYPES.PHONE,
-        req.body.contact,
-        req.body.code,
-      );
-      if (!token) {
-        throw new ValidationFailed(undefined, [
-          genValidatorItem('Code not matched.', 'code'),
-        ]);
+      if (appConfig.phoneOtpRequired) {
+        // Verify OTP using Evolution API
+        const verificationService = new VerificationService();
+        const token = await verificationService.verifyToken(
+          VerificationToken.TYPES.PHONE,
+          req.body.contact,
+          req.body.code,
+        );
+        if (!token) {
+          throw new ValidationFailed(undefined, [
+            genValidatorItem('Code not matched.', 'code'),
+          ]);
+        }
+        user.contact_verified_at = new Date();
+      } else if (user.contact !== req.body.contact) {
+        // unverified number - drop any previous verification
+        user.contact_verified_at = null;
       }
 
       // update contact
       user.contact = req.body.contact;
-      user.contact_verified_at = new Date();
       await user.save({ transaction: t });
 
       await t.commit();

@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { body } = require('express-validator');
 const { validatorMessage } = require('../../helpers/locale');
 const { User } = require('../../models');
+const appConfig = require('../../../config/app');
 
 /* eslint-disable newline-per-chained-call */
 const nameValidator = () => body('name')
@@ -104,5 +105,5 @@ exports.changeContactReq = [
  */
 exports.saveContactReq = [
   contactValidatorAllowOwn(),
-  codeValidator(),
+  ...(appConfig.phoneOtpRequired ? [codeValidator()] : []),
 ];

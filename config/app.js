@@ -19,6 +19,9 @@ module.exports = {
   // urls
   webUrl: getEnv(process.env.WEB_URL, ''),
 
+  // require OTP code when saving phone number
+  phoneOtpRequired: getEnv(process.env.PHONE_OTP_REQUIRED, true),
+
   // allowed app keys (this keys will be used to validate some endpoint)
   appKeys: [
     'rZ~3Je9>sdD*M8+QjCh}PmH2', // web key

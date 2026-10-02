@@ -10,15 +10,24 @@ class CronController extends ApiController {
    */
   async triggerQueueTask(req, res) {
     const queueService = new QueueService();
-    let queueTask;
-    if (req.query.queue_id) {
+
+    // scheduler mode - run every task that is due
+    if (!req.query.queue_id) {
       try {
-        queueTask = await queueService.findById(req.query.queue_id);
+        const executed = await queueService.runDueQueues();
+        return this.responseJson(req, res, {
+          data: executed.length ? `Run jobs - ${executed.join(', ')}` : 'No task',
+        });
       } catch (err) {
-        // ...
+        return this.responseError(req, res, err);
       }
-    } else {
-      queueTask = await queueService.getNextQueue();
+    }
+
+    let queueTask;
+    try {
+      queueTask = await queueService.findById(req.query.queue_id);
+    } catch (err) {
+      // ...
     }
     if (!queueTask) {
       return this.responseJson(req, res, {

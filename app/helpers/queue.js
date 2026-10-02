@@ -1,27 +1,39 @@
 const { SQSClient, SendMessageCommand } = require('@aws-sdk/client-sqs');
 const { consoleLog } = require('./logger');
-const { aws: awsConfig } = require('../../config/providers');
+const { aws: awsConfig, drivers } = require('../../config/providers');
 
-const client = new SQSClient({
-  credentials: {
-    accessKeyId: awsConfig.accessId,
-    secretAccessKey: awsConfig.secretKey,
-  },
-  region: awsConfig.region,
-});
+let client;
+function getClient() {
+  if (!client) {
+    client = new SQSClient({
+      credentials: {
+        accessKeyId: awsConfig.accessId,
+        secretAccessKey: awsConfig.secretKey,
+      },
+      region: awsConfig.region,
+    });
+  }
+  return client;
+}
 
 /**
- * SMS service was relying on AWS SNS service
+ * Push queue_id to SQS (QUEUE_DRIVER=sqs).
+ * With QUEUE_DRIVER=cron, pending tasks are picked up by the scheduled /v1/utils/run-cron-queue call.
  */
 async function pushQueue({
   data = {},
   delay = 0,
   throwErr = false,
 }) {
+  if (drivers.queue !== 'sqs') {
+    consoleLog(`Queue driver ${drivers.queue} - task left for scheduler`, data);
+    return true;
+  }
+
   try {
     // debug log
     consoleLog('Push to SQS queue');
-    const response = await client.send(new SendMessageCommand({
+    const response = await getClient().send(new SendMessageCommand({
       QueueUrl: awsConfig.sqsUrl,
       MessageBody: JSON.stringify(data),
       DelaySeconds: delay,
@@ -39,6 +51,6 @@ async function pushQueue({
 }
 
 module.exports = {
-  client,
+  getClient,
   pushQueue,
 };

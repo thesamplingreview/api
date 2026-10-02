@@ -58,6 +58,50 @@ class QueueService extends BaseService {
   }
 
   /**
+   * Claim queueTask so overlapping scheduler runs never execute it twice
+   *
+   * @param  {model}  queue
+   * @return {boolean}
+   */
+  async claimQueue(queue) {
+    const [claimed] = await this.model.update({
+      execute_at: new Date(),
+    }, {
+      where: {
+        id: queue.id,
+        execute_at: null,
+        status: QueueTask.STATUSES.PENDING,
+      },
+    });
+    return claimed > 0;
+  }
+
+  /**
+   * Run all runnable queueTasks (QUEUE_DRIVER=cron)
+   *
+   * @param  {number}  options.limit - max tasks per run
+   * @param  {number}  options.timeBudget - stop picking new tasks after this many ms
+   * @return {array} executed queue ids
+   */
+  async runDueQueues({ limit = 50, timeBudget = 45000 } = {}) {
+    const startedAt = Date.now();
+    const executed = [];
+    /* eslint-disable no-await-in-loop */
+    while (executed.length < limit && Date.now() - startedAt < timeBudget) {
+      const queue = await this.getNextQueue();
+      if (!queue) {
+        break;
+      }
+      if (await this.claimQueue(queue)) {
+        await this.runQueueTask(queue);
+        executed.push(queue.id);
+      }
+    }
+    /* eslint-enable no-await-in-loop */
+    return executed;
+  }
+
+  /**
    * Create queue from task
    *
    * @param {string} taskId
