@@ -1,0 +1,40 @@
+.env.sample
+  h_55ed20ed42cd13 15-16,18-25,39-43,56
+app/controllers/CronController.js
+  h_55ed20ed42cd13 13-15,17-20,22,24-30
+app/controllers/auth/MyController.js
+  h_55ed20ed42cd13 12,158-174
+app/helpers/mailer.js
+  h_55ed20ed42cd13 1-9
+app/helpers/mailer_resend.js
+  h_55ed20ed42cd13 1-102
+app/helpers/queue.js
+  h_55ed20ed42cd13 3,5-17,20-21,28-32,36,54
+app/helpers/sms.js
+  h_55ed20ed42cd13 1-15
+app/helpers/upload.js
+  h_55ed20ed42cd13 20-23,25,129-131,135-148,154-155
+app/middlewares/validators/MyValidator.js
+  h_55ed20ed42cd13 5,108
+app/services/QueueService.js
+  h_55ed20ed42cd13 60-103
+config/app.js
+  h_55ed20ed42cd13 22-24
+config/providers.js
+  h_55ed20ed42cd13 4-11,18-29
+routes/v1/utils.js
+  h_55ed20ed42cd13 72,77
+run-migration-dokploy.js
+  h_55ed20ed42cd13 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8ec036008106c2f0e179b4e6abf69925c1f23e3e",
+  "prompts": {},
+  "humans": {
+    "h_55ed20ed42cd13": {
+      "author": "Developer <imexlight@gmail.com>"
+    }
+  }
+}
